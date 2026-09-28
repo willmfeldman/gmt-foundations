@@ -1,0 +1,24 @@
+name = "gmt_foundations"
+version = "0.1.0"
+description = "Lean 4 formalization of geometric measure theory and Sobolev foundations: De Giorgi–Federer structure theory of sets of locally finite perimeter, Naber–Valtorta Reifenberg theorems for hyperplanes, and Rellich–Kondrachov compactness with compact trace"
+keywords = ["math", "mathlib", "geometric-measure-theory", "finite-perimeter", "reifenberg", "sobolev"]
+defaultTargets = ["GMTFoundations"]
+
+[leanOptions]
+pp.unicode.fun = true
+relaxedAutoImplicit = false
+autoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.30.0"
+
+[[lean_lib]]
+name = "GMTFoundations"
+
+[[lean_lib]]
+name = "GMTFoundationsComparator"
+roots = ["GMTFoundations.Comparator"]

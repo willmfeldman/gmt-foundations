@@ -1,0 +1,63 @@
+cff-version: 1.2.0
+message: "If you use this Lean formalization, please cite it using this metadata."
+title: "GMT Foundations: sets of finite perimeter, Reifenberg theorems, and Sobolev compactness in Lean"
+version: "0.1.0"
+license: "Apache-2.0"
+repository-code: "https://github.com/willmfeldman/gmt-foundations"
+authors:
+  - family-names: Feldman
+    given-names: "William M."
+abstract: >-
+  Lean 4 / Mathlib formalization of the De Giorgi–Federer structure theory of sets of
+  locally finite perimeter (Gauss–Green measures, De Giorgi blow-up, rectifiability of the
+  essential boundary, the perimeter measure as Hausdorff measure, and the null case of
+  Federer's criterion), the discrete and rectifiable Reifenberg theorems of Naber and
+  Valtorta for hyperplanes, and Rellich–Kondrachov compactness with compact boundary trace.
+keywords:
+  - Lean
+  - Mathlib
+  - formalized mathematics
+  - geometric measure theory
+  - sets of finite perimeter
+  - Reifenberg theorem
+  - Sobolev spaces
+references:
+  - type: book
+    authors:
+      - family-names: Evans
+        given-names: "Lawrence C."
+      - family-names: Gariepy
+        given-names: "Ronald F."
+    title: "Measure Theory and Fine Properties of Functions"
+    edition: "Revised edition"
+    collection-title: "Textbooks in Mathematics"
+    publisher:
+      name: "CRC Press"
+    year: 2015
+  - type: article
+    authors:
+      - family-names: Naber
+        given-names: Aaron
+      - family-names: Valtorta
+        given-names: Daniele
+    title: "Rectifiable-Reifenberg and the regularity of stationary and minimizing harmonic maps"
+    journal: "Annals of Mathematics"
+    volume: "185"
+    issue: "1"
+    start: 131
+    end: 227
+    year: 2017
+    identifiers:
+      - type: url
+        value: "https://arxiv.org/abs/1504.02043"
+  - type: article
+    authors:
+      - family-names: Miśkiewicz
+        given-names: Michał
+    title: "Discrete Reifenberg-type theorem"
+    journal: "Annales Academiae Scientiarum Fennicae Mathematica"
+    volume: "43"
+    year: 2018
+    identifiers:
+      - type: url
+        value: "https://arxiv.org/abs/1612.02461"

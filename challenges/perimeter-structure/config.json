@@ -1,0 +1,14 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "challenge_gauss_green_pair_of_divergence_bound",
+    "challenge_gauss_green_pair_of_locally_finite_perimeter",
+    "challenge_half_space_blow_up",
+    "challenge_rectifiable_essential_boundary",
+    "challenge_perimeter_measure_eq_hausdorff",
+    "challenge_trivial_of_null_essential_boundary"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": false
+}

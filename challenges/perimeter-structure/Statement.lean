@@ -1,0 +1,156 @@
+import Mathlib
+
+/-!
+# Trusted statements: structure theory of sets of locally finite perimeter
+
+This file imports Mathlib only. It is the complete trusted surface of the `perimeter-structure`
+challenge: `Challenge.lean` and `Solution.lean` both state the six claims below.
+
+Source: L. C. Evans and R. F. Gariepy, *Measure Theory and Fine Properties of Functions*, revised
+edition, CRC Press, 2015, cited `[EG]` (theorem numbers of the revised edition).
+
+## Vocabulary
+
+All notions are defined below from Mathlib's measure theory and calculus. The ambient space is
+`ℝⁿ = EuclideanSpace ℝ (Fin n)` with Lebesgue measure `volume`, and every claim assumes `n ≥ 2`.
+
+* `hausdorffN n d = (ω_d / 2^d) μH[d]`: the `d`-dimensional Hausdorff measure with the
+  normalization of [EG, §2.1].
+* `divergence ξ x = tr Dξ(x)`, and `IsSmoothTestField Ω ξ`: `ξ ∈ C^∞_c(Ω; ℝⁿ)`.
+* `HasLocallyFinitePerimeter U E`: near each point of the open set `U`, the distributional
+  perimeter of `E` is bounded: `|∫_E div φ| ≤ C sup|φ|` for `φ ∈ C^∞_c(B_r(x); ℝⁿ)`. This is
+  implied by the definition of [EG, Definition 5.2] (`χ_E ∈ BV_loc(U)`).
+* `IsGaussGreenPair U E μ ν`: `μ` is a Radon measure on `U` and `ν` a `μ`-measurable unit vector
+  field with `∫_E div φ = ∫ ⟪φ, ν⟫ dμ` for all `φ ∈ C^∞_c(U; ℝⁿ)`. For `E` of locally finite
+  perimeter these are `μ = ‖∂E‖` and `ν = ν_E` of [EG, Theorem 5.1] (applied to `χ_E`, with
+  `ν_E = −σ`), and the pair is unique.
+* `reducedBoundary U E`: the reduced boundary `∂*E ∩ U` of [EG, Definition 5.4], with open
+  instead of closed balls.
+* `HasDensity E x d` and `essentialBoundary E`: the Lebesgue density of `E` at `x` is `d`, and the
+  measure-theoretic boundary `∂_*E` of [EG, Definition 5.7] (points where neither `E` nor its
+  complement has density `0`).
+* `IsCountablyRectifiable n k S`: up to an `ℋ^k`-null set, `S` is covered by countably many
+  Lipschitz images of `ℝ^k`.
+-/
+
+noncomputable section
+
+open MeasureTheory Metric Set Filter Topology
+open scoped ENNReal RealInnerProductSpace
+
+namespace GMTChallenge
+
+/-- The Euclidean space `ℝⁿ`. -/
+abbrev Rn (n : ℕ) := EuclideanSpace ℝ (Fin n)
+
+/-- `ω_n = |B₁|`, the Lebesgue measure of the unit ball of `ℝⁿ`. -/
+def unitBallVolume (n : ℕ) : ℝ :=
+  (volume (ball (0 : Rn n) 1)).toReal
+
+/-- The normalized `d`-dimensional Hausdorff measure `ℋ^d = (ω_d / 2^d) μH[d]` on `ℝⁿ`. -/
+def hausdorffN (n d : ℕ) : Measure (Rn n) :=
+  ENNReal.ofReal (unitBallVolume d / 2 ^ d) • (Measure.hausdorffMeasure (d : ℝ))
+
+/-- The divergence `div ξ(x) = tr Dξ(x)` of a vector field `ξ : ℝⁿ → ℝⁿ`. -/
+def divergence {n : ℕ} (ξ : Rn n → Rn n) (x : Rn n) : ℝ :=
+  LinearMap.trace ℝ (Rn n) (fderiv ℝ ξ x : Rn n →ₗ[ℝ] Rn n)
+
+/-- `ξ ∈ C^∞_c(Ω; ℝⁿ)`: `ξ` is smooth and has compact support contained in `Ω`. -/
+def IsSmoothTestField {n : ℕ} (Ω : Set (Rn n)) (ξ : Rn n → Rn n) : Prop :=
+  ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) ξ ∧ HasCompactSupport ξ ∧ tsupport ξ ⊆ Ω
+
+/-- `S ⊆ ℝⁿ` is countably `ℋ^k`-rectifiable. -/
+def IsCountablyRectifiable (n k : ℕ) (S : Set (Rn n)) : Prop :=
+  ∃ f : ℕ → Rn k → Rn n, (∀ i, ∃ C, LipschitzWith C (f i)) ∧
+    hausdorffN n k (S \ ⋃ i, range (f i)) = 0
+
+/-- `E` has locally finite perimeter in the open set `U`: each point of `U` has a ball
+`B_r(x) ⊆ U` on which `|∫_E div φ| ≤ C sup|φ|` for all `φ ∈ C^∞_c(B_r(x); ℝⁿ)`. -/
+def HasLocallyFinitePerimeter {n : ℕ} (U E : Set (Rn n)) : Prop :=
+  ∀ x ∈ U, ∃ r > 0, ball x r ⊆ U ∧ ∃ C : ℝ, ∀ φ : Rn n → Rn n,
+    IsSmoothTestField (ball x r) φ → |∫ y in E, divergence φ y| ≤ C * ⨆ y, ‖φ y‖
+
+/-- A Gauss–Green pair `(μ, ν)` for `E` in `Ω`: the perimeter measure and outer unit normal. -/
+structure IsGaussGreenPair {n : ℕ} (Ω E : Set (Rn n)) (μ : Measure (Rn n)) (ν : Rn n → Rn n) :
+    Prop where
+  /-- `μ` is concentrated on `Ω`. -/
+  measure_compl : μ Ωᶜ = 0
+  /-- `μ` is finite on compact subsets of `Ω`. -/
+  lt_top_of_isCompact : ∀ K, IsCompact K → K ⊆ Ω → μ K < ∞
+  /-- `ν` is measurable. -/
+  measurable_normal : Measurable ν
+  /-- `ν` is a unit vector `μ`-a.e. -/
+  norm_normal : ∀ᵐ x ∂μ, ‖ν x‖ = 1
+  /-- The Gauss–Green formula `∫_E div φ = ∫ ⟪φ, ν⟫ dμ` for `φ ∈ C^∞_c(Ω; ℝⁿ)`. -/
+  integral_divergence : ∀ φ : Rn n → Rn n, IsSmoothTestField Ω φ →
+    ∫ x in E, divergence φ x = ∫ x, ⟪φ x, ν x⟫ ∂μ
+
+/-- The reduced boundary `∂*E ∩ Ω`: points `x ∈ Ω` with `μ(B_r(x)) > 0` for all `r > 0` at which
+the averages `⨍_{B_r(x)} ν dμ` converge to a unit vector, `(μ, ν)` a Gauss–Green pair. -/
+def reducedBoundary {n : ℕ} (Ω E : Set (Rn n)) : Set (Rn n) :=
+  {x | x ∈ Ω ∧ ∃ μ ν, IsGaussGreenPair Ω E μ ν ∧ (∀ r, 0 < r → 0 < μ (ball x r)) ∧
+    ∃ v : Rn n, ‖v‖ = 1 ∧
+      Tendsto (fun r => (μ (ball x r)).toReal⁻¹ • ∫ y in ball x r, ν y ∂μ) (𝓝[>] 0) (𝓝 v)}
+
+/-- `E` has Lebesgue density `d` at `x`: `|E ∩ B_r(x)| / |B_r(x)| → d` as `r → 0⁺`. -/
+def HasDensity {n : ℕ} (E : Set (Rn n)) (x : Rn n) (d : ℝ) : Prop :=
+  Tendsto (fun r => (volume (E ∩ ball x r)).toReal / (volume (ball x r)).toReal) (𝓝[>] 0) (𝓝 d)
+
+/-- The essential (measure-theoretic) boundary: the points at which `E` has neither density `0`
+nor density `1`. -/
+def essentialBoundary {n : ℕ} (E : Set (Rn n)) : Set (Rn n) :=
+  {x | ¬ HasDensity E x 0 ∧ ¬ HasDensity E x 1}
+
+/-- **Gauss–Green measure from a divergence bound** ([EG, Theorem 5.1]). If `U` is open, `E` is
+measurable and `|∫_E div φ| ≤ C sup|φ|` for all `φ ∈ C^∞_c(U; ℝⁿ)`, then `E` has a Gauss–Green
+pair `(μ, ν)` in `U` with `μ(U) ≤ C`. -/
+def GaussGreenPairOfDivergenceBoundClaim (n : ℕ) : Prop :=
+  2 ≤ n → ∀ {U E : Set (Rn n)}, IsOpen U → MeasurableSet E → ∀ C : ℝ,
+    (∀ φ : Rn n → Rn n, IsSmoothTestField U φ → |∫ x in E, divergence φ x| ≤ C * ⨆ x, ‖φ x‖) →
+    ∃ μ ν, IsGaussGreenPair U E μ ν ∧ μ U ≤ ENNReal.ofReal C
+
+/-- **Structure theorem for sets of locally finite perimeter** ([EG, Theorem 5.1], `BV_loc`
+form). A measurable set of locally finite perimeter in the open set `U` has a Gauss–Green pair
+in `U`. -/
+def GaussGreenPairOfLocallyFinitePerimeterClaim (n : ℕ) : Prop :=
+  2 ≤ n → ∀ {U E : Set (Rn n)}, IsOpen U → MeasurableSet E → HasLocallyFinitePerimeter U E →
+    ∃ μ ν, IsGaussGreenPair U E μ ν
+
+/-- **De Giorgi's blow-up theorem** ([EG, Theorem 5.13]). Let `(μ, ν)` be a Gauss–Green pair for
+the measurable set `E` in the open set `Ω`, and let `x ∈ ∂*E ∩ Ω`: `μ(B_r(x)) > 0` for all
+`r > 0` and `⨍_{B_r(x)} ν dμ → v` with `‖v‖ = 1`. Then `E` is asymptotic to the half-space
+`{y : ⟪y − x, v⟫ < 0}` at `x`: their symmetric difference has density `0` at `x`. -/
+def HalfSpaceBlowUpClaim (n : ℕ) : Prop :=
+  2 ≤ n → ∀ {Ω E : Set (Rn n)}, IsOpen Ω → MeasurableSet E →
+    ∀ {μ : Measure (Rn n)} {ν : Rn n → Rn n}, IsGaussGreenPair Ω E μ ν →
+    ∀ {x : Rn n}, x ∈ Ω → (∀ r, 0 < r → 0 < μ (ball x r)) → ∀ {v : Rn n}, ‖v‖ = 1 →
+    Tendsto (fun r => (μ (ball x r)).toReal⁻¹ • ∫ y in ball x r, ν y ∂μ) (𝓝[>] 0) (𝓝 v) →
+    HasDensity (symmDiff E {y | ⟪y - x, v⟫ < 0}) x 0
+
+/-- **Rectifiability of the essential boundary** ([EG, Theorem 5.15 (i) and Lemma 5.5]).
+If `E` is measurable with locally finite perimeter in the open set `Ω`, then
+`Ω ∩ ∂_*E` is countably `ℋ^{n-1}`-rectifiable, `ℋ^{n-1}((Ω ∩ ∂_*E) \ ∂*E) = 0`, and
+`∂*E ∩ Ω ⊆ ∂_*E`. -/
+def RectifiableEssentialBoundaryClaim (n : ℕ) : Prop :=
+  2 ≤ n → ∀ {Ω E : Set (Rn n)}, IsOpen Ω → MeasurableSet E → HasLocallyFinitePerimeter Ω E →
+    IsCountablyRectifiable n (n - 1) (Ω ∩ essentialBoundary E) ∧
+      hausdorffN n (n - 1) ((Ω ∩ essentialBoundary E) \ reducedBoundary Ω E) = 0 ∧
+      reducedBoundary Ω E ⊆ essentialBoundary E
+
+/-- **Perimeter measure equals `ℋ^{n-1}` on the essential boundary** ([EG, Theorem 5.15 (iii)
+with Lemma 5.5]). If `(μ, ν)` is a Gauss–Green pair for the measurable set `E` in
+the open set `Ω`, then `μ = ℋ^{n-1}⌊(Ω ∩ ∂_*E)`. -/
+def GaussGreenMeasureEqHausdorffClaim (n : ℕ) : Prop :=
+  2 ≤ n → ∀ {Ω E : Set (Rn n)} {μ : Measure (Rn n)} {ν : Rn n → Rn n}, IsOpen Ω →
+    MeasurableSet E → IsGaussGreenPair Ω E μ ν →
+    μ = (hausdorffN n (n - 1)).restrict (Ω ∩ essentialBoundary E)
+
+/-- **Federer's criterion, null case** ([EG, Theorem 5.23] localized to a ball, with the relative
+isoperimetric inequality [EG, Theorem 5.11 (ii)]). If `E` is measurable and
+`ℋ^{n-1}(∂_*E ∩ B_r(c)) = 0`, then `E ∩ B_r(c)` is Lebesgue-null or `B_r(c) \ E` is. -/
+def TrivialOfNullEssentialBoundaryClaim (n : ℕ) : Prop :=
+  2 ≤ n → ∀ {E : Set (Rn n)}, MeasurableSet E → ∀ {c : Rn n} {r : ℝ},
+    hausdorffN n (n - 1) (essentialBoundary E ∩ ball c r) = 0 →
+    volume (E ∩ ball c r) = 0 ∨ volume (ball c r \ E) = 0
+
+end GMTChallenge

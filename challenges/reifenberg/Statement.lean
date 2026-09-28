@@ -1,0 +1,106 @@
+import Mathlib
+
+/-!
+# Trusted statements: discrete and rectifiable Reifenberg theorems for hyperplanes
+
+This file imports Mathlib only. It is the complete trusted surface of the `reifenberg`
+challenge: `Challenge.lean` and `Solution.lean` both state `GMTChallenge.DiscreteReifenbergClaim`
+and `GMTChallenge.RectifiableReifenbergClaim`.
+
+Source: A. Naber and D. Valtorta, *Rectifiable-Reifenberg and the regularity of stationary and
+minimizing harmonic maps*, Ann. of Math. (2) 185 (2017), 131–227 (arXiv:1504.02043), cited `[NV]`;
+and M. Miśkiewicz, *Discrete Reifenberg-type theorem*, Ann. Acad. Sci. Fenn. Math. 43 (2018)
+(arXiv:1612.02461).
+
+Both claims are the codimension-one case `k = n − 1`, with the lower mass threshold `ε_n` of
+[NV, Definition 3.1] set to `0`, which [NV, Remark 3.2] allows; so the hypotheses are imposed on
+every ball `B_s(y) ⊆ B₂`.
+
+* `DiscreteReifenbergClaim` is [NV, Theorem 3.4] for finite collections of balls (also
+  [Miśkiewicz, Theorem 1.1] with `q = 2`).
+* `RectifiableReifenbergClaim` is the rectifiability conclusion (2) of [NV, Theorem 3.3] under the
+  additional hypotheses that `S` is Borel with `ℋ^{n-1}(S) < ∞` and satisfies the upper density
+  bound `ℋ^{n-1}(S ∩ B_r(x)) ≤ C r^{n-1}`; the constant `δ` may depend on `C`.
+
+Vocabulary, all from Mathlib:
+* `hausdorffN n d = (ω_d / 2^d) μH[d]` is the `d`-dimensional Hausdorff measure on `ℝⁿ` with the
+  normalization of Evans–Gariepy, where `ω_d = unitBallVolume d` is the volume of the unit ball of
+  `ℝ^d` and `μH[d]` is Mathlib's (unnormalized) Hausdorff measure.
+* `jonesBetaSq μ x r = inf_L r^{-(n+1)} ∫_{B_r(x)} dist(y, L)² dμ(y)`, the infimum over affine
+  hyperplanes `L = {y : ⟪y − p, ν⟫ = 0}` with `‖ν‖ = 1` (so `dist(y, L) = |⟪y − p, ν⟫|`). This is
+  [NV, Definition 3.1] `D^{n-1}_μ(x, r)` with `ε_n = 0`.
+* `IsCountablyRectifiable n k S`: up to an `ℋ^k`-null set, `S` is covered by countably many
+  Lipschitz images of `ℝ^k`.
+-/
+
+noncomputable section
+
+open MeasureTheory Metric Set Filter Topology
+open scoped ENNReal RealInnerProductSpace
+
+namespace GMTChallenge
+
+/-- The Euclidean space `ℝⁿ`. -/
+abbrev Rn (n : ℕ) := EuclideanSpace ℝ (Fin n)
+
+/-- `ω_n = |B₁|`, the Lebesgue measure of the unit ball of `ℝⁿ`. -/
+def unitBallVolume (n : ℕ) : ℝ :=
+  (volume (ball (0 : Rn n) 1)).toReal
+
+/-- The normalized `d`-dimensional Hausdorff measure `ℋ^d = (ω_d / 2^d) μH[d]` on `ℝⁿ`. -/
+def hausdorffN (n d : ℕ) : Measure (Rn n) :=
+  ENNReal.ofReal (unitBallVolume d / 2 ^ d) • (Measure.hausdorffMeasure (d : ℝ))
+
+/-- `S ⊆ ℝⁿ` is countably `ℋ^k`-rectifiable: up to an `ℋ^k`-null set, `S` is contained in a
+countable union of Lipschitz images of `ℝ^k`. -/
+def IsCountablyRectifiable (n k : ℕ) (S : Set (Rn n)) : Prop :=
+  ∃ f : ℕ → Rn k → Rn n, (∀ i, ∃ C, LipschitzWith C (f i)) ∧
+    hausdorffN n k (S \ ⋃ i, range (f i)) = 0
+
+/-- The squared Jones number with respect to affine hyperplanes,
+`β²_μ(x, r) = inf_{p, ‖ν‖ = 1} r^{-(n-1)} ∫_{B_r(x)} ⟪y − p, ν⟫² / r² dμ(y)`. -/
+def jonesBetaSq {n : ℕ} (μ : Measure (Rn n)) (x : Rn n) (r : ℝ) : ℝ≥0∞ :=
+  ⨅ (p : Rn n) (ν : Rn n) (_ : ‖ν‖ = 1),
+    (∫⁻ y in ball x r, ENNReal.ofReal (⟪y - p, ν⟫ ^ 2 / r ^ 2) ∂μ) / ENNReal.ofReal (r ^ (n - 1))
+
+open scoped Classical in
+/-- Discrete Reifenberg theorem for hyperplanes ([NV, Theorem 3.4], `k = n − 1`, `ε_n = 0`).
+
+For `n ≥ 2` there are `δ > 0` and `D` such that: if `{B_{r_j}(x_j)}_{j ∈ J}` is a finite
+collection of pairwise disjoint balls contained in `B₂`, `μ = Σ_j ω_{n-1} r_j^{n-1} δ_{x_j}`, and
+`∫_{B_s(y)} ∫_0^s β²_μ(z, t) dt/t dμ(z) < δ² s^{n-1}` for every ball `B_s(y) ⊆ B₂`, then
+`Σ_{x_j ∈ B₁} r_j^{n-1} < D`. -/
+def DiscreteReifenbergClaim (n : ℕ) : Prop :=
+  2 ≤ n →
+    ∃ δ : ℝ, 0 < δ ∧ ∃ D : ℝ, ∀ {ι : Type} (J : Finset ι) (x : ι → Rn n) (r : ι → ℝ),
+      (∀ j ∈ J, 0 < r j) → (∀ j ∈ J, ball (x j) (r j) ⊆ ball 0 2) →
+      (J : Set ι).Pairwise (fun i j => Disjoint (ball (x i) (r i)) (ball (x j) (r j))) →
+      (∀ (y : Rn n) (s : ℝ), 0 < s → ball y s ⊆ ball 0 2 →
+        ∫⁻ z in ball y s, (∫⁻ t in Ioo 0 s,
+            jonesBetaSq (∑ j ∈ J, ENNReal.ofReal (unitBallVolume (n - 1) * r j ^ (n - 1)) •
+              Measure.dirac (x j)) z t / ENNReal.ofReal t)
+          ∂(∑ j ∈ J, ENNReal.ofReal (unitBallVolume (n - 1) * r j ^ (n - 1)) •
+              Measure.dirac (x j)) <
+          ENNReal.ofReal (δ ^ 2 * s ^ (n - 1))) →
+      ∑ j ∈ J with x j ∈ ball 0 1, r j ^ (n - 1) < D
+
+/-- Rectifiable-Reifenberg theorem for hyperplanes, rectifiability part ([NV, Theorem 3.3 (2)],
+`k = n − 1`, `ε_n = 0`), under an upper density bound.
+
+For `n ≥ 2` and every `C` there is `δ > 0` such that: if `S ⊆ B₂` is Borel with
+`ℋ^{n-1}(S) < ∞`, `ℋ^{n-1}(S ∩ B_r(x)) ≤ C r^{n-1}` for every ball, and
+`∫_{S ∩ B_s(y)} ∫_0^s β²_{ℋ^{n-1}⌊S}(z, t) dt/t dℋ^{n-1}(z) < δ² s^{n-1}` for every ball
+`B_s(y) ⊆ B₂`, then `S ∩ B₁` is countably `ℋ^{n-1}`-rectifiable. -/
+def RectifiableReifenbergClaim (n : ℕ) : Prop :=
+  2 ≤ n → ∀ C : ℝ,
+    ∃ δ : ℝ, 0 < δ ∧ ∀ S : Set (Rn n), MeasurableSet S → S ⊆ ball 0 2 →
+      hausdorffN n (n - 1) S < ∞ →
+      (∀ (x : Rn n) (r : ℝ), 0 < r →
+        hausdorffN n (n - 1) (S ∩ ball x r) ≤ ENNReal.ofReal (C * r ^ (n - 1))) →
+      (∀ (y : Rn n) (s : ℝ), 0 < s → ball y s ⊆ ball 0 2 →
+        ∫⁻ z in S ∩ ball y s, (∫⁻ t in Ioo 0 s,
+            jonesBetaSq ((hausdorffN n (n - 1)).restrict S) z t / ENNReal.ofReal t)
+          ∂hausdorffN n (n - 1) < ENNReal.ofReal (δ ^ 2 * s ^ (n - 1))) →
+      IsCountablyRectifiable n (n - 1) (S ∩ ball 0 1)
+
+end GMTChallenge
