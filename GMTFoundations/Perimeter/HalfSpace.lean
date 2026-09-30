@@ -12,8 +12,8 @@ import GMTFoundations.GMT.HausdorffLebesgue
 import GMTFoundations.BV.TotalVariation
 import GMTFoundations.BV.Compactness
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.Hom
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
@@ -76,7 +76,7 @@ theorem volume_setOf_inner_eq {e : Rn n} (he : e ≠ 0) (γ : ℝ) :
       (fun y ↦ y + -((γ / ‖e‖ ^ 2) • e)) ⁻¹' GMT.hyperplane e := by
     ext y
     have : ‖e‖ ^ 2 ≠ 0 := by positivity
-    simp only [mem_setOf_eq, mem_preimage, GMT.mem_hyperplane, inner_add_left, inner_neg_left,
+    simp only [mem_ofPred_eq, mem_preimage, GMT.mem_hyperplane, inner_add_left, inner_neg_left,
       real_inner_smul_left, real_inner_self_eq_norm_sq]
     constructor
     · intro h; rw [h]; field_simp; ring
@@ -106,7 +106,7 @@ theorem mollify_indicator_antitone_inner (h : IsGaussGreenPair univ F μ ν)
     (hF : MeasurableSet F) {e : Rn n} (he : ‖e‖ = 1) (hν : ∀ᵐ y ∂μ, ν y = e)
     (ρ : ContDiffBump (0 : Rn n)) {y y' : Rn n} (hyy' : ⟪y, e⟫ ≤ ⟪y', e⟫) :
     mollify ρ (F.indicator 1) y' ≤ mollify ρ (F.indicator 1) y := by
-  haveI : ContinuousSMul ℝ (Rn n) := inferInstance
+  have : ContinuousSMul ℝ (Rn n) := inferInstance
   set u := mollify ρ (F.indicator 1) with hu_def
   have hli : LocallyIntegrable (F.indicator (1 : Rn n → ℝ)) volume :=
     (locallyIntegrable_const (1 : ℝ)).indicator hF
@@ -175,7 +175,7 @@ theorem ae_eq_halfSpace_of_isGaussGreenPair (h : IsGaussGreenPair univ F μ ν)
     exact (eq_empty_iff_forall_notMem.1 hFG) y ⟨hyF, hyG⟩
   by_cases hbdd : BddAbove S
   · right; right
-    refine ⟨sSup S, eventuallyEq_set.2 ?_⟩
+    refine ⟨sSup S, eventuallyEqSet_iff.2 ?_⟩
     have he0 : e ≠ 0 := fun h0 ↦ by rw [h0, norm_zero] at he; exact zero_ne_one he
     have hplane : ∀ᵐ y, ⟪y, e⟫ ≠ sSup S :=
       measure_eq_zero_iff_ae_notMem.1 (volume_setOf_inner_eq he0 (sSup S))
@@ -330,7 +330,7 @@ private theorem hausdorffN_hyperplane_lt_top {e : Rn (m + 1)}
 private theorem isGaussGreenPair_halfSpace_aux {e : Rn (m + 1)} (he : ‖e‖ = 1) :
     IsGaussGreenPair univ {y | ⟪y, e⟫ ≤ 0} ((hausdorffN (m + 1) m).restrict (hyperplane e))
       (fun _ ↦ e) := by
-  haveI : ContinuousSMul ℝ (Rn (m + 1)) := inferInstance
+  have : ContinuousSMul ℝ (Rn (m + 1)) := inferInstance
   obtain ⟨T, hT⟩ := exists_linearIsometryEquiv_north he
   set L := T.symm.toLinearIsometry.comp (snocZero m) with hL_def
   have hmap := GMT.map_volume_add_linearIsometry_eq_hausdorffN L 0
@@ -389,7 +389,7 @@ private theorem isGaussGreenPair_halfSpace_aux {e : Rn (m + 1)} (he : ‖e‖ = 
     have hderiv : ∀ y, fderiv ℝ (g ε) y (φ y) = -(scaledKernel 0 ε ⟪y, e⟫ * ⟪φ y, e⟫) :=
       fun y ↦ by
         rw [(hgd ε hε y).fderiv]
-        simp only [ContinuousLinearMap.neg_apply, ContinuousLinearMap.smul_apply,
+        simp only [neg_apply, smul_apply,
           innerSL_apply_apply, smul_eq_mul, scaledKernel, sub_zero]
         rw [real_inner_comm (φ y) e]
         ring
@@ -516,7 +516,7 @@ theorem totalVariationOn_halfSpace_ball (hn : 2 ≤ n) {e : Rn n} (he : ‖e‖ 
     (hp : p ∈ hyperplane e) {r : ℝ} (hr : 0 ≤ r) :
     totalVariationOn (ball p r) ({y : Rn n | ⟪y, e⟫ ≤ 0}.indicator 1) =
       ENNReal.ofReal (unitBallVolume (n - 1) * r ^ (n - 1)) := by
-  haveI : NeZero n := ⟨by omega⟩
+  have : NeZero n := ⟨by omega⟩
   have he0 : e ≠ 0 := fun h0 ↦ by rw [h0, norm_zero] at he; exact zero_ne_one he
   rw [(isGaussGreenPair_halfSpace he).totalVariationOn_indicator_eq (measurableSet_halfSpace e)
     isOpen_ball (subset_univ _), Measure.restrict_apply measurableSet_ball, inter_comm,

@@ -130,7 +130,7 @@ theorem setIntegral_fderiv_single_eq_zero (i : Fin (m + 1)) {F : Set (Rn (m + 1)
       (∀ t, (splitCoord i).symm (t, z) ∈ tsupport g → (splitCoord i).symm (t, z) ∈ F) ∨
       (∀ t, (splitCoord i).symm (t, z) ∈ tsupport g → (splitCoord i).symm (t, z) ∉ F)) :
     ∫ x in F, fderiv ℝ g x (EuclideanSpace.single i 1) = 0 := by
-  haveI : ContinuousSMul ℝ (Rn (m + 1)) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn (m + 1)) := IsBoundedSMul.continuousSMul
   set e : Rn (m + 1) := EuclideanSpace.single i 1
   set L := (splitCoord i).symm
   set h : Rn (m + 1) → ℝ := fun x => fderiv ℝ g x e

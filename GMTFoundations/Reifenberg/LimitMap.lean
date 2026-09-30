@@ -8,7 +8,8 @@ module
 public import GMTFoundations.Reifenberg.EngineMass
 public import GMTFoundations.Reifenberg.Flow
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # The limit map of the Reifenberg flow and the mass accounting
@@ -87,7 +88,7 @@ theorem ofMeasure_fin (hρ0 : 0 < ρ) (hρ1 : ρ ≤ 1) (i : ℕ) : (ofMeasure �
   | succ i =>
     rw [← Finset.coe_eq_empty, coe_fin_succ (ofMeasure_hyp hρ0 hρ1) (Nat.zero_le i)]
     refine eq_empty_of_forall_notMem fun x hx => ?_
-    exact absurd hx.2 (ENat.top_ne_coe (i + 1))
+    exact absurd hx.2 (ENat.top_ne_natCast (i + 1))
 
 /-- **The engine hypotheses for the continuous instance.** The oracle `hup` is the global upper
 bound `μ(B_t(y)) ≤ Λ t^k` on all balls; the square-function hypothesis is required on the balls

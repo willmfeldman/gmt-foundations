@@ -8,8 +8,8 @@ module
 public import GMTFoundations.Reifenberg.BestPlane
 public import GMTFoundations.Reifenberg.Hyperplane
 public import GMTFoundations.GMT.Packing
-import Mathlib.Data.Real.Hom
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Far points and the tilt between planes
@@ -146,7 +146,7 @@ theorem exists_far_point (hn : 2 ≤ n) {μ : Measure (Rn n)} {x : Rn n} {r ρ a
                 mul_le_mul_of_nonneg_right (by linarith only [hρ0']) hrn.le
   -- Step 4: the complement `O = B_r(x) \ U` has mass `≥ (a/2) r^{n−1}`.
   have hO : ENNReal.ofReal (a / 2 * r ^ (n - 1)) ≤ μ (ball x r \ U) := by
-    have h1 := measure_le_inter_add_diff μ (ball x r) U
+    have h1 := measure_le_inter_add_sdiff μ (ball x r) U
     have h2 : ENNReal.ofReal (a * r ^ (n - 1)) =
         ENNReal.ofReal (a / 2 * r ^ (n - 1)) + ENNReal.ofReal (a / 2 * r ^ (n - 1)) := by
       rw [← ENNReal.ofReal_add (by positivity) (by positivity)]
@@ -160,7 +160,7 @@ theorem exists_far_point (hn : 2 ≤ n) {μ : Measure (Rn n)} {x : Rn n} {r ρ a
       (F : Set (Rn n)).Pairwise (fun y z => ρ * r ≤ dist y z) → (F.card : ℝ) ≤ (3 / ρ) ^ n := by
     intro F hFO hF
     refine (NaberValtorta.card_le_of_pairwise_le_dist hs hr.le
-      (hFO.trans (diff_subset.trans ball_subset_closedBall)) hF).trans ?_
+      (hFO.trans (sdiff_subset.trans ball_subset_closedBall)) hF).trans ?_
     have e : 2 * r / (ρ * r) = 2 / ρ := by field_simp
     have h1 : 1 ≤ 1 / ρ := by rw [le_div_iff₀ hρ]; linarith
     have h3 : 3 / ρ = 2 / ρ + 1 / ρ := by ring

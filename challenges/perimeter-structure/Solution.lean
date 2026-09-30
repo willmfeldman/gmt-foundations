@@ -26,7 +26,7 @@ theorem isGaussGreenPair_iff {Ω E : Set (Rn n)} {μ : Measure (Rn n)} {ν : Rn 
 theorem reducedBoundary_eq (Ω E : Set (Rn n)) :
     reducedBoundary Ω E = GMTFoundations.reducedBoundary Ω E := by
   ext x
-  simp only [reducedBoundary, GMTFoundations.reducedBoundary, Set.mem_setOf_eq,
+  simp only [reducedBoundary, GMTFoundations.reducedBoundary, Set.mem_ofPred_eq,
     isGaussGreenPair_iff]
 
 theorem exists_isGaussGreenPair_iff {Ω E : Set (Rn n)} :

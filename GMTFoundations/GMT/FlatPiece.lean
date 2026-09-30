@@ -6,7 +6,8 @@ Authors: William M. Feldman
 module
 
 public import GMTFoundations.GMT.Basic
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Flat pieces and their blow-ups
@@ -55,7 +56,7 @@ theorem IsFlatPiece.mono {ν : Rn n} {ε : ℝ} {G G' : Set (Rn n)} (h : IsFlatP
 /-! ### The projection onto `ν^⊥` (continued) -/
 
 theorem continuous_projH (ν : Rn n) : Continuous (projH ν) :=
-  continuous_id.sub ((continuous_id.inner continuous_const).smul continuous_const)
+  continuous_id.sub (by fun_prop : Continuous fun y : Rn n => ⟪y, ν⟫ • ν)
 
 theorem measurable_projH (ν : Rn n) : Measurable (projH ν) :=
   (continuous_projH ν).measurable

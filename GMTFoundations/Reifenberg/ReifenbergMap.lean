@@ -8,7 +8,8 @@ module
 public import GMTFoundations.Reifenberg.Hyperplane
 public import GMTFoundations.Reifenberg.PartitionOfUnity
 public import GMTFoundations.GMT.FlatPiece
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Graphs over planes, Reifenberg maps, and the inverse-function device

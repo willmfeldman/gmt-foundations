@@ -180,7 +180,7 @@ theorem volume_image_snd_eq_zero {m : ℕ} {T O : Set (ℝ × (Fin m → ℝ))} 
     volume (Prod.snd '' T) = 0 := by
   have hT : T = ⋃ j : ℤ, T ∩ {p | j * δ ≤ p.1 ∧ p.1 < j * δ + δ} := by
     ext p
-    simp only [mem_iUnion, mem_inter_iff, mem_setOf_eq]
+    simp only [mem_iUnion, mem_inter_iff, mem_ofPred_eq]
     refine ⟨fun hp => ⟨⌊p.1 / δ⌋, hp, ?_, ?_⟩, fun ⟨_, hp, _⟩ => hp⟩
     · have := Int.floor_le (p.1 / δ)
       rwa [le_div_iff₀ hδ] at this

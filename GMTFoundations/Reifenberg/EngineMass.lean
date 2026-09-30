@@ -7,7 +7,8 @@ module
 
 public import GMTFoundations.Reifenberg.Induction
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Discrete Reifenberg: one engine run and its mass bound

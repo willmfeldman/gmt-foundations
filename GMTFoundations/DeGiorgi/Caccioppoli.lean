@@ -9,7 +9,8 @@ public import GMTFoundations.Defs.Sobolev
 public import GMTFoundations.Sobolev.Lattice
 public import GMTFoundations.Sobolev.Cutoff
 public import GMTFoundations.DeGiorgi.Iteration
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Function.L2Space
 import Mathlib.Analysis.Calculus.Gradient.Basic
 
@@ -48,12 +49,14 @@ variable {d : ℕ}
 theorem integrableOn_norm_sq_of_memH1Loc {U K : Set (E d)} {w : E d → ℝ} {G : E d → E d}
     (hw : MemH1Loc U w G) (hK : K ⊆ U) (hKc : IsCompact K) :
     IntegrableOn (fun x ↦ ‖G x‖ ^ 2) K :=
-  (memLp_two_iff_integrable_sq_norm (hw.2 K hK hKc).2.1).1 (hw.2 K hK hKc).2
+  (memLp_two_iff_integrable_sq_norm (hw.2 K hK hKc).2.aestronglyMeasurable).1 (hw.2 K hK hKc).2
 
 theorem integrableOn_sq_of_memH1Loc {U K : Set (E d)} {w : E d → ℝ} {G : E d → E d}
     (hw : MemH1Loc U w G) (hK : K ⊆ U) (hKc : IsCompact K) :
     IntegrableOn (fun x ↦ w x ^ 2) K := by
-  have := (memLp_two_iff_integrable_sq_norm (hw.2 K hK hKc).1.1).1 (hw.2 K hK hKc).1
+  have := (memLp_two_iff_integrable_sq_norm (hw.2 K hK hKc).1.aestronglyMeasurable).1
+    (hw.2 K hK hKc).1
+  rw [IntegrableOn]
   simpa [Real.norm_eq_abs, sq_abs] using this
 
 /-! ### The De Giorgi classes -/
@@ -152,9 +155,9 @@ theorem caccioppoli_of_step {F : E d → ℝ} {GF : E d → E d} {z : E d} {R₀
         integral_const_mul, setIntegral_indicator measurableSet_closedBall.compl]
     have h4 : ∫ x in ball z t ∩ (closedBall z s)ᶜ, ‖GF x‖ ^ 2 ≤ Φ t - Φ s := by
       have e : ∫ x in ball z t \ ball z s, ‖GF x‖ ^ 2 = Φ t - Φ s :=
-        setIntegral_diff measurableSet_ball (hGFσ t htR₀) (ball_subset_ball hst.le)
+        setIntegral_sdiff measurableSet_ball (hGFσ t htR₀) (ball_subset_ball hst.le)
       rw [← e]
-      refine setIntegral_mono_set ((hGFσ t htR₀).mono_set diff_subset)
+      refine setIntegral_mono_set ((hGFσ t htR₀).mono_set sdiff_subset)
         (ae_of_all _ fun _ ↦ sq_nonneg _) (Eventually.of_forall fun x hx ↦ ?_)
       exact ⟨hx.1, fun h ↦ hx.2 (ball_subset_closedBall h)⟩
     have h5 : ∫ x in ball z t, F x ^ 2 ≤ S :=

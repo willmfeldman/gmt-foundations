@@ -265,7 +265,6 @@ theorem exists_bigPiece (hn : 2 ≤ n) (C : ℝ) :
         ← ENNReal.ofReal_mul (by positivity),
         ← ENNReal.ofReal_add (by positivity) (by positivity)]
       refine ENNReal.ofReal_le_ofReal ?_
-      change θ * ledgerC1 n * _ + _ ≤ _
       rw [mul_add]
       linarith
     have h2 : D.μ {x | ENNReal.ofReal 1 < D.stopFun x} ≤ ENNReal.ofReal (η / 8) := by

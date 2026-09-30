@@ -10,8 +10,8 @@ public import GMTFoundations.Perimeter.VectorRiesz
 public import GMTFoundations.Defs.BV
 import GMTFoundations.BV.TotalVariation
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.Hom
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Geometry.Manifold.SmoothApprox
 import Mathlib.MeasureTheory.Function.ContinuousMapDense
 import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
@@ -62,14 +62,14 @@ section Divergence
 private theorem divergence_add' {φ ψ : Rn n → Rn n} (hφ : Differentiable ℝ φ)
     (hψ : Differentiable ℝ ψ) : divergence (φ + ψ) = divergence φ + divergence ψ := by
   funext x
-  simp only [divergence, Pi.add_apply, fderiv_add (hφ x) (hψ x), ContinuousLinearMap.coe_add,
-    map_add]
+  simp only [divergence, Pi.add_apply, fderiv_add (hφ x) (hψ x),
+    ContinuousLinearMap.toLinearMap_add, map_add]
 
 private theorem divergence_smul' (c : ℝ) {φ : Rn n → Rn n} (hφ : Differentiable ℝ φ) :
     divergence (c • φ) = c • divergence φ := by
   funext x
-  simp only [divergence, Pi.smul_apply, fderiv_const_smul (hφ x), ContinuousLinearMap.coe_smul,
-    map_smul, smul_eq_mul]
+  simp only [divergence, Pi.smul_apply, fderiv_const_smul (hφ x),
+    ContinuousLinearMap.toLinearMap_smul, map_smul, smul_eq_mul]
 
 /-- Not private: reused in `GaussGreenPair/API.lean`. -/
 theorem IsSmoothTestField.differentiable {U : Set (Rn n)} {φ : Rn n → Rn n}
@@ -191,7 +191,7 @@ private theorem inner_retract_ge {u v : Rn n} (hu : ‖u‖ = 1) :
 `GaussGreenPair/WeightedTV.lean`. -/
 theorem measure_le_of_forall_isCompact {μ : Measure (Rn n)} {V : Set (Rn n)}
     (hV : IsOpen V) {c : ℝ≥0∞} (h : ∀ K, IsCompact K → K ⊆ V → μ K ≤ c) : μ V ≤ c := by
-  haveI : LocallyCompactSpace V := hV.locallyCompactSpace
+  have : LocallyCompactSpace V := hV.locallyCompactSpace
   have hVeq : V = ⋃ k, Subtype.val '' compactCovering V k := by
     rw [← image_iUnion, iUnion_compactCovering, image_univ, Subtype.range_coe]
   rw [hVeq, Monotone.measure_iUnion fun a b hab ↦ image_mono (compactCovering_subset V hab)]
@@ -211,8 +211,8 @@ theorem IsGaussGreenPair.exists_smooth_integral_norm_sub_le (h : IsGaussGreenPai
   obtain ⟨K', hK', hKK', hK'V⟩ := exists_compact_between hK hV hKV
   have hμK' : μ K' < ⊤ := h.lt_top_of_isCompact K' hK' (hK'V.trans hVΩ)
   set m := μ.restrict K' with hm
-  haveI : IsFiniteMeasure m := isFiniteMeasure_restrict.2 hμK'.ne
-  haveI : m.Regular := Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure m
+  have : IsFiniteMeasure m := isFiniteMeasure_restrict.2 hμK'.ne
+  have : m.Regular := Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure m
   have hν1 : ∀ᵐ x ∂m, ‖ν x‖ = 1 := ae_restrict_of_ae h.norm_normal
   -- `L¹(m)` approximation of `1_K ν` by a continuous compactly supported field
   set g : Rn n → Rn n := K.indicator ν with hg_def
@@ -235,7 +235,7 @@ theorem IsGaussGreenPair.exists_smooth_integral_norm_sub_le (h : IsGaussGreenPai
   have hφ₀norm : ∀ x, ‖φ₀ x‖ ≤ 1 := by
     intro x
     rw [hφ₀, norm_smul, Real.norm_of_nonneg (hχI x).1]
-    exact mul_le_one₀ (hχI x).2 (norm_nonneg _) (norm_retract_le_one _)
+    exact (mul_le_of_le_one_left (norm_nonneg _) (hχI x).2).trans (norm_retract_le_one _)
   have hzero : ∀ f : Rn n → Rn n, support f ⊆ K' → ∀ x ∉ K', ⟪f x, ν x⟫ = 0 := by
     intro f hf x hx
     have : f x = 0 := by by_contra hne; exact hx (hf hne)
@@ -277,7 +277,7 @@ theorem IsGaussGreenPair.exists_smooth_integral_norm_sub_le (h : IsGaussGreenPai
       _ ≤ ε * 1 := by gcongr; exact div_le_one_of_le₀ (by linarith) (by linarith)
       _ = ε := mul_one ε
   obtain ⟨φ, hφs, hφapprox, hφsupp⟩ :=
-    (continuous_const.smul hφ₀cont : Continuous fun x ↦ (1 - δ) • φ₀ x).exists_contDiff_approx
+    (by fun_prop : Continuous fun x ↦ (1 - δ) • φ₀ x).exists_contDiff_approx
       (ε := fun _ ↦ δ) ⊤ continuous_const (fun _ ↦ hδpos)
   have hφsupp' : support φ ⊆ K' := hφsupp.trans
     ((support_const_smul_subset (1 - δ) φ₀).trans hφ₀supp)

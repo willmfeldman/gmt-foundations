@@ -7,7 +7,8 @@ module
 
 public import GMTFoundations.Defs.Setup
 import GMTFoundations.GMT.Packing
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # A piecewise linear partition of unity at one scale
@@ -108,7 +109,7 @@ theorem card_filter_dist_lt_four_le (hr : 0 < r)
     (z := z) (ρ := 4 * r) hr (by positivity) ?_ ?_
   · rwa [show 2 * (4 * r) / r + 1 = 9 by field_simp; norm_num] at h
   · intro c hc
-    rw [Finset.coe_filter, Set.mem_setOf_eq] at hc
+    rw [Finset.coe_filter, Set.mem_ofPred_eq] at hc
     rw [mem_closedBall, dist_comm]
     exact hc.2.le
   · exact hY.mono (Finset.coe_subset.2 (Finset.filter_subset _ Y))
@@ -126,14 +127,14 @@ theorem sum_abs_puBump_sub_le (hr : 0 < r)
     intro c _
     by_cases h1 : dist z c < 4 * r
     · have h := abs_puBump_sub_le hr c z z'
-      rw [if_pos h1]
+      rw [ite_eq_left h1]
       split_ifs <;> nlinarith
     · by_cases h2 : dist z' c < 4 * r
       · have h := abs_puBump_sub_le hr c z z'
-        rw [if_neg h1, if_pos h2]
+        rw [ite_eq_right h1, ite_eq_left h2]
         linarith
       · rw [puBump_eq_zero hr (not_lt.1 h1), puBump_eq_zero hr (not_lt.1 h2), sub_self, abs_zero]
-        rw [if_neg h1, if_neg h2]
+        rw [ite_eq_right h1, ite_eq_right h2]
         simp
   refine (Finset.sum_le_sum hterm).trans ?_
   rw [← Finset.sum_mul, Finset.sum_add_distrib, Finset.sum_boole, Finset.sum_boole]

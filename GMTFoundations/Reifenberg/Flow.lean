@@ -7,7 +7,8 @@ module
 
 public import GMTFoundations.Reifenberg.Induction
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # The Reifenberg flow and its limit map
@@ -122,7 +123,7 @@ theorem dist_flow_limitMap_le {a : Rn n} (ha : a ∈ D.surf 0) (i : ℕ) :
   linarith [mul_pos this hρ0, mul_le_mul_of_nonneg_right hρ1 (mul_pos this hρ0).le]
 
 theorem dist_limitMap_le {a : Rn n} (ha : a ∈ D.surf 0) : dist a (D.limitMap a) ≤ D.ρ / 9 := by
-  simpa using dist_flow_limitMap_le h hj ha 0
+  simpa [flow_zero] using dist_flow_limitMap_le h hj ha 0
 
 theorem dist_flow_le {a : Rn n} (ha : a ∈ D.surf 0) (i : ℕ) : dist a (D.flow i a) ≤ D.ρ / 4 := by
   have h1 := dist_limitMap_le h hj ha

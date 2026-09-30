@@ -157,7 +157,7 @@ theorem finrank_orthogonal_span_singleton' (hn : 1 ≤ n) {ν : Rn n} (hν : ν 
 /-- `ω_d` from the Gamma-function formula for the volume of balls. -/
 theorem unitBallVolume_eq {d : ℕ} (hd : 0 < d) :
     unitBallVolume d = √Real.pi ^ d / Real.Gamma ((d : ℝ) / 2 + 1) := by
-  haveI : Nontrivial (Rn d) := Module.nontrivial_of_finrank_pos (R := ℝ) (by simpa using hd)
+  have : Nontrivial (Rn d) := Module.nontrivial_of_finrank_pos (R := ℝ) (by simpa using hd)
   rw [unitBallVolume, InnerProductSpace.volume_ball, finrank_euclideanSpace_fin,
     ENNReal.ofReal_one, one_pow, one_mul, ENNReal.toReal_ofReal]
   positivity
@@ -170,7 +170,7 @@ theorem euclideanHausdorffMeasure_hyperplane_inter_closedBall (hn : 2 ≤ n) {ν
   set K : Submodule ℝ (Rn n) := (ℝ ∙ ν)ᗮ
   have hK : finrank ℝ K = n - 1 := finrank_orthogonal_span_singleton' (by omega) hν
   have hpK : p ∈ K := by rw [hyperplane_eq_orthogonal] at hp; exact hp
-  haveI : Nontrivial K := Module.nontrivial_of_finrank_pos (R := ℝ) (by omega)
+  have : Nontrivial K := Module.nontrivial_of_finrank_pos (R := ℝ) (by omega)
   have himage : hyperplane ν ∩ closedBall p r =
       Subtype.val '' (closedBall (⟨p, hpK⟩ : K) r) := by
     ext y
@@ -197,7 +197,7 @@ theorem euclideanHausdorffMeasure_hyperplane_inter_ball (hn : 2 ≤ n) {ν : Rn 
   set K : Submodule ℝ (Rn n) := (ℝ ∙ ν)ᗮ
   have hK : finrank ℝ K = n - 1 := finrank_orthogonal_span_singleton' (by omega) hν
   have hpK : p ∈ K := by rw [hyperplane_eq_orthogonal] at hp; exact hp
-  haveI : Nontrivial K := Module.nontrivial_of_finrank_pos (R := ℝ) (by omega)
+  have : Nontrivial K := Module.nontrivial_of_finrank_pos (R := ℝ) (by omega)
   have himage : hyperplane ν ∩ ball p r = Subtype.val '' (ball (⟨p, hpK⟩ : K) r) := by
     ext y
     simp only [mem_inter_iff, mem_ball, mem_image, Subtype.exists, exists_and_right,

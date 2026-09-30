@@ -8,8 +8,8 @@ module
 public import GMTFoundations.DeGiorgi.DeGiorgi
 public import Mathlib.Analysis.Calculus.ParametricIntegral
 public import Mathlib.Analysis.Calculus.MeanValue
-import Mathlib.Data.Real.Hom
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.UniformSpace.Uniformizable
 import Mathlib.Analysis.Calculus.Gradient.Basic
 
@@ -75,7 +75,7 @@ theorem integral_le_boundary_poincare {U : Set (E d)} {g : E d → ℝ} {G : E d
     (hρ : 0 < ρ) (hzU : closedBall z ρ ⊆ U) (hgnn : ∀ x ∈ closedBall z ρ, 0 ≤ g x)
     (hg0 : ∀ x ∈ ball z ρ, x ∉ ball x₀ r → g x = 0) :
     ∫ x in ball z (ρ / 8), g x ≤ ρ / 4 * ∫ x in ball z (ρ / 2), ‖G x‖ := by
-  haveI : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
   obtain ⟨ψ, hψ, hψ01, hψ1, hψ0, hψc, hψt, hψg⟩ :=
     exists_cutoff z (by positivity : 0 ≤ ρ / 8) (by linarith : ρ / 8 < ρ / 4)
   set ν : E d := r⁻¹ • (z - x₀) with hν

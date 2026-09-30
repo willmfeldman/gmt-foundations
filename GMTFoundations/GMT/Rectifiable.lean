@@ -10,7 +10,8 @@ public import GMTFoundations.GMT.Packing
 import Mathlib.Analysis.Calculus.Rademacher
 import Mathlib.MeasureTheory.Covering.BesicovitchVectorSpace
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Flat-piece covers of rectifiable sets
@@ -67,10 +68,10 @@ theorem isFlatPiece_closure {ν : Rn n} {ε : ℝ} {G : Set (Rn n)} (h : IsFlatP
     exact ⟨hy, hz⟩
   have hsub : G ×ˢ G ⊆ {q : Rn n × Rn n | 0 ≤ ε * ‖q.1 - q.2‖ - |⟪q.1 - q.2, ν⟫|} := by
     rintro ⟨q1, q2⟩ ⟨h1, h2⟩
-    simp only [mem_setOf_eq, sub_nonneg]
+    simp only [mem_ofPred_eq, sub_nonneg]
     exact h q1 h1 q2 h2
   have := closure_minimal hsub (isClosed_le continuous_const hc) hmem
-  simp only [mem_setOf_eq, sub_nonneg] at this
+  simp only [mem_ofPred_eq, sub_nonneg] at this
   exact this
 
 /-- A Lipschitz map `ℝ^k → ℝⁿ` maps Lebesgue-null sets to `μHE[k]`-null sets. -/
@@ -220,8 +221,8 @@ theorem hausdorffMeasure_image_critical_le (hn : 2 ≤ n) {f : Rn (n - 1) → Rn
     (hf.euclideanHausdorffMeasure_image_eq_zero (measure_iUnion_null htnull))
   -- the covers
   set ι : ℕ → Type _ := fun m => Σ x : t m, ((Fs x (r m x) : Finset (Rn n)) : Set (Rn n))
-  haveI hι : ∀ m, Countable (ι m) := fun m => by
-    haveI := (htc m).to_subtype
+  have hι : ∀ m, Countable (ι m) := fun m => by
+    have := (htc m).to_subtype
     infer_instance
   set T : ∀ m, ι m → Set (Rn n) := fun m i =>
     f '' closedBall (i.1 : Rn (n - 1)) (r m i.1) ∩ ball (i.2 : Rn n) (δ * r m i.1)
@@ -305,7 +306,7 @@ theorem hausdorffMeasure_image_critical_le (hn : 2 ≤ n) {f : Rn (n - 1) → Rn
       _ ≤ _ := by gcongr; exact hsumr m
   calc μH[((n - 1 : ℕ) : ℝ)] (f '' Zj) ≤ μH[((n - 1 : ℕ) : ℝ)] (f '' (Zj \ N) ∪ f '' N) := by
         refine measure_mono ?_
-        rw [← image_union, diff_union_self]
+        rw [← image_union, sdiff_union_self]
         exact image_mono subset_union_left
     _ ≤ μH[((n - 1 : ℕ) : ℝ)] (f '' (Zj \ N)) + μH[((n - 1 : ℕ) : ℝ)] (f '' N) :=
         measure_union_le _ _
@@ -389,7 +390,7 @@ theorem isFlatPiece_image_regularPiece {f : Rn (n - 1) → Rn n} {T : Rn (n - 1)
     have h2 : ‖(D - T) (b - c)‖ ≤ θ * lam * ‖b - c‖ :=
       ((D - T).le_opNorm _).trans (by gcongr; exact hc.2.1)
     have : err = (f b - f c - D (b - c)) + (D - T) (b - c) := by
-      simp only [err, ContinuousLinearMap.sub_apply]
+      simp only [err, sub_apply]
       abel
     rw [this]
     exact (norm_add_le _ _).trans (by linarith)
@@ -438,7 +439,7 @@ theorem exists_mem_regularPiece {f : Rn (n - 1) → Rn n} {a : Rn (n - 1)}
   have h2 : ‖(L - T j) v‖ ≤ θ * lam * ‖v‖ :=
     ((L - T j).le_opNorm v).trans (by gcongr)
   have h3 : ‖L v‖ ≤ ‖T j v‖ + ‖(L - T j) v‖ := by
-    rw [ContinuousLinearMap.sub_apply]
+    rw [sub_apply]
     have := norm_sub_norm_le (L v) (T j v)
     linarith
   have h4 : θ * lam * ‖v‖ ≤ lam * ‖v‖ := by

@@ -6,7 +6,8 @@ Authors: William M. Feldman
 module
 
 public import GMTFoundations.Defs.Setup
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Hyperplanes and the projection onto them

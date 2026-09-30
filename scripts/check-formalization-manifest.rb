@@ -6,7 +6,9 @@
 # is complete, on the root toolchain, trusted-only by default, with a Mathlib-only Statement.lean
 # and a Challenge.lean importing only Statement; config theorem names and permitted axioms agree
 # with the manifest; every target's challenge theorem is listed; the pinned Comparator tool
-# revisions agree with scripts/release-comparator.sh.
+# revisions agree with scripts/release-comparator.sh; the recorded Mathlib rev agrees with
+# lakefile.toml and lake-manifest.json; and each workspace's lake-manifest.json locks exactly
+# the root manifest's package revisions.
 #
 # Lean checks (after `lake build`): every lean_name and statement_interface resolves, and every
 # target depends on exactly axioms.expected.
@@ -64,6 +66,18 @@ allowed = external.fetch('permitted_axioms')
 failures << 'comparator permitted_axioms differ from axioms.expected' unless allowed.sort == expected_axioms.sort
 failures << 'external_challenges.toolchain differs from lean-toolchain' unless external['toolchain'] == root_toolchain
 
+# The recorded Mathlib rev must be the one the lakefile requires and the lockfile resolves.
+root_lock = JSON.parse(File.read('lake-manifest.json'))
+root_revs = root_lock.fetch('packages').to_h { |pkg| [pkg.fetch('name'), pkg['rev']] }
+mathlib_lock = root_lock.fetch('packages').find { |pkg| pkg.fetch('name') == 'mathlib' }
+lakefile_rev = File.read('lakefile.toml')[/^\[\[require\]\]\s*\nname = "mathlib"\s*\n(?:[^\[\n]*\n)*?rev = "([^"]+)"/, 1]
+[['project.mathlib', manifest.fetch('project')['mathlib']], ['external_challenges.mathlib', external['mathlib']]].each do |key, rev|
+  failures << "#{key} #{rev.inspect} differs from the lakefile's Mathlib rev #{lakefile_rev.inspect}" \
+    unless rev == lakefile_rev
+end
+failures << 'lake-manifest.json Mathlib inputRev differs from lakefile.toml' \
+  unless mathlib_lock && mathlib_lock['inputRev'] == lakefile_rev
+
 listed = entries.map { |e| e.fetch('path') }.sort
 on_disk = Dir.glob('challenges/*/config.json').map { |c| File.dirname(c) }.sort
 unless listed == on_disk
@@ -80,6 +94,13 @@ entries.each do |entry|
   toolchain = File.join(path, 'lean-toolchain')
   failures << "#{path}: lean-toolchain differs from the root" \
     if File.file?(toolchain) && File.read(toolchain).strip != root_toolchain
+  lock = File.join(path, 'lake-manifest.json')
+  if File.file?(lock)
+    revs = JSON.parse(File.read(lock)).fetch('packages').reject { |pkg| pkg['type'] == 'path' }
+                                     .to_h { |pkg| [pkg.fetch('name'), pkg['rev']] }
+    failures << "#{path}: lake-manifest.json package revisions differ from the root manifest" \
+      unless revs == root_revs
+  end
   imports = lambda do |f|
     File.file?(f) ? File.read(f).scan(/^\s*import\s+(\S+)/).flatten : []
   end

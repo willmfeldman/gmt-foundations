@@ -9,7 +9,8 @@ public import GMTFoundations.Perimeter.BlowUpScaling
 import GMTFoundations.Perimeter.Mollify
 import GMTFoundations.Perimeter.HalfSpace
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # The normal of a blow-up limit is constant (EG Thm 5.13, Claim #1)
@@ -76,7 +77,7 @@ theorem setIntegral_mul_one_sub_inner_le (hνm : Measurable ν) (hν1 : ∀ᵐ y
     (hψ01 : ∀ y, 0 ≤ ψ y ∧ ψ y ≤ 1) {v : Rn n} (hv : ‖v‖ = 1) :
     0 ≤ ∫ y in U, ψ y * (1 - ⟪v, ν y⟫) ∂m ∧
       ∫ y in U, ψ y * (1 - ⟪v, ν y⟫) ∂m ≤ (m U).toReal - ⟪v, ∫ y in U, ν y ∂m⟫ := by
-  haveI : IsFiniteMeasure (m.restrict U) := isFiniteMeasure_restrict.2 hU.ne
+  have : IsFiniteMeasure (m.restrict U) := isFiniteMeasure_restrict.2 hU.ne
   have hin : ∀ᵐ y ∂m, |⟪v, ν y⟫| ≤ 1 := by
     filter_upwards [hν1] with y hy
     exact (abs_real_inner_le_norm _ _).trans (by rw [hv, hy, one_mul])

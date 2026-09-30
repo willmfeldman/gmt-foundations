@@ -7,7 +7,8 @@ module
 
 public import GMTFoundations.GMT.Polar
 import GMTFoundations.Sobolev.Lipschitz
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 import Mathlib.MeasureTheory.Order.Group.Lattice
 
@@ -240,7 +241,7 @@ private lemma measurable_density {u : Rn n → ℝ} (hu : Measurable u) :
 
 private lemma annulus_iff {t : ℝ} (ht : 0 < t) (ω : sphere (0 : Rn n) 1) :
     t • (ω : Rn n) ∈ ball (0 : Rn n) 1 \ ball 0 (1 / 2) ↔ t ∈ Ico (1 / 2 : ℝ) 1 := by
-  simp only [mem_diff, mem_ball_zero_iff, norm_smul_sphere ht.le, not_lt, mem_Ico]
+  simp only [Set.mem_sdiff, mem_ball_zero_iff, norm_smul_sphere ht.le, not_lt, mem_Ico]
   exact and_comm
 
 private lemma lintegral_annulus_eq [NeZero n] {u : Rn n → ℝ} (hu : Measurable u) :
@@ -275,7 +276,7 @@ theorem lintegral_shell_sq_le_of_lipschitzWith [NeZero n] {u : Rn n → ℝ} {K 
   have hshell : ∀ t : ℝ, 0 < t → ∀ ω : sphere (0 : Rn n) 1,
       t • (ω : Rn n) ∈ ball (0 : Rn n) 1 \ closedBall 0 (1 - δ) ↔ t ∈ Ioo (1 - δ) 1 := by
     intro t ht ω
-    simp only [mem_diff, mem_ball_zero_iff, mem_closedBall_zero_iff, norm_smul_sphere ht.le,
+    simp only [Set.mem_sdiff, mem_ball_zero_iff, mem_closedBall_zero_iff, norm_smul_sphere ht.le,
       not_le, mem_Ioo]
     exact and_comm
   rw [lintegral_set_eq_lintegral_sphere (hum.pow_const 2).ennreal_ofReal

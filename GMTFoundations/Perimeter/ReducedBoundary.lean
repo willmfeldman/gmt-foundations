@@ -238,7 +238,7 @@ private theorem IsGaussGreenPair.ae_restrict_ball (h : IsGaussGreenPair Ω E μ 
   have hVfin : μ V ≠ ∞ := ne_top_of_le_ne_top
     (h.lt_top_of_isCompact _ (isCompact_closedBall z ε) hzΩ).ne
     (measure_mono ball_subset_closedBall)
-  haveI : IsFiniteMeasure (μ.restrict V) := isFiniteMeasure_restrict.2 hVfin
+  have : IsFiniteMeasure (μ.restrict V) := isFiniteMeasure_restrict.2 hVfin
   have hint : Integrable ν (μ.restrict V) :=
     Integrable.of_bound h.measurable_normal.aestronglyMeasurable 1
       (by filter_upwards [ae_restrict_of_ae h.norm_normal] with x hx using hx.le)
@@ -310,7 +310,7 @@ theorem IsGaussGreenPair.measure_compl_reducedBoundary (h : IsGaussGreenPair Ω 
 /-- **The reduced boundary has full measure** (EG, remark after Def 5.4): `μ(Ω ∖ ∂*E) = 0`. -/
 theorem IsGaussGreenPair.measure_diff_reducedBoundary (h : IsGaussGreenPair Ω E μ ν)
     (hΩ : IsOpen Ω) : μ (Ω \ reducedBoundary Ω E) = 0 :=
-  measure_mono_null (diff_subset_compl _ _) (h.measure_compl_reducedBoundary hΩ)
+  measure_mono_null (sdiff_subset_compl _ _) (h.measure_compl_reducedBoundary hΩ)
 
 end ReducedBoundary
 
@@ -384,8 +384,8 @@ theorem hasDensity_compl_zero_iff {E : Set (Rn n)} (hE : NullMeasurableSet E vol
     intro r hr
     have hB0 : (volume (ball x r)).toReal ≠ 0 :=
       ENNReal.toReal_ne_zero.2 ⟨(measure_ball_pos volume x hr).ne', measure_ball_lt_top.ne⟩
-    have hadd := measure_inter_add_diff₀ (μ := volume) (ball x r) hE
-    rw [inter_comm, diff_eq, inter_comm (ball x r) Eᶜ] at hadd
+    have hadd := measure_inter_add_sdiff₀ (μ := volume) (ball x r) hE
+    rw [inter_comm, sdiff_eq, inter_comm (ball x r) Eᶜ] at hadd
     have hadd' : (volume (E ∩ ball x r)).toReal + (volume (Eᶜ ∩ ball x r)).toReal =
         (volume (ball x r)).toReal := by
       rw [← ENNReal.toReal_add (measure_ne_top_of_subset inter_subset_right measure_ball_lt_top.ne)
@@ -444,9 +444,9 @@ theorem mem_essentialBoundary_iff_limsup {E : Set (Rn n)} (hE : NullMeasurableSe
     x ∈ essentialBoundary E ↔
       0 < limsup (fun r => volume (closedBall x r ∩ E) / ENNReal.ofReal (r ^ n)) (𝓝[>] 0) ∧
       0 < limsup (fun r => volume (closedBall x r \ E) / ENNReal.ofReal (r ^ n)) (𝓝[>] 0) := by
-  simp only [essentialBoundary, mem_setOf_eq, pos_iff_ne_zero]
+  simp only [essentialBoundary, mem_ofPred_eq, pos_iff_ne_zero]
   rw [← hasDensity_compl_zero_iff hE, hasDensity_zero_iff_limsup, hasDensity_zero_iff_limsup]
-  simp only [diff_eq]
+  simp only [sdiff_eq]
 
 /-- `rⁿ`-normalized characterization of density `0` along rational radii, for the Borel
 measurability of the density-`0` set. -/
@@ -462,7 +462,7 @@ private theorem hasDensity_zero_iff_rat {E : Set (Rn n)} {x : Rn n} :
     refine ⟨m, fun q hq hqm => ?_⟩
     have hq' : (0 : ℝ) < q := by exact_mod_cast hq
     have := hδU ⟨hq', hqm.trans (by simpa [one_div] using hm)⟩
-    simp only [mem_setOf_eq] at this
+    simp only [mem_ofPred_eq] at this
     rwa [ENNReal.div_le_iff (ENNReal.ofReal_pos.2 (pow_pos hq' n)).ne' ENNReal.ofReal_ne_top]
       at this
   · intro h ε hε
@@ -508,7 +508,7 @@ theorem measurableSet_setOf_hasDensity_zero (E : Set (Rn n)) :
       {x | 0 < q → (q : ℝ) < ((m : ℝ) + 1)⁻¹ →
         volume (E' ∩ ball x q) ≤ ((k : ℝ≥0∞) + 1)⁻¹ * ENNReal.ofReal ((q : ℝ) ^ n)} := by
     ext x
-    simp only [mem_setOf_eq, mem_iInter, mem_iUnion]
+    simp only [mem_ofPred_eq, mem_iInter, mem_iUnion]
     rw [← hasDensity_toMeasurable_iff, hasDensity_zero_iff_rat]
   rw [hset]
   refine MeasurableSet.iInter fun k => MeasurableSet.iUnion fun m =>
@@ -519,7 +519,7 @@ theorem measurableSet_setOf_hasDensity_zero (E : Set (Rn n)) :
   · have : {x : Rn n | 0 < q → (q : ℝ) < ((m : ℝ) + 1)⁻¹ →
         volume (E' ∩ ball x q) ≤ ((k : ℝ≥0∞) + 1)⁻¹ * ENNReal.ofReal ((q : ℝ) ^ n)} = univ := by
       ext x
-      simp only [mem_setOf_eq, mem_univ, iff_true]
+      simp only [mem_ofPred_eq, mem_univ, iff_true]
       exact fun h1 h2 => absurd ⟨h1, h2⟩ hq
     rw [this]
     exact MeasurableSet.univ
@@ -530,7 +530,7 @@ theorem measurableSet_setOf_hasDensity_one (E : Set (Rn n)) :
     MeasurableSet {x | HasDensity E x 1} := by
   have hset : {x | HasDensity E x 1} = {x | HasDensity (toMeasurable volume E)ᶜ x 0} := by
     ext x
-    simp only [mem_setOf_eq]
+    simp only [mem_ofPred_eq]
     rw [hasDensity_compl_zero_iff (measurableSet_toMeasurable _ _).nullMeasurableSet,
       hasDensity_toMeasurable_iff]
   rw [hset]

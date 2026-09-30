@@ -10,7 +10,8 @@ public import GMTFoundations.Reifenberg.Tilt
 public import GMTFoundations.Reifenberg.BestPlane
 public import GMTFoundations.GMT.Packing
 import GMTFoundations.GMT.Polar
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Discrete Reifenberg: the upper-bound lemma and the covering construction
@@ -306,10 +307,10 @@ def leaves (N : ℕ) : Finset (ℕ × Rn n) :=
 theorem state_of_le {i : ℕ} (h : i ≤ D.j) : D.state i = D.init := by
   cases i with
   | zero => rfl
-  | succ i => simp only [state, if_pos h]
+  | succ i => simp only [state, ite_eq_left h]
 
 theorem state_succ {i : ℕ} (h : D.j ≤ i) : D.state (i + 1) = D.step i (D.state i) := by
-  simp only [state, if_neg (show ¬ i + 1 ≤ D.j by omega)]
+  simp only [state, ite_eq_right (show ¬ i + 1 ≤ D.j by omega)]
 
 theorem good_top : D.good D.j = {D.p} := by simp [good, state_of_le D le_rfl, init]
 theorem bad_top : D.bad D.j = ∅ := by simp [bad, state_of_le D le_rfl, init]
@@ -348,7 +349,7 @@ variable {D}
 
 theorem mem_avail_iff {i : ℕ} {x : Rn n} : x ∈ D.avail i (D.state i) ↔
     x ∈ D.P ∧ (∃ z ∈ D.good i, x ∈ ball z (D.ρ ^ i)) ∧ x ∉ D.rem i := by
-  simp only [avail_eq, mem_inter_iff, mem_diff, mem_iUnion, exists_prop]
+  simp only [avail_eq, mem_inter_iff, Set.mem_sdiff, mem_iUnion, exists_prop]
 
 theorem avail_subset_P (i : ℕ) (s : CoverState n) : D.avail i s ⊆ D.P := fun _ hx => hx.1
 
@@ -542,7 +543,7 @@ theorem not_mem_ball_good_of_lev_le {i : ℕ} (hi : D.j ≤ i) {y x : Rn n} (hy 
   have hyP := mem_P_of_mem_succ hD (by omega) (Finset.mem_union_left _ (Finset.mem_union_left _ hy))
   have hly := lev_of_mem_good_succ (by omega) hy
   have hne : x ≠ y := by rintro rfl; exact absurd hlev (not_le.2 hly)
-  obtain ⟨a, ha, hai⟩ := ENat.le_coe_iff.1 hlev
+  obtain ⟨a, ha, hai⟩ := ENat.le_natCast_iff.1 hlev
   have hd := hD.sep x hx y hyP hne a ha
   have : D.ρ ^ (i' + 1) ≤ D.ρ ^ a := pow_le_pow_of_le_one hD.ρ_pos.le hD.ρ_le_one hai
   rw [mem_ball, not_lt]
@@ -573,7 +574,7 @@ theorem subset_cover {N : ℕ} (hN : D.j ≤ N) :
       have hlt := lt_lev_of_mem_avail hD hN hav
       have hle : ((N + 1 : ℕ) : ℕ∞) ≤ D.lev x := by
         rw [Nat.cast_add, Nat.cast_one]
-        exact (ENat.add_one_le_iff (ENat.coe_ne_top N)).2 hlt
+        exact (ENat.add_one_le_iff (ENat.natCast_ne_top N)).2 hlt
       rcases eq_or_lt_of_le hle with heq | hlt'
       · -- a final center
         have hxF : x ∈ D.fin (i := N + 1) := by
@@ -726,7 +727,7 @@ theorem ofFamily_hyp {ρ κ θ : ℝ} {Z : Finset (Rn n)} {lev : Rn n → ℕ} {
   lev_gt := by
     rintro x ⟨hxZ, hxb⟩
     change ((j : ℕ) : ℕ∞) < ((lev x : ℕ) : ℕ∞)
-    rw [ENat.coe_lt_coe]
+    rw [ENat.natCast_lt_natCast]
     by_contra hle
     rw [not_lt] at hle
     have hne : x ≠ p := by rintro rfl; omega

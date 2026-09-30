@@ -13,7 +13,8 @@ import GMTFoundations.GMT.HausdorffLebesgue
 import GMTFoundations.BV.TotalVariation
 import GMTFoundations.BV.Compactness
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationThm
 import Mathlib.Topology.UniformSpace.Uniformizable
@@ -118,8 +119,8 @@ private theorem hasFDerivAt_norm_sub {y : Rn n} (hy : y ≠ x) :
   rw [hfun] at h2
   convert h2 using 1
   ext v
-  simp only [ContinuousLinearMap.coe_smul', Pi.smul_apply, innerSL_apply_apply,
-    ContinuousLinearMap.coe_comp', ContinuousLinearMap.coe_id', comp_apply, id_eq, smul_eq_mul,
+  simp only [FunLike.coe_smul, Pi.smul_apply, innerSL_apply_apply,
+    ContinuousLinearMap.coe_comp, ContinuousLinearMap.coe_id', comp_apply, id_eq, smul_eq_mul,
     nsmul_eq_mul, Nat.cast_ofNat, Real.sqrt_sq (norm_nonneg _), Pi.mul_apply, Pi.ofNat_apply]
   have : ‖y - x‖ ≠ 0 := norm_ne_zero_iff.2 hyx
   field_simp
@@ -141,14 +142,14 @@ theorem contDiff_radialCutoff (hr : 0 < r) (hε : 0 < ε) :
 theorem fderiv_radialCutoff_apply (hr : 0 < r) (hε : 0 < ε) (y v : Rn n) :
     fderiv ℝ (radialCutoff x r ε) y v =
       -(scaledKernel r ε ‖y - x‖ * ⟪‖y - x‖⁻¹ • (y - x), v⟫) := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   rcases lt_or_ge ‖y - x‖ r with hy | hy
   · have hloc : radialCutoff x r ε =ᶠ[𝓝 y] fun _ ↦ 1 := by
       have : IsOpen {z : Rn n | ‖z - x‖ < r} :=
         isOpen_lt (continuous_id.sub continuous_const).norm continuous_const
       filter_upwards [this.mem_nhds hy] with z hz using radialCutoff_of_le hε (le_of_lt hz)
     rw [hloc.fderiv_eq, scaledKernel_eq_zero hε (fun h ↦ by linarith [h.1])]
-    simp only [fderiv_const_apply, ContinuousLinearMap.zero_apply, zero_mul, neg_zero]
+    simp only [fderiv_const_apply, zero_apply, zero_mul, neg_zero]
   · have hyx : y ≠ x := fun h ↦ by rw [h, sub_self, norm_zero] at hy; linarith
     have hσ : HasDerivAt Real.smoothTransition (transitionKernel ((‖y - x‖ - r) / ε))
         ((‖y - x‖ - r) / ε) :=
@@ -161,7 +162,7 @@ theorem fderiv_radialCutoff_apply (hr : 0 < r) (hε : 0 < ε) (y v : Rn n) :
     have hd' : HasFDerivAt (radialCutoff x r ε) (0 - transitionKernel ((‖y - x‖ - r) / ε) •
         ε⁻¹ • ‖y - x‖⁻¹ • innerSL ℝ (y - x)) y := hd
     rw [hd'.fderiv]
-    simp only [zero_sub, ContinuousLinearMap.neg_apply, ContinuousLinearMap.smul_apply,
+    simp only [zero_sub, neg_apply, smul_apply,
       innerSL_apply_apply, smul_eq_mul, scaledKernel, real_inner_smul_left]
     ring
 
@@ -227,7 +228,7 @@ variable {Ω E : Set (Rn n)} {μ : Measure (Rn n)} {ν : Rn n → Rn n}
 /-- Spheres about `x` are `μ`-null for all but countably many radii. -/
 theorem IsGaussGreenPair.ae_measure_sphere_eq_zero (h : IsGaussGreenPair Ω E μ ν)
     (hΩ : IsOpen Ω) (x : Rn n) : ∀ᵐ r, μ (sphere x r) = 0 := by
-  haveI := h.sigmaFinite hΩ
+  have := h.sigmaFinite hΩ
   have hc : {r : ℝ | 0 < μ (sphere x r)}.Countable :=
     Measure.countable_meas_pos_of_disjoint_iUnion (fun _ ↦ isClosed_sphere.measurableSet)
       fun r s hrs ↦ Set.disjoint_left.2 fun y h1 h2 ↦
@@ -239,7 +240,7 @@ theorem IsGaussGreenPair.ae_measure_sphere_eq_zero (h : IsGaussGreenPair Ω E μ
 theorem closedBall_ae_eq_ball_of {m : Measure (Rn n)} {x : Rn n} {r : ℝ}
     (h : m (sphere x r) = 0) : closedBall x r =ᵐ[m] ball x r := by
   refine ae_eq_set.2 ⟨measure_mono_null (fun y hy ↦ ?_) h, by
-    simp [diff_eq_empty.2 ball_subset_closedBall]⟩
+    simp [sdiff_eq_empty.2 ball_subset_closedBall]⟩
   rw [← ball_union_sphere] at hy
   exact hy.1.resolve_left hy.2
 
@@ -417,7 +418,8 @@ theorem IsGaussGreenPair.integral_divergence_inter_ball_ae [NeZero n]
         funext y
         by_cases hy : y ∈ closedBall x r <;> simp [hy]
       rw [this, setIntegral_indicator measurableSet_closedBall]
-      exact setIntegral_congr_set ((ae_eq_refl E).inter (closedBall_ae_eq_ball_of hvol0))
+      exact setIntegral_congr_set
+        ((EventuallyEqSet.refl _ E).inter (closedBall_ae_eq_ball_of hvol0))
     rw [← e1]
     exact this
   have hL2 : Tendsto (fun k ↦ ∫ s in Ioi (0 : ℝ), scaledKernel r (e k) s * sphereIntegral f x s)
@@ -521,7 +523,7 @@ theorem IsGaussGreenPair.totalVariationOn_inter_ball_le_ae [NeZero n]
       have := h.integrable_inner (hc1.continuous.smul hψ1.continuous)
         (HasCompactSupport.of_support_subset_isCompact (isCompact_closedBall _ _)
           ((subset_tsupport _).trans htΨ)) (htΨ.trans (hBk k))
-      simpa only [real_inner_smul_left] using this
+      simpa only [Pi.smul_apply', real_inner_smul_left] using this
     have hμ : ∫ y, c y * ⟪ψ y, ν y⟫ ∂μ ≤ μ.real (closedBall x (r + e k)) := by
       rw [← integral_indicator_one measurableSet_closedBall]
       refine integral_mono_ae hμint ((integrable_indicator_iff measurableSet_closedBall).2
@@ -624,14 +626,14 @@ theorem IsGaussGreenPair.totalVariationOn_inter_ball_le_ae [NeZero n]
     rw [lintegral_zero] at hdom
     refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hdom
       (fun _ ↦ zero_le) fun k ↦ ?_
-    rw [eLpNorm_one_eq_lintegral_enorm]
+    rw [eLpNorm_one_eq_lintegral_enorm ((hχmeas k).sub hχ₀meas).aestronglyMeasurable]
     exact lintegral_mono' Measure.restrict_le_self le_rfl
   have hbdd : ∀ g : Rn n → ℝ, Measurable g → (∀ y, ‖g y‖ ≤ 1) → LocallyIntegrableOn g univ :=
     fun g hg hg1 ↦ (locallyIntegrable_iff.2 fun K hK ↦ Measure.integrableOn_of_bounded
       hK.measure_lt_top.ne hg.aestronglyMeasurable (ae_of_all _ hg1)).locallyIntegrableOn univ
   have hχb : ∀ k y, ‖χ k y‖ ≤ 1 := fun k y ↦ by
     simp only [hχ_def, norm_mul, Real.norm_of_nonneg (radialCutoff_nonneg y)]
-    exact mul_le_one₀ (radialCutoff_le_one y) (norm_nonneg _) (hχE y)
+    exact (mul_le_of_le_one_left (norm_nonneg _) (radialCutoff_le_one y)).trans (hχE y)
   have hχ₀b : ∀ y, ‖χ₀ y‖ ≤ 1 := fun y ↦ by
     by_cases hy : y ∈ E ∩ closedBall x r <;> simp [hχ₀_def, hy]
   have hlsc := weightedTV_le_liminf (U := univ) 1 χ χ₀
@@ -661,7 +663,7 @@ theorem IsGaussGreenPair.totalVariationOn_inter_ball_le_ae [NeZero n]
     rw [← hlim.liminf_eq]
     exact liminf_le_liminf (Eventually.of_forall hbound)
   have h2 : totalVariationOn univ ((E ∩ ball x r).indicator 1) = totalVariationOn univ χ₀ :=
-    totalVariationOn_congr_ae (indicator_ae_eq_of_ae_eq_set ((ae_eq_refl E).inter
+    totalVariationOn_congr_ae (indicator_ae_eq_of_ae_eq_set ((EventuallyEqSet.refl _ E).inter
       (closedBall_ae_eq_ball_of (Measure.addHaar_sphere volume x r)).symm))
   have h3 : μ (closedBall x r) = μ (ball x r) := measure_congr (closedBall_ae_eq_ball_of hsph)
   rw [h2, ← h3]
@@ -740,7 +742,7 @@ theorem sphereIntegral_indicator_eq_hausdorffN [NeZero n] {E : Set (Rn n)} (hE :
     rw [← this]
     congr 1
     ext y
-    rw [mem_preimage, mem_inter_iff, mem_inter_iff, hA_def, mem_setOf_eq,
+    rw [mem_preimage, mem_inter_iff, mem_inter_iff, hA_def, mem_ofPred_eq,
       mem_sphere_zero_iff_norm, mem_sphere, dist_eq_norm, smul_smul, mul_inv_cancel₀ hr.ne',
       one_smul, add_sub_cancel, norm_smul, norm_inv, Real.norm_of_nonneg hr.le]
     constructor

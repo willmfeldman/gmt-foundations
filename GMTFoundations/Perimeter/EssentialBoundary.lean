@@ -80,7 +80,7 @@ private theorem volume_halfSpace_neg_eq_pos {v : Rn n} (x : Rn n) (r : ℝ) :
     have h1 : (2 : ℝ) • x - y - x = -(y - x) := by rw [two_smul]; abel
     have h2 : dist ((2 : ℝ) • x - y) x = dist y x := by
       rw [dist_eq_norm, dist_eq_norm, h1, norm_neg]
-    simp only [mem_preimage, mem_inter_iff, mem_setOf_eq, mem_ball, h1, h2, inner_neg_left,
+    simp only [mem_preimage, mem_inter_iff, mem_ofPred_eq, mem_ball, h1, h2, inner_neg_left,
       neg_lt_zero]
   rw [← hpre, hmp.measure_preimage]
   exact ((measurableSet_lt ((continuous_id.sub continuous_const).inner
@@ -96,7 +96,7 @@ theorem volume_halfSpace_inter_ball {v : Rn n} (hv : v ≠ 0) (x : Rn n) (r : �
     rw [← measure_union]
     · exact measure_mono (union_subset inter_subset_right inter_subset_right)
     · refine disjoint_left.2 fun y hy hy' => ?_
-      simp only [mem_inter_iff, mem_setOf_eq] at hy hy'
+      simp only [mem_inter_iff, mem_ofPred_eq] at hy hy'
       linarith [hy.1, hy'.1]
     · exact (measurableSet_lt measurable_const ((continuous_id.sub continuous_const).inner
         continuous_const).measurable).inter measurableSet_ball
@@ -180,7 +180,7 @@ private theorem volume_inter_ball_sub_le (E : Set (Rn n)) (x : Rn n) {s r : ℝ}
     ((measure_mono inter_subset_right).trans_lt measure_ball_lt_top).ne
   have hBsub : ball x s ⊆ ball x r := ball_subset_ball hsr
   have hdiff : volume (ball x r \ ball x s) = volume (ball x r) - volume (ball x s) :=
-    measure_diff hBsub measurableSet_ball.nullMeasurableSet measure_ball_lt_top.ne
+    measure_sdiff hBsub measurableSet_ball.nullMeasurableSet measure_ball_lt_top.ne
   have hle : volume (E ∩ ball x r) ≤ volume (E ∩ ball x s) + volume (ball x r \ ball x s) :=
     (measure_mono fun y hy => by
       by_cases hys : y ∈ ball x s
@@ -329,14 +329,14 @@ theorem IsGaussGreenPair.limsup_measure_ball_pos (hn : 2 ≤ n) {Ω E : Set (Rn 
     exact ENNReal.ofReal_le_ofReal ((le_div_iff₀ hBpos).1 h1)
   have hBE : ENNReal.ofReal c * volume (ball x r) ≤ volume (ball x r \ E) := by
     have hd : volume (ball x r \ E) = volume (ball x r) - volume (E ∩ ball x r) := by
-      rw [← measure_diff (inter_subset_right) (hE.inter measurableSet_ball).nullMeasurableSet
+      rw [← measure_sdiff (inter_subset_right) (hE.inter measurableSet_ball).nullMeasurableSet
         (hfin E)]
       congr 1; ext y; simp
     have hdr : (volume (ball x r \ E)).toReal =
         (volume (ball x r)).toReal - (volume (E ∩ ball x r)).toReal := by
       rw [hd, ENNReal.toReal_sub_of_le (measure_mono inter_subset_right) measure_ball_lt_top.ne]
     rw [← ENNReal.ofReal_toReal measure_ball_lt_top.ne, ← ENNReal.ofReal_mul hc.le,
-      ← ENNReal.ofReal_toReal ((measure_mono diff_subset).trans_lt measure_ball_lt_top).ne, hdr]
+      ← ENNReal.ofReal_toReal ((measure_mono sdiff_subset).trans_lt measure_ball_lt_top).ne, hdr]
     refine ENNReal.ofReal_le_ofReal ?_
     have := (div_le_iff₀ hBpos).1 h2
     linarith
@@ -382,8 +382,8 @@ theorem IsGaussGreenPair.hausdorffN_essentialBoundary_diff_reducedBoundary (hn :
     {Ω E : Set (Rn n)} {μ : Measure (Rn n)} {ν : Rn n → Rn n} (h : IsGaussGreenPair Ω E μ ν)
     (hΩ : IsOpen Ω) (hE : MeasurableSet E) :
     hausdorffN n (n - 1) ((Ω ∩ essentialBoundary E) \ reducedBoundary Ω E) = 0 :=
-  h.hausdorffN_eq_zero_of_subset_essentialBoundary hn hΩ hE diff_subset
-    (measure_mono_null (diff_subset_diff_left inter_subset_left)
+  h.hausdorffN_eq_zero_of_subset_essentialBoundary hn hΩ hE sdiff_subset
+    (measure_mono_null (sdiff_subset_sdiff_left inter_subset_left)
       (h.measure_diff_reducedBoundary hΩ))
 
 end GMTFoundations

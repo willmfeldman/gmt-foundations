@@ -11,7 +11,8 @@ import GMTFoundations.Perimeter.HalfSpace
 import GMTFoundations.Perimeter.ReducedBoundary
 import GMTFoundations.Perimeter.DensityEstimates.Lemma53
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Blow-up at reduced-boundary points (EG Thms 5.13, 5.14)
@@ -84,7 +85,7 @@ theorem blowupSet_ball (x : Rn n) {r : ℝ} (hr : 0 < r) (L : ℝ) :
 theorem blowupSet_halfSpace (x : Rn n) {r : ℝ} (hr : 0 < r) (v : Rn n) :
     blowupSet x r {y | ⟪y - x, v⟫ < 0} = {z | ⟪z, v⟫ < 0} := by
   ext z
-  simp only [blowupSet, mem_preimage, mem_setOf_eq, add_sub_cancel_left, real_inner_smul_left]
+  simp only [blowupSet, mem_preimage, mem_ofPred_eq, add_sub_cancel_left, real_inner_smul_left]
   constructor
   · intro h; by_contra h'; exact absurd h (not_lt.2 (mul_nonneg hr.le (not_lt.1 h')))
   · intro h; exact mul_neg_of_pos_of_neg hr h
@@ -103,7 +104,7 @@ theorem volume_ball_inter_eq (x : Rn n) {r : ℝ} (hr : 0 < r) (L : ℝ) (S : Se
 theorem volume_ball_diff_eq (x : Rn n) {r : ℝ} (hr : 0 < r) (L : ℝ) (S : Set (Rn n)) :
     volume (ball x (r * L) \ S) =
       ENNReal.ofReal (r ^ n) * volume (ball 0 L \ blowupSet x r S) := by
-  rw [diff_eq, volume_ball_inter_eq x hr L, diff_eq]
+  rw [sdiff_eq, volume_ball_inter_eq x hr L, sdiff_eq]
   rfl
 
 end Volume
@@ -116,7 +117,8 @@ theorem eLpNorm_indicator_sub_indicator {A B K : Set (Rn n)} (hA : MeasurableSet
     (hB : MeasurableSet B) :
     eLpNorm (A.indicator (1 : Rn n → ℝ) - B.indicator 1) 1 (volume.restrict K) =
       volume (A ∆ B ∩ K) := by
-  rw [eLpNorm_one_eq_lintegral_enorm]
+  rw [eLpNorm_one_eq_lintegral_enorm
+    ((measurable_one.indicator hA).sub (measurable_one.indicator hB)).aestronglyMeasurable]
   have hpt : ∀ y, ‖(A.indicator (1 : Rn n → ℝ) - B.indicator (1 : Rn n → ℝ)) y‖ₑ =
       (A ∆ B).indicator 1 y := by
     intro y
@@ -190,19 +192,19 @@ theorem ae_eq_halfSpace_zero_of_measure_pos {F : Set (Rn n)} {v : Rn n} (hv : �
     (abs_real_inner_le_norm y v).trans (by rw [hv, mul_one])
   rcases hF with hF | hF | ⟨γ, hF⟩
   · have := hin 1 one_pos
-    rw [measure_congr ((ae_eq_refl (ball (0 : Rn n) 1)).inter hF), inter_empty,
+    rw [measure_congr ((EventuallyEqSet.refl _ (ball (0 : Rn n) 1)).inter hF), inter_empty,
       measure_empty] at this
     exact absurd this (lt_irrefl 0)
   · have := hout 1 one_pos
-    rw [measure_congr ((ae_eq_refl (ball (0 : Rn n) 1)).diff hF), diff_univ,
+    rw [measure_congr ((EventuallyEqSet.refl _ (ball (0 : Rn n) 1)).diff hF), sdiff_univ,
       measure_empty] at this
     exact absurd this (lt_irrefl 0)
   rcases lt_trichotomy γ 0 with hγ | rfl | hγ
   · have := hin (-γ) (by linarith)
-    rw [measure_congr ((ae_eq_refl (ball (0 : Rn n) (-γ))).inter hF)] at this
+    rw [measure_congr ((EventuallyEqSet.refl _ (ball (0 : Rn n) (-γ))).inter hF)] at this
     have hempty : ball (0 : Rn n) (-γ) ∩ {y | ⟪y, v⟫ ≤ γ} = ∅ := by
       ext y
-      simp only [mem_inter_iff, mem_ball, dist_zero_right, mem_setOf_eq, mem_empty_iff_false,
+      simp only [mem_inter_iff, mem_ball, dist_zero_right, mem_ofPred_eq, mem_empty_iff_false,
         iff_false, not_and, not_le]
       intro hy
       linarith [neg_abs_le ⟪y, v⟫, hinner y]
@@ -210,10 +212,10 @@ theorem ae_eq_halfSpace_zero_of_measure_pos {F : Set (Rn n)} {v : Rn n} (hv : �
     exact absurd this (lt_irrefl 0)
   · exact hF
   · have := hout γ hγ
-    rw [measure_congr ((ae_eq_refl (ball (0 : Rn n) γ)).diff hF)] at this
+    rw [measure_congr ((EventuallyEqSet.refl _ (ball (0 : Rn n) γ)).diff hF)] at this
     have hempty : ball (0 : Rn n) γ \ {y | ⟪y, v⟫ ≤ γ} = ∅ := by
       ext y
-      simp only [mem_diff, mem_ball, dist_zero_right, mem_setOf_eq, mem_empty_iff_false,
+      simp only [Set.mem_sdiff, mem_ball, dist_zero_right, mem_ofPred_eq, mem_empty_iff_false,
         iff_false, not_and, not_not]
       intro hy
       linarith [le_abs_self ⟪y, v⟫, hinner y]
@@ -282,9 +284,9 @@ theorem exists_blowup_subseq_ae_eq_halfSpace (hn : 1 ≤ n) (hΩ : IsOpen Ω)
     rw [zero_mul] at this
     filter_upwards [this.eventually (gt_mem_nhds hr₀)] with k hk
     have hout' : ∀ r, 0 < r → r < r₀ → ENNReal.ofReal (c * r ^ n) ≤ volume (ball x r ∩ Eᶜ) :=
-      fun r hr hrr ↦ by rw [← diff_eq]; exact hout r hr hrr
+      fun r hr hrr ↦ by rw [← sdiff_eq]; exact hout r hr hrr
     have := ofReal_le_volume_ball_inter_blowupSet hout' (hs0 (φ k)) hρ hk
-    rw [diff_eq]
+    rw [sdiff_eq]
     exact this
 
 theorem measurableSet_setOf_inner_lt (v : Rn n) : MeasurableSet {z : Rn n | ⟪z, v⟫ < 0} :=
@@ -296,9 +298,9 @@ theorem halfSpace_ae_eq {v : Rn n} (hv : ‖v‖ = 1) :
   have hv0 : v ≠ 0 := fun h0 ↦ by rw [h0, norm_zero] at hv; exact zero_ne_one hv
   refine ae_eq_set.2 ⟨measure_mono_null (fun z hz ↦ ?_) (volume_setOf_inner_eq hv0 0),
     measure_mono_null (fun z hz ↦ ?_) measure_empty⟩
-  · simp only [mem_diff, mem_setOf_eq, not_lt] at hz
+  · simp only [Set.mem_sdiff, mem_ofPred_eq, not_lt] at hz
     exact le_antisymm hz.1 hz.2
-  · simp only [mem_diff, mem_setOf_eq, not_le] at hz
+  · simp only [Set.mem_sdiff, mem_ofPred_eq, not_le] at hz
     exact absurd hz.1.le (not_le.2 hz.2)
 
 /-- **Sequential criterion on `𝓝[>] 0`.** If along every sequence of positive scales tending to
@@ -459,7 +461,7 @@ theorem exists_subseq_tendsto_blowupMeasure_ball_one (hn : 2 ≤ n) (hΩ : IsOpe
         exact ball_subset_ball (by linarith [hη.1])
       filter_upwards [hT.eventually (lt_mem_nhds (haη.trans_le hlow)), hfin 1] with k hk hkf
       refine hk.trans_le ?_
-      haveI : IsFiniteMeasure ((μk k).restrict (ball 0 1)) := isFiniteMeasure_restrict.2 hkf.2.ne
+      have : IsFiniteMeasure ((μk k).restrict (ball 0 1)) := isFiniteMeasure_restrict.2 hkf.2.ne
       calc ∫ y in ball 0 1, ψ y ∂μk k ≤ ∫ _ in ball 0 1, (1 : ℝ) ∂μk k :=
             integral_mono_of_nonneg (Eventually.of_forall fun y ↦ ψ.nonneg) (integrable_const _)
               (Eventually.of_forall fun y ↦ ψ.le_one)
@@ -478,7 +480,7 @@ theorem exists_subseq_tendsto_blowupMeasure_ball_one (hn : 2 ≤ n) (hΩ : IsOpe
         exact closedBall_subset_ball (by change 1 + η < R; linarith)
       have hT := hcut hR ψ.contDiff ψ.hasCompactSupport hψR fun y ↦ ⟨ψ.nonneg, ψ.le_one⟩
       have hupF : ∫ y in ball 0 R, ψ y ∂μF ≤ wₙ * R ^ (n - 1) := by
-        haveI : IsFiniteMeasure (μF.restrict (ball 0 R)) := isFiniteMeasure_restrict.2
+        have : IsFiniteMeasure (μF.restrict (ball 0 R)) := isFiniteMeasure_restrict.2
           (by rw [hμF R hR]; exact ENNReal.ofReal_ne_top)
         calc ∫ y in ball 0 R, ψ y ∂μF ≤ ∫ _ in ball 0 R, (1 : ℝ) ∂μF :=
               integral_mono_of_nonneg (Eventually.of_forall fun y ↦ ψ.nonneg)

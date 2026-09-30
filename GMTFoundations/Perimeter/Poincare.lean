@@ -125,7 +125,7 @@ theorem lintegral_lintegral_comp_segment_le {G : Rn n → ℝ≥0∞} (hG : Meas
 `|u(y) - u(z)| ≤ |y - z| ∫_{(0,1]} |Du(z + t(y - z))| dt`. -/
 theorem enorm_sub_le_lintegral_segment {u : Rn n → ℝ} (hu : ContDiff ℝ 1 u) (y z : Rn n) :
     ‖u y - u z‖ₑ ≤ ‖y - z‖ₑ * ∫⁻ t in Ioc (0 : ℝ) 1, ‖fderiv ℝ u (z + t • (y - z))‖ₑ := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   set γ : ℝ → Rn n := fun t ↦ z + t • (y - z) with hγ
   have hγc : Continuous γ := by fun_prop
   set f' : ℝ → ℝ := fun t ↦ fderiv ℝ u (γ t) (y - z) with hf'
@@ -134,7 +134,7 @@ theorem enorm_sub_le_lintegral_segment {u : Rn n → ℝ} (hu : ContDiff ℝ 1 u
   have hderiv : ∀ t, HasDerivAt (fun t ↦ u (γ t)) (f' t) t := fun t ↦ by
     have h1 : HasDerivAt γ (y - z) t := by
       convert ((hasDerivAt_id t).smul_const (y - z)).const_add z using 1
-      simp
+      all_goals simp [hγ]
     exact (hu.differentiable one_ne_zero (γ t)).hasFDerivAt.comp_hasDerivAt t h1
   have hFTC : ∫ t in (0 : ℝ)..1, f' t = u y - u z := by
     rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ ↦ hderiv t)
@@ -208,7 +208,7 @@ theorem lintegral_lintegral_enorm_sub_le {u : Rn n → ℝ} (hu : ContDiff ℝ 1
           (ν := volume.restrict (Ioc (0 : ℝ) 1)) (f := fun y t ↦ ∫⁻ z in B, F y z t)
           hH.aemeasurable
     _ ≤ ENNReal.ofReal (2 * r) * ∫⁻ _ in Ioc (0 : ℝ) 1, 2 ^ n * volume B * ∫⁻ w, G w := by
-        gcongr ?_ * ?_
+        gcongr ENNReal.ofReal (2 * r) * ?_
         exact setLIntegral_mono' measurableSet_Ioc fun t ht ↦
           lintegral_lintegral_comp_segment_le hG B t
     _ = 2 ^ n * ENNReal.ofReal (2 * r) * volume B * ∫⁻ w in B, g w := by
@@ -278,7 +278,7 @@ theorem lintegral_enorm_sub_setAverage_le {u : Rn n → ℝ} (hu : ContDiff ℝ 
 theorem min_volume_le_lintegral_enorm_indicator_sub {E A : Set (Rn n)} (hE : MeasurableSet E)
     (hA : MeasurableSet A) (c : ℝ) :
     min (volume (E ∩ A)) (volume (A \ E)) ≤ ∫⁻ y in A, ‖E.indicator (1 : Rn n → ℝ) y - c‖ₑ := by
-  rw [← lintegral_inter_add_diff _ A hE]
+  rw [← lintegral_inter_add_sdiff _ A hE]
   have h1 : ∫⁻ y in A ∩ E, ‖E.indicator (1 : Rn n → ℝ) y - c‖ₑ =
       ‖1 - c‖ₑ * volume (E ∩ A) := by
     rw [setLIntegral_congr_fun (g := fun _ ↦ ‖1 - c‖ₑ) (hA.inter hE)
@@ -329,7 +329,8 @@ private theorem min_volume_le_of_lt {E : Set (Rn n)} (hE : MeasurableSet E) (x :
       ((measurable_const.indicator hE).sub (contDiff_mollify _ hli).continuous.measurable).enorm
     have h1 : ∫⁻ y in ball x s, ‖E.indicator (1 : Rn n → ℝ) y - u y‖ₑ ≤
         eLpNorm (u - E.indicator 1) 1 (volume.restrict (closedBall x s)) := by
-      rw [eLpNorm_one_eq_lintegral_enorm]
+      rw [eLpNorm_one_eq_lintegral_enorm (hu1.continuous.aestronglyMeasurable.sub
+        (measurable_one.indicator hE).aestronglyMeasurable)]
       refine (lintegral_mono_set ball_subset_closedBall).trans (le_of_eq ?_)
       congr 1
       funext y
@@ -391,9 +392,9 @@ theorem min_volume_le_totalVariationOn_ball {E : Set (Rn n)} (hE : MeasurableSet
     exact tendsto_measure_iUnion_atTop fun i j hij ↦
       inter_subset_inter_right _ (ball_subset_ball (hmono hij))
   have hB : Tendsto (fun k ↦ volume (ball x (s k) \ E)) atTop (𝓝 (volume (ball x r \ E))) := by
-    rw [← hUnion, iUnion_diff]
+    rw [← hUnion, iUnion_sdiff]
     exact tendsto_measure_iUnion_atTop fun i j hij ↦
-      diff_subset_diff_left (ball_subset_ball (hmono hij))
+      sdiff_subset_sdiff_left (ball_subset_ball (hmono hij))
   refine le_of_tendsto' (hA.min hB) fun k ↦ (min_volume_le_of_lt hE x (hsr k)).trans ?_
   gcongr
   exact (hsr k).le

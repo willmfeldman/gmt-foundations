@@ -39,7 +39,7 @@ theorem divergence_eq_sum (ξ : Rn n → Rn n) (x : Rn n) :
 theorem fderiv_coord_apply {ξ : Rn n → Rn n} {x : Rn n} (h : DifferentiableAt ℝ ξ x)
     (i : Fin n) (v : Rn n) :
     fderiv ℝ (fun y => ξ y i) x v = fderiv ℝ ξ x v i := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   have := ((EuclideanSpace.proj i : Rn n →L[ℝ] ℝ).hasFDerivAt.comp x h.hasFDerivAt).fderiv
   simp only [EuclideanSpace.coe_proj, Function.comp_def] at this
   rw [this]

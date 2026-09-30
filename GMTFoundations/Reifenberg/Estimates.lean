@@ -7,7 +7,8 @@ module
 
 public import GMTFoundations.Reifenberg.Covering
 public import GMTFoundations.Reifenberg.GraphArea
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Discrete Reifenberg: general estimates
@@ -105,7 +106,7 @@ theorem sum_setLIntegral_le {ι : Type*} (μ : Measure (Rn n)) (Y : Finset ι) (
   simp_rw [indicator_apply]
   rw [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul]
   by_cases hw : w ∈ U
-  · rw [if_pos hw]
+  · rw [ite_eq_left hw]
     gcongr
     exact_mod_cast hN w
   · have : (Y.filter fun i => w ∈ ball (c i) s) = ∅ :=
@@ -149,16 +150,16 @@ theorem hausdorffN_image_le_add_sum (k : ℕ) {σ : Rn n → Rn n} {R : ℝ} (L 
         · exact hx.2
         · exact hY y hy)
       (fun y hy => (hL y (Finset.mem_insert_of_mem hy)).mono
-        (inter_subset_inter_left _ diff_subset))
+        (inter_subset_inter_left _ sdiff_subset))
     have hsplit : hausdorffN n k B₁ + hausdorffN n k B₂ = hausdorffN n k B :=
-      measure_inter_add_diff B measurableSet_ball
+      measure_inter_add_sdiff B measurableSet_ball
     have himg : σ '' B ⊆ σ '' B₁ ∪ σ '' B₂ := by
-      rw [← image_union, inter_union_diff]
+      rw [← image_union, inter_union_sdiff]
     have hsum2 : ∑ y ∈ Y, ((L y : ℝ≥0∞) ^ k - 1) * hausdorffN n k (B₂ ∩ ball y R) ≤
         ∑ y ∈ Y, ((L y : ℝ≥0∞) ^ k - 1) * hausdorffN n k (B ∩ ball y R) :=
       Finset.sum_le_sum fun y _ => by
         gcongr
-        exact diff_subset
+        exact sdiff_subset
     have hL1 : (L a : ℝ≥0∞) ^ k ≤ 1 + ((L a : ℝ≥0∞) ^ k - 1) := le_add_tsub
     rw [Finset.sum_insert ha]
     calc hausdorffN n k (σ '' B)

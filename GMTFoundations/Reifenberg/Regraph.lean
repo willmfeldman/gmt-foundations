@@ -6,7 +6,8 @@ Authors: William M. Feldman
 module
 
 public import GMTFoundations.Reifenberg.ReifenbergMap
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Regraphing over a nearby plane (Miśkiewicz Lemma 3.6)

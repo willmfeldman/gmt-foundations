@@ -6,7 +6,8 @@ Authors: William M. Feldman
 module
 
 public import GMTFoundations.Defs.GMT
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 import Mathlib.Order.CompletePartialOrder
 import Mathlib.Order.SuccPred.IntervalSucc

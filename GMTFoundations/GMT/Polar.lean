@@ -108,7 +108,7 @@ theorem lintegral_volumeIoiPow (k : ℕ) (F : ℝ → ℝ≥0∞) :
 theorem integral_eq_integral_prod_polar [NormedSpace ℝ E] [NeZero n] (g : Rn n → E) :
     ∫ y, g y = ∫ p : sphere (0 : Rn n) 1 × Ioi (0 : ℝ), g ((p.2 : ℝ) • (p.1 : Rn n))
       ∂(sphereMeasure n).prod (Measure.volumeIoiPow (n - 1)) := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   have h := (measurePreserving_polar n).integral_comp
     (homeomorphUnitSphereProd (Rn n)).measurableEmbedding
     (fun p => g ↑((homeomorphUnitSphereProd (Rn n)).symm p))
@@ -120,7 +120,7 @@ theorem integral_eq_integral_prod_polar [NormedSpace ℝ E] [NeZero n] (g : Rn n
 theorem integrable_iff_integrable_prod_polar [NeZero n] {g : Rn n → E} :
     Integrable g ↔ Integrable (fun p : sphere (0 : Rn n) 1 × Ioi (0 : ℝ) =>
       g ((p.2 : ℝ) • (p.1 : Rn n))) ((sphereMeasure n).prod (Measure.volumeIoiPow (n - 1))) := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   have h := (measurePreserving_polar n).integrable_comp_emb
     (homeomorphUnitSphereProd (Rn n)).measurableEmbedding
     (g := fun p => g ↑((homeomorphUnitSphereProd (Rn n)).symm p))
@@ -136,7 +136,7 @@ theorem integrable_iff_integrable_prod_polar [NeZero n] {g : Rn n → E} :
 theorem lintegral_eq_lintegral_prod_polar [NeZero n] (g : Rn n → ℝ≥0∞) :
     ∫⁻ y, g y = ∫⁻ p : sphere (0 : Rn n) 1 × Ioi (0 : ℝ), g ((p.2 : ℝ) • (p.1 : Rn n))
       ∂(sphereMeasure n).prod (Measure.volumeIoiPow (n - 1)) := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   have h := (measurePreserving_polar n).lintegral_comp_emb
     (homeomorphUnitSphereProd (Rn n)).measurableEmbedding
     (fun p => g ↑((homeomorphUnitSphereProd (Rn n)).symm p))
@@ -215,7 +215,7 @@ theorem setIntegral_ball_diff_ball_eq [NormedSpace ℝ E] (f : Rn n → E) (x : 
     ∫ y in ball x b \ ball x a, f y = ∫ y in ball 0 b \ ball 0 a, f (x + y) := by
   have h := (measurePreserving_add_left (volume : Measure (Rn n)) x).setIntegral_preimage_emb
     (measurableEmbedding_addLeft x) f (ball x b \ ball x a)
-  rw [preimage_diff, preimage_add_left_ball, preimage_add_left_ball] at h
+  rw [preimage_sdiff, preimage_add_left_ball, preimage_add_left_ball] at h
   exact h.symm
 
 theorem integrableOn_ball_diff_ball_iff {f : Rn n → E} {x : Rn n} {a b : ℝ} :
@@ -223,7 +223,7 @@ theorem integrableOn_ball_diff_ball_iff {f : Rn n → E} {x : Rn n} {a b : ℝ} 
       IntegrableOn (fun y => f (x + y)) (ball 0 b \ ball 0 a) := by
   have h := (measurePreserving_add_left (volume : Measure (Rn n)) x).integrableOn_comp_preimage
     (measurableEmbedding_addLeft x) (f := f) (s := ball x b \ ball x a)
-  rw [preimage_diff, preimage_add_left_ball, preimage_add_left_ball] at h
+  rw [preimage_sdiff, preimage_add_left_ball, preimage_add_left_ball] at h
   exact h.symm
 
 /-- **Annulus formula**: `∫_{B_b(x) ∖ B_a(x)} f = ∫_a^b ∫_{∂B_s(x)} f ds`. -/
@@ -233,7 +233,7 @@ theorem integral_ball_diff_ball [NeZero n] {f : Rn n → ℝ} {x : Rn n} {a b : 
   set S : Set (Rn n) := ball 0 b \ ball 0 a with hS
   have hSm : MeasurableSet S := measurableSet_ball.diff measurableSet_ball
   have hint : IntegrableOn (fun y => f (x + y)) S :=
-    integrableOn_ball_diff_ball_iff.1 (hf.mono_set diff_subset)
+    integrableOn_ball_diff_ball_iff.1 (hf.mono_set sdiff_subset)
   rw [setIntegral_ball_diff_ball_eq, ← integral_indicator hSm,
     integral_eq_integral_Ioi_sphere ((integrable_indicator_iff hSm).2 hint)]
   have key : ∀ t : ℝ, 0 < t → t ≠ a → t ≠ b → t ^ (n - 1) •
@@ -242,7 +242,7 @@ theorem integral_ball_diff_ball [NeZero n] {f : Rn n → ℝ} {x : Rn n} {a b : 
     intro t ht hta htb
     have hmem : ∀ ω : sphere (0 : Rn n) 1, t • (ω : Rn n) ∈ S ↔ t ∈ Ioc a b := by
       intro ω
-      simp only [hS, mem_diff, mem_ball_zero_iff, norm_smul_sphere ht.le, not_lt, mem_Ioc]
+      simp only [hS, Set.mem_sdiff, mem_ball_zero_iff, norm_smul_sphere ht.le, not_lt, mem_Ioc]
       constructor
       · rintro ⟨h1, h2⟩; exact ⟨lt_of_le_of_ne h2 (Ne.symm hta), h1.le⟩
       · rintro ⟨h1, h2⟩; exact ⟨lt_of_le_of_ne h2 htb, h1.le⟩
@@ -271,7 +271,7 @@ theorem integral_ball_diff_ball [NeZero n] {f : Rn n → ℝ} {x : Rn n} {a b : 
 theorem integral_ball_eq [NeZero n] {f : Rn n → ℝ} {x : Rn n} {r : ℝ} (hr : 0 ≤ r)
     (hf : IntegrableOn f (ball x r)) :
     ∫ y in ball x r, f y = ∫ s in (0 : ℝ)..r, sphereIntegral f x s := by
-  rw [← integral_ball_diff_ball le_rfl hr hf, ball_zero, diff_empty]
+  rw [← integral_ball_diff_ball le_rfl hr hf, ball_zero, sdiff_empty]
 
 /-- If `f` is integrable on `B_b(x)`, then `s ↦ ∫_{∂B_s(x)} f` is integrable on `(0, b)`. -/
 theorem intervalIntegrable_sphereIntegral [NeZero n] {f : Rn n → ℝ} {x : Rn n} {b : ℝ}
@@ -279,7 +279,7 @@ theorem intervalIntegrable_sphereIntegral [NeZero n] {f : Rn n → ℝ} {x : Rn 
     IntervalIntegrable (sphereIntegral f x) volume 0 b := by
   have hint : IntegrableOn (fun y => f (x + y)) (ball 0 b) := by
     have := integrableOn_ball_diff_ball_iff (f := f) (x := x) (a := 0) (b := b)
-    rw [ball_zero, ball_zero, diff_empty, diff_empty] at this
+    rw [ball_zero, ball_zero, sdiff_empty, sdiff_empty] at this
     exact this.1 hf
   have h :=
     (integrableOn_Ioi_sphere ((integrable_indicator_iff measurableSet_ball).2 hint)).mono_set
@@ -379,7 +379,7 @@ theorem _root_.LipschitzOnWith.ae_sphere_ae_hasDerivAt [NeZero n] {u : Rn n → 
       DifferentiableAt ℝ u (x + t • (ω : Rn n)) ∧
       HasDerivAt (fun τ : ℝ => u (x + τ • (ω : Rn n)))
         (⟪gradient u (x + t • (ω : Rn n)), (ω : Rn n)⟫) t := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   have hdiff : ∀ᵐ y, y ∈ ball x R → DifferentiableAt ℝ u y := by
     filter_upwards [hu.ae_differentiableWithinAt_of_mem (μ := volume)] with y hy hyb
     exact (hy hyb).differentiableAt (isOpen_ball.mem_nhds hyb)
@@ -391,6 +391,7 @@ theorem _root_.LipschitzOnWith.ae_sphere_ae_hasDerivAt [NeZero n] {u : Rn n → 
     simpa using ((hasDerivAt_id t).smul_const (ω : Rn n)).const_add x
   have := hd.hasFDerivAt.comp_hasDerivAt t hray
   convert this using 1
-  rw [gradient, InnerProductSpace.toDual_symm_apply]
+  · rfl
+  · rw [inner_gradient_left]
 
 end GMTFoundations

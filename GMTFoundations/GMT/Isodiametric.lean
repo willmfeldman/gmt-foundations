@@ -105,7 +105,7 @@ theorem volume_le_volume_closedBall_diam_div_two {s : Set (Rn d)}
 theorem volume_le_volume_ball_diam_div_two (hd : 0 < d) {s : Set (Rn d)}
     (hs : Bornology.IsBounded s) :
     volume s ≤ volume (ball (0 : Rn d) (diam s / 2)) := by
-  haveI : Nontrivial (Rn d) := Module.nontrivial_of_finrank_pos (R := ℝ) (by simpa using hd)
+  have : Nontrivial (Rn d) := Module.nontrivial_of_finrank_pos (R := ℝ) (by simpa using hd)
   refine (volume_le_volume_closedBall_diam_div_two hs).trans_eq ?_
   exact Measure.addHaar_closedBall_eq_addHaar_ball _ _ _
 

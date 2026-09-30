@@ -9,7 +9,8 @@ public import GMTFoundations.Perimeter.GaussGreenPair.Basic
 public import GMTFoundations.Perimeter.GaussGreenPair.API
 import GMTFoundations.BV.TotalVariation
 import Mathlib.Analysis.Calculus.BumpFunction.Convolution
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Geometry.Manifold.SmoothApprox
 import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 import Mathlib.Topology.UniformSpace.Uniformizable
@@ -52,8 +53,8 @@ private theorem exists_smooth_approx_of_contDiff_one {ψ : Rn n → Rn n} (hψ :
     ∃ φ : Rn n → Rn n, ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) φ ∧
       support φ ⊆ Metric.thickening η (support ψ) ∧ (∀ x, ‖φ x - ψ x‖ ≤ ε) ∧
       ∀ x, ‖fderiv ℝ φ x - fderiv ℝ ψ x‖ ≤ ε := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
-  haveI : ContinuousSMul ℝ (Rn n →L[ℝ] Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n →L[ℝ] Rn n) := IsBoundedSMul.continuousSMul
   have hψcont : Continuous ψ := hψ.continuous
   have hDcont : Continuous (fderiv ℝ ψ) := hψ.continuous_fderiv one_ne_zero
   have hDc : HasCompactSupport (fderiv ℝ ψ) := hψc.fderiv ℝ
@@ -86,7 +87,7 @@ private theorem exists_smooth_approx_of_contDiff_one {ψ : Rn n → Rn n} (hψ :
         convolution (ρ.normed volume) (fderiv ℝ ψ) (ContinuousLinearMap.lsmul ℝ ℝ) volume x := by
       rw [convolution_def, convolution_def]
       congr 1
-    haveI : CompleteSpace (Rn n →L[ℝ] Rn n) := FiniteDimensional.complete ℝ _
+    have : CompleteSpace (Rn n →L[ℝ] Rn n) := FiniteDimensional.complete ℝ _
     rw [hderiv, hconv, ← dist_eq_norm]
     refine ρ.dist_normed_convolution_le hDcont.aestronglyMeasurable fun y hy ↦ (h₂ ?_).le
     exact (mem_ball.1 hy).trans_le ((min_le_left _ _).trans (min_le_right _ _))
@@ -221,7 +222,7 @@ theorem IsGaussGreenPair.integral_divergence_of_contDiff (h : IsGaussGreenPair �
 private theorem exists_contDiff_abs_le {η : Rn n → ℝ} (hη : Continuous η) (hη0 : ∀ x, 0 ≤ η x)
     {δ : ℝ} (hδ : 0 < δ) :
     ∃ θ : Rn n → ℝ, ContDiff ℝ 1 θ ∧ (∀ x, |θ x| ≤ η x) ∧ ∀ x, η x - 3 * δ ≤ θ x := by
-  obtain ⟨θ, hθ, hθa, hθs⟩ := ((hη.sub continuous_const).max continuous_const :
+  obtain ⟨θ, hθ, hθa, hθs⟩ := ((by fun_prop) :
       Continuous fun x ↦ max (η x - 2 * δ) 0).exists_contDiff_approx (ε := fun _ ↦ δ) 1
       continuous_const (fun _ ↦ hδ)
   refine ⟨θ, by exact_mod_cast hθ, fun x ↦ ?_, fun x ↦ ?_⟩ <;>
@@ -288,7 +289,7 @@ private theorem lintegral_le_weightedTV_indicator_of_self {V : Set (Rn n)}
   have hM'0 : 0 ≤ M' := le_max_right _ _
   have hηM : ∀ x ∈ K', η x ≤ M' := fun x hx ↦ (hM (mem_image_of_mem η hx)).trans (le_max_left _ _)
   have hηK : IntegrableOn η K μ := by
-    haveI : IsFiniteMeasure (μ.restrict K) := isFiniteMeasure_restrict.2 hμK.ne
+    have : IsFiniteMeasure (μ.restrict K) := isFiniteMeasure_restrict.2 hμK.ne
     refine Integrable.of_bound hη.aestronglyMeasurable M'
       (ae_restrict_of_forall_mem hK.measurableSet fun x hx ↦ ?_)
     rw [Real.norm_of_nonneg (hη0 x)]

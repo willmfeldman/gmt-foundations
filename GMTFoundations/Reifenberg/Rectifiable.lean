@@ -73,7 +73,7 @@ theorem rectifiable_reifenberg : RectifiableReifenbergStatement n := by
   refine ⟨f, hf, ?_⟩
   set P := E \ ⋃ i, range (f i) with hPdef
   by_contra hP0
-  have hPfin : hausdorffN n (n - 1) P ≠ ∞ := ne_top_of_le_ne_top hEfin (measure_mono diff_subset)
+  have hPfin : hausdorffN n (n - 1) P ≠ ∞ := ne_top_of_le_ne_top hEfin (measure_mono sdiff_subset)
   -- Step A: a ball `B_r(x)`, `r < 1/16`, carrying mass `> η r^{n-1}` of `P`.
   obtain ⟨x, hxP, r, hr, hr16, hmass⟩ := GMT.exists_lt_hausdorffN_inter_ball hPfin hP0
     (bigPieceMass_lt (by omega)) (show (0 : ℝ) < 1 / 16 by norm_num)

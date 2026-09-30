@@ -14,7 +14,8 @@ import GMTFoundations.BV.Compactness
 import GMTFoundations.Sobolev.Mollify
 public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 public import Mathlib.Analysis.Calculus.BumpFunction.Normed
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
@@ -70,8 +71,8 @@ variable {n : ℕ}
 private theorem divergence_const_smul (c : ℝ) {φ : Rn n → Rn n} (hφ : Differentiable ℝ φ) :
     divergence (c • φ) = c • divergence φ := by
   funext x
-  simp only [divergence, Pi.smul_apply, fderiv_const_smul (hφ x), ContinuousLinearMap.coe_smul,
-    map_smul, smul_eq_mul]
+  simp only [divergence, Pi.smul_apply, fderiv_const_smul (hφ x),
+    ContinuousLinearMap.toLinearMap_smul, map_smul, smul_eq_mul]
 
 private theorem divergence_zero' : divergence (0 : Rn n → Rn n) = 0 := by
   funext x
@@ -219,7 +220,7 @@ variable {Ω E : Set (Rn n)} {μ : Measure (Rn n)} {ν : Rn n → Rn n}
 /-- The measure of a Gauss–Green pair on an open set is σ-finite. -/
 theorem IsGaussGreenPair.sigmaFinite (h : IsGaussGreenPair Ω E μ ν) (hΩ : IsOpen Ω) :
     SigmaFinite μ := by
-  haveI : LocallyCompactSpace Ω := hΩ.locallyCompactSpace
+  have : LocallyCompactSpace Ω := hΩ.locallyCompactSpace
   let K : ℕ → Set (Rn n) := fun k ↦ Subtype.val '' compactCovering Ω k ∪ Ωᶜ
   refine ⟨⟨{ set := K, set_mem := fun _ ↦ trivial, finite := fun k ↦ ?_, spanning := ?_ }⟩⟩
   · refine (measure_union_le _ _).trans_lt ?_
@@ -325,7 +326,7 @@ theorem fderiv_mollify_indicator_apply (h : IsGaussGreenPair Ω E μ ν) (hE : M
     (ρ : ContDiffBump (0 : Rn n)) {x : Rn n} (hx : closedBall x ρ.rOut ⊆ Ω) (v : Rn n) :
     fderiv ℝ (mollify ρ (E.indicator 1)) x v =
       -∫ y, ρ.normed volume (x - y) * ⟪v, ν y⟫ ∂μ := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   set k := ρ.normed volume with hk_def
   have hk_cs : HasCompactSupport k := ρ.hasCompactSupport_normed
   have hk_cd : ContDiff ℝ ∞ k := ρ.contDiff_normed
@@ -391,7 +392,7 @@ theorem lintegral_norm_fderiv_mollify_indicator_le (h : IsGaussGreenPair Ω E μ
     (hΩ : IsOpen Ω) (hE : MeasurableSet E) (ρ : ContDiffBump (0 : Rn n)) {V : Set (Rn n)}
     (hV : MeasurableSet V) (hVΩ : ∀ x ∈ V, closedBall x ρ.rOut ⊆ Ω) :
     ∫⁻ x in V, ‖fderiv ℝ (mollify ρ (E.indicator 1)) x‖ₑ ≤ μ (thickening ρ.rOut V) := by
-  haveI := h.sigmaFinite hΩ
+  have := h.sigmaFinite hΩ
   set k := ρ.normed volume with hk_def
   have hk0 : ∀ z, 0 ≤ k z := ρ.nonneg_normed
   have hmeas : Measurable fun p : Rn n × Rn n ↦ ENNReal.ofReal (k (p.1 - p.2)) :=
@@ -535,7 +536,9 @@ theorem tendstoLpLoc_mollify {ρ : ℕ → ContDiffBump (0 : Rn n)}
     _ ≤ eLpNorm ((fun x ↦ mollify (ρ i) f' x) - f') 1 volume :=
         eLpNorm_mono_measure _ Measure.restrict_le_self
     _ = ENNReal.ofReal (∫ x, ‖mollify (ρ i) f' x - f' x‖) := by
-        rw [eLpNorm_one_eq_lintegral_enorm, ofReal_integral_norm_eq_lintegral_enorm hint]
+        have hm : AEStronglyMeasurable ((fun x ↦ mollify (ρ i) f' x) - f') volume :=
+          hint.aestronglyMeasurable
+        rw [eLpNorm_one_eq_lintegral_enorm hm, ofReal_integral_norm_eq_lintegral_enorm hint]
         rfl
 
 end Convergence

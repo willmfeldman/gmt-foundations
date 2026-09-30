@@ -202,7 +202,7 @@ theorem mul_hausdorffMeasure_le_of_frequently {k : ℕ} {μ : Measure (Rn n)} {A
       (ball_subset_ball (hrI.2.trans_le (min_le_right _ _)).le).trans hεU, hr⟩
     obtain ⟨b, hbu, hsub⟩ := hucov (x, r) hp
     exact mem_iUnion.2 ⟨⟨b, hbu⟩, hsub (mem_ball_self hrI.1)⟩
-  haveI : Encodable u := hu_count.toEncodable
+  have : Encodable u := hu_count.toEncodable
   set T : ℕ → Set (Rn n) := fun i =>
     ⋃ p ∈ Encodable.decode₂ u i, ball (p : Rn n × ℝ).1 (4 * (p : Rn n × ℝ).2) with hTdef
   have hTcov : A ⊆ ⋃ i, T i := by
@@ -298,7 +298,7 @@ theorem exists_isOpen_subset_measure_le {μ : Measure (Rn n)} {Ω A : Set (Rn n)
   choose ρ hρ hρΩ using hball
   obtain ⟨T, hTc, hTU⟩ := TopologicalSpace.isOpen_iUnion_countable
     (fun z : Ω => ball (z : Rn n) (ρ z)) fun z => isOpen_ball
-  haveI : Countable T := hTc.to_subtype
+  have : Countable T := hTc.to_subtype
   have hcover : Ω ⊆ ⋃ z : T, ball ((z : Ω) : Rn n) (ρ z) := by
     intro x hx
     have : x ∈ ⋃ z : Ω, ball (z : Rn n) (ρ z) := mem_iUnion.2 ⟨⟨x, hx⟩, mem_ball_self (hρ _)⟩
@@ -312,7 +312,7 @@ theorem exists_isOpen_subset_measure_le {μ : Measure (Rn n)} {Ω A : Set (Rn n)
     set V := ball ((z : Ω) : Rn n) (ρ z)
     have hVfin : μ V ≠ ∞ := ne_top_of_le_ne_top
       (hμ _ (isCompact_closedBall _ _) (hρΩ z)).ne (measure_mono ball_subset_closedBall)
-    haveI : IsFiniteMeasure (μ.restrict V) := isFiniteMeasure_restrict.2 hVfin
+    have : IsFiniteMeasure (μ.restrict V) := isFiniteMeasure_restrict.2 hVfin
     have hA0 : μ.restrict V A < δ z := by
       rw [Measure.restrict_apply' measurableSet_ball, measure_mono_null inter_subset_left hA]
       exact ENNReal.coe_pos.2 (hδ0 z)
@@ -404,7 +404,7 @@ theorem exists_isOpen_subset_measure_le_add {μ : Measure (Rn n)} {Ω A : Set (R
   have hemb : MeasurableEmbedding (Subtype.val : Ω → Rn n) :=
     MeasurableEmbedding.subtype_coe hΩ.measurableSet
   set μΩ : Measure Ω := μ.comap Subtype.val
-  haveI : IsLocallyFiniteMeasure μΩ := by
+  have : IsLocallyFiniteMeasure μΩ := by
     refine ⟨fun z => ?_⟩
     obtain ⟨ρ, hρ, hρΩ⟩ := Metric.isOpen_iff.1 hΩ z z.2
     refine ⟨Subtype.val ⁻¹' closedBall (z : Rn n) (ρ / 2),

@@ -145,13 +145,13 @@ theorem exists_lipschitz_exhaustion {k : ℕ} {E : Set (Rn n)} (hE : hausdorffN 
   have hVG : V G ≤ V F := (le_sSup (mem_image_of_mem V hG)).trans hVF
   have hsplit : V G = V F + hausdorffN n k ((E \ U) ∩ range g) := by
     change hausdorffN n k (E ∩ ⋃ i, range (G i)) = hausdorffN n k (E ∩ U) + _
-    rw [← measure_inter_add_diff (E ∩ ⋃ i, range (G i)) hU, hUG]
+    rw [← measure_inter_add_sdiff (E ∩ ⋃ i, range (G i)) hU, hUG]
     congr 2
     · ext y
       simp only [mem_inter_iff, mem_union]
       tauto
     · ext y
-      simp only [mem_inter_iff, mem_union, mem_diff]
+      simp only [mem_inter_iff, mem_union, Set.mem_sdiff]
       tauto
   have hVFfin : V F ≠ ∞ := ne_top_of_le_ne_top hE (measure_mono inter_subset_left)
   rw [hsplit] at hVG
@@ -170,6 +170,8 @@ theorem measurableEmbedding_smul_sub {r : ℝ} (hr : r ≠ 0) (x : Rn n) :
   have := ((Homeomorph.addRight (-x)).trans
     (Homeomorph.smulOfNeZero r⁻¹ (inv_ne_zero hr))).measurableEmbedding
   convert this using 1
+  ext y
+  simp [sub_eq_add_neg]
 
 /-- Preimages under the blow-up are images under `ψ z = x + r z`. -/
 theorem preimage_smul_sub {r : ℝ} (hr : r ≠ 0) (x : Rn n) (A : Set (Rn n)) :

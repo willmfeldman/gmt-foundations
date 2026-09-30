@@ -61,7 +61,7 @@ theorem Measurable.exists_isCompact_continuousOn {g : X → Y} (hg : Measurable 
     ∃ K ⊆ A, IsCompact K ∧ μ (A \ K) < ε ∧ ContinuousOn g K := by
   classical
   set b := countableBasis Y
-  haveI : Countable b := (countable_countableBasis Y).to_subtype
+  have : Countable b := (countable_countableBasis Y).to_subtype
   -- The sets to approximate: `A`, and `A ∩ g⁻¹ V`, `A \ g⁻¹ V` for each basic open `V`.
   let S : Option (b × Bool) → Set X
     | none => A
@@ -71,13 +71,13 @@ theorem Measurable.exists_isCompact_continuousOn {g : X → Y} (hg : Measurable 
     hg (isOpen_of_mem_countableBasis V.2).measurableSet
   have hSA : ∀ j, S j ⊆ A := by
     rintro (_ | ⟨V, _ | _⟩)
-    exacts [subset_rfl, diff_subset, inter_subset_left]
+    exacts [subset_rfl, sdiff_subset, inter_subset_left]
   have hSm : ∀ j, MeasurableSet (S j) := by
     rintro (_ | ⟨V, _ | _⟩)
     exacts [hA, hA.diff (hVm V), hA.inter (hVm V)]
   obtain ⟨δ, hδ0, hδ⟩ := ENNReal.exists_pos_sum_of_countable hε (Option (b × Bool))
   have hK : ∀ j, ∃ K ⊆ S j, IsCompact K ∧ μ (S j \ K) < δ j := fun j =>
-    (hSm j).exists_isCompact_diff_lt (ne_top_of_le_ne_top hμA (measure_mono (hSA j)))
+    (hSm j).exists_isCompact_sdiff_lt (ne_top_of_le_ne_top hμA (measure_mono (hSA j)))
       (ENNReal.coe_pos.2 (hδ0 j)).ne'
   choose C hCS hCc hCμ using hK
   set F : b → Set X := fun V => C (some (V, true))
@@ -134,8 +134,8 @@ theorem AEMeasurable.exists_isCompact_continuousOn
   set A' := A₀ \ N
   have hA'm : MeasurableSet A' := hA₀m.diff (measurableSet_toMeasurable _ _)
   obtain ⟨K, hKA', hKc, hKμ, hKg⟩ := hg.measurable_mk.exists_isCompact_continuousOn (μ := μ)
-    hA'm (ne_top_of_le_ne_top hμA (measure_mono (diff_subset.trans hA₀A))) hε
-  refine ⟨K, hKA'.trans (diff_subset.trans hA₀A), hKc, ?_, ?_⟩
+    hA'm (ne_top_of_le_ne_top hμA (measure_mono (sdiff_subset.trans hA₀A))) hε
+  refine ⟨K, hKA'.trans (sdiff_subset.trans hA₀A), hKc, ?_, ?_⟩
   · calc μ (A \ K) ≤ μ ((A \ A₀) ∪ N ∪ (A' \ K)) := by
           refine measure_mono fun x ⟨hxA, hxK⟩ => ?_
           by_cases hx₀ : x ∈ A₀

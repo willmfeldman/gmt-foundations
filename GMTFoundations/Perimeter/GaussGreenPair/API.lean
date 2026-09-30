@@ -66,7 +66,7 @@ private theorem measure_eq_of_isOpen (hΩ : IsOpen Ω) {μ₁ μ₂ : Measure (R
     (h₁ : μ₁ Ωᶜ = 0) (h₂ : μ₂ Ωᶜ = 0) (hf₁ : ∀ K, IsCompact K → K ⊆ Ω → μ₁ K < ⊤)
     (hf₂ : ∀ K, IsCompact K → K ⊆ Ω → μ₂ K < ⊤)
     (h : ∀ V, IsOpen V → V ⊆ Ω → μ₁ V = μ₂ V) : μ₁ = μ₂ := by
-  haveI : LocallyCompactSpace Ω := hΩ.locallyCompactSpace
+  have : LocallyCompactSpace Ω := hΩ.locallyCompactSpace
   have hV : ∀ k, ∃ V, IsOpen V ∧ Subtype.val '' compactCovering Ω k ⊆ V ∧ closure V ⊆ Ω ∧
       IsCompact (closure V) := fun k ↦ exists_open_between_and_isCompact_closure
     ((isCompact_compactCovering Ω k).image continuous_subtype_val) hΩ
@@ -89,12 +89,12 @@ private theorem measure_eq_of_isOpen (hΩ : IsOpen Ω) {μ₁ μ₂ : Measure (R
   | some k =>
     simp only [s, Option.elim]
     have hVk : V k ⊆ Ω := subset_closure.trans (hVΩ k)
-    haveI : IsFiniteMeasure (μ₁.restrict (V k)) := isFiniteMeasure_restrict.2
+    have : IsFiniteMeasure (μ₁.restrict (V k)) := isFiniteMeasure_restrict.2
       ((measure_mono subset_closure).trans_lt (hf₁ _ (hVc k) (hVΩ k))).ne
-    haveI : IsFiniteMeasure (μ₂.restrict (V k)) := isFiniteMeasure_restrict.2
+    have : IsFiniteMeasure (μ₂.restrict (V k)) := isFiniteMeasure_restrict.2
       ((measure_mono subset_closure).trans_lt (hf₂ _ (hVc k) (hVΩ k))).ne
-    haveI := Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure (μ₁.restrict (V k))
-    haveI := Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure (μ₂.restrict (V k))
+    have := Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure (μ₁.restrict (V k))
+    have := Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure (μ₂.restrict (V k))
     refine Measure.OuterRegular.ext_isOpen fun W hW ↦ ?_
     rw [Measure.restrict_apply hW.measurableSet, Measure.restrict_apply hW.measurableSet]
     exact h _ (hW.inter (hVo k)) (inter_subset_right.trans hVk)
@@ -116,7 +116,7 @@ theorem IsGaussGreenPair.ae_eq_normal {ν₁ ν₂ : Rn n → Rn n} (h₁ : IsGa
   have hloc : LocallyIntegrableOn (fun x ↦ ν₁ x - ν₂ x) Ω μ := by
     rw [locallyIntegrableOn_iff hΩ.isLocallyClosed]
     intro K hKΩ hK
-    haveI : IsFiniteMeasure (μ.restrict K) :=
+    have : IsFiniteMeasure (μ.restrict K) :=
       isFiniteMeasure_restrict.2 (h₁.lt_top_of_isCompact K hK hKΩ).ne
     refine Integrable.mono' (integrable_const (2 : ℝ))
       (h₁.measurable_normal.sub h₂.measurable_normal).aestronglyMeasurable ?_
@@ -185,7 +185,7 @@ theorem IsGaussGreenPair.restrict (h : IsGaussGreenPair Ω E μ ν) {Ω' : Set (
 /-- The total integral of the divergence of a `C¹` compactly supported field vanishes. -/
 private theorem integral_divergence_eq_zero {φ : Rn n → Rn n} (hφ : ContDiff ℝ 1 φ)
     (hφc : HasCompactSupport φ) : ∫ x, divergence φ x = 0 := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   set b := EuclideanSpace.basisFun (Fin n) ℝ
   have hdiff : Differentiable ℝ φ := hφ.differentiable one_ne_zero
   have hcomp : ∀ i x, fderiv ℝ (fun y ↦ ⟪b i, φ y⟫) x = (innerSL ℝ (b i)).comp (fderiv ℝ φ x) :=
@@ -254,7 +254,7 @@ private theorem divergence_comp_affineHomeo_symm (x : Rn n) {r : ℝ} (hr : 0 < 
     {φ' : Rn n → Rn n} (hφ' : Differentiable ℝ φ') (y : Rn n) :
     divergence (φ' ∘ (affineHomeo x hr).symm) y =
       r⁻¹ * divergence φ' ((affineHomeo x hr).symm y) := by
-  haveI : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (Rn n) := IsBoundedSMul.continuousSMul
   have hA : HasFDerivAt (affineHomeo x hr).symm (r⁻¹ • ContinuousLinearMap.id ℝ (Rn n)) y := by
     have : (affineHomeo x hr).symm = fun y ↦ r⁻¹ • (y - x) :=
       funext (affineHomeo_symm_apply x hr)
@@ -262,7 +262,7 @@ private theorem divergence_comp_affineHomeo_symm (x : Rn n) {r : ℝ} (hr : 0 < 
     exact ((hasFDerivAt_id y).sub_const x).const_smul r⁻¹
   have hcomp := ((hφ' _).hasFDerivAt.comp y hA).fderiv
   rw [divergence, divergence, hcomp, ContinuousLinearMap.comp_smul,
-    ContinuousLinearMap.comp_id, ContinuousLinearMap.coe_smul, map_smul, smul_eq_mul]
+    ContinuousLinearMap.comp_id, ContinuousLinearMap.toLinearMap_smul, map_smul, smul_eq_mul]
 
 /-- **Translation and dilation.** If `(μ, ν)` is a Gauss–Green pair for `E` on `Ω`, then for
 `x ∈ ℝⁿ` and `r > 0` the blown-up set `E_{x,r} = {z : x + r z ∈ E}` has the Gauss–Green pair
@@ -321,6 +321,7 @@ theorem IsGaussGreenPair.blowup (hn : 1 ≤ n) (h : IsGaussGreenPair Ω E μ ν)
       rw [h1, ← Measure.map_map (measurable_const_add x) (measurable_const_smul r),
         Measure.map_addHaar_smul volume hr.ne', finrank_euclideanSpace_fin, Measure.map_smul,
         map_add_left_eq_self]
+      exact (measurable_const_add x).aemeasurable
     have hLHS : ∫ z in A ⁻¹' E, divergence φ' z =
         (ENNReal.ofReal |(r ^ n)⁻¹|).toReal * (r * ∫ y in E, divergence φ y) := by
       have e1 : ∫ z in A ⁻¹' E, divergence φ' z = ∫ z in A ⁻¹' E, r * divergence φ (A z) :=

@@ -174,7 +174,7 @@ lemma vol_superlevelset_measurable (f : ℝ → ENNReal)
   apply Antitone.measurable
   intro a b hab
   apply measure_mono
-  simp only [setOf_subset_setOf]
+  simp only [ofPred_subset_ofPred]
   intro z hz
   calc
     ENNReal.ofReal a ≤ ENNReal.ofReal b := ENNReal.ofReal_le_ofReal hab
@@ -281,7 +281,7 @@ lemma prekopa_leindler_1d_normalized
     intro t ht
     rw [add_subset_iff]
     intro x hx y hy
-    simp only [mem_setOf_eq] at hx hy ⊢
+    simp only [mem_ofPred_eq] at hx hy ⊢
     calc
       ENNReal.ofReal t = (ENNReal.ofReal t) ^ (1 - θ) * (ENNReal.ofReal t) ^ θ := by
         rw [← ENNReal.rpow_add (1-θ) θ (ne_of_gt (ENNReal.ofReal_pos.mpr ht)) ENNReal.ofReal_ne_top]
@@ -303,11 +303,11 @@ lemma prekopa_leindler_1d_normalized
         : {x | ENNReal.ofReal t ≤ f x}.Nonempty := by
       apply nonempty_def.mpr
       suffices ∃ x, x ∈ {x | ENNReal.ofReal t < f x} by
-        simp only [mem_setOf_eq] at this ⊢
+        simp only [mem_ofPred_eq] at this ⊢
         rcases this with ⟨x, hx⟩
         use x
         exact le_of_lt hx
-      simp only [mem_setOf_eq]
+      simp only [mem_ofPred_eq]
       apply exists_lt_of_lt_ciSup
       simp only [hf_sup1, ENNReal.ofReal_lt_one, ht.2]
     exact brunn_minkowski_1d
@@ -324,9 +324,7 @@ lemma prekopa_leindler_1d_normalized
       rw [lintegral_add_left (vol_superlevelset_measurable f)]
     _ ≤ ∫⁻ t in Ioo 0 1, vh t := by
       apply lintegral_mono_ae
-      rw [ae_restrict_iff (measurableSet_le
-        (Measurable.add (vol_superlevelset_measurable f) (vol_superlevelset_measurable g))
-        (vol_superlevelset_measurable h))]
+      rw [ae_restrict_iff' measurableSet_Ioo]
       filter_upwards
       exact h_vol_ineq
     _ ≤ ∫⁻ t in Ioi 0, vh t := lintegral_mono_set Ioo_subset_Ioi_self
@@ -565,7 +563,7 @@ def append {d : ℕ} (x : Fin d → ℝ) (t : Fin 1 → ℝ) : Fin (d + 1) → �
 @[fun_prop]
 lemma append_measurable {d : ℕ} (x : Fin d → ℝ) : Measurable (append x) := by
   unfold append
-  apply measurable_pi_lambda
+  apply Measurable.of_eval
   intro
   split
   · fun_prop
@@ -574,7 +572,7 @@ lemma append_measurable {d : ℕ} (x : Fin d → ℝ) : Measurable (append x) :=
 @[fun_prop]
 lemma append_measurable' {d : ℕ} (t : Fin 1 → ℝ) : Measurable (fun x : Fin d → ℝ ↦ append x t) := by
   unfold append
-  apply measurable_pi_lambda
+  apply Measurable.of_eval
   intro
   split
   · fun_prop
@@ -612,8 +610,8 @@ lemma lintegral_fix_eq_lmarginal {d : ℕ}
   simp_all only [Pi.default_def, eq_rec_constant, Fin.default_eq_zero, Fin.isValue, dite_eq_ite,
     Function.comp_apply]
   congr; ext; congr; ext i; split
-  case e_f.h.e_a.h.isTrue => simp_all
-  case e_f.h.e_a.h.isFalse h => simp [Fin.val_lt_last h]
+  case isTrue => simp_all
+  case isFalse h => simp [Fin.val_lt_last h]
 
 lemma lintegral_fix_lintegral_eq_lintegral
     {d : ℕ} {f : (Fin (d + 2) → ℝ) → ENNReal} (hf_measurable : Measurable f) :

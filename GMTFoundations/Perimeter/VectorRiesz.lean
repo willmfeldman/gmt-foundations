@@ -608,7 +608,7 @@ measures on the open set `U`. -/
 theorem IsOrderZero.exists_measures (hU : IsOpen U) (hℓ : IsOrderZero U ℓ) :
     ∃ μp μm : Measure U, μp.Regular ∧ μm.Regular ∧
       ∀ f, IsTestFunction U f → ℓ f = ∫ x : U, f x ∂μp - ∫ x : U, f x ∂μm := by
-  haveI : LocallyCompactSpace U := hU.locallyCompactSpace
+  have : LocallyCompactSpace U := hU.locallyCompactSpace
   obtain ⟨μp, μm, hp, hm, h⟩ :=
     exists_measures_of_isOrderBddAbove (isOrderBddAbove_extendLinear hU hℓ)
   refine ⟨μp, μm, hp, hm, fun f hf ↦ ?_⟩
@@ -721,7 +721,7 @@ theorem exists_rieszPair (hU : IsOpen U) {L : (Rn n → Rn n) → ℝ} (hL : IsV
     ∃ (μ : Measure (Rn n)) (ν : Rn n → Rn n), μ Uᶜ = 0 ∧
       (∀ K, IsCompact K → K ⊆ U → μ K < ⊤) ∧ Measurable ν ∧ (∀ᵐ x ∂μ, ‖ν x‖ = 1) ∧
       ∀ φ, IsSmoothTestField U φ → L φ = ∫ x, ⟪φ x, ν x⟫ ∂μ := by
-  haveI : LocallyCompactSpace U := hU.locallyCompactSpace
+  have : LocallyCompactSpace U := hU.locallyCompactSpace
   set b := EuclideanSpace.basisFun (Fin n) ℝ
   have hcomp : ∀ i, IsOrderZero U (fun f ↦ L (fun x ↦ f x • b i)) := fun i ↦
     hL.isOrderZero_comp_smul (b i) (b.norm_eq_one i).le
@@ -734,7 +734,7 @@ theorem exists_rieszPair (hU : IsOpen U) {L : (Rn n → Rn n) → ℝ} (hL : IsV
     exact ENNReal.sum_lt_top.2 fun i _ ↦ by
       rw [Measure.add_apply]
       exact ENNReal.add_lt_top.2 ⟨hK.measure_lt_top, hK.measure_lt_top⟩
-  haveI : IsFiniteMeasureOnCompacts P := ⟨hPK⟩
+  have : IsFiniteMeasureOnCompacts P := ⟨hPK⟩
   have hpP : ∀ i, μp i ≤ P := fun i ↦ Measure.le_iff'.2 fun s ↦ by
     rw [hP, Measure.finsetSum_apply]
     refine le_trans ?_ (Finset.single_le_sum (f := fun j ↦ (μp j + μm j) s)

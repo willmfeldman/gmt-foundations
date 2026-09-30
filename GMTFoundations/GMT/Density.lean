@@ -8,7 +8,8 @@ module
 public import GMTFoundations.GMT.ApproxTangent
 import GMTFoundations.GMT.HausdorffLebesgue
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Measure.Decomposition.RadonNikodym
 import Mathlib.MeasureTheory.Measure.RegularityCompacts
 import Mathlib.Topology.EMetricSpace.Paracompact
@@ -214,7 +215,7 @@ theorem eq_withDensity_upperDensity (hn : 2 ≤ n)
     have h1 : ρ (A ∩ S) = 0 := measure_eq_zero_of_hausdorffMeasure_eq_zero (by omega) hΩ hbd
       (inter_subset_right.trans hSΩ) (euclideanHausdorffMeasure_eq_zero_iff.1 hA)
     have h2 : ρ (A \ S) = 0 := measure_mono_null (fun x hx => hx.2) hρS
-    rw [← measure_inter_add_diff A hS, h1, h2, add_zero]
+    rw [← measure_inter_add_sdiff A hS, h1, h2, add_zero]
   -- (2) density one, `σ`-a.e.
   have hdens : ∀ᵐ x ∂σ,
       Tendsto (fun r => σ (closedBall x r) / ENNReal.ofReal (ω * r ^ k)) (𝓝[>] 0) (𝓝 1) := by
@@ -244,7 +245,7 @@ theorem eq_withDensity_upperDensity (hn : 2 ≤ n)
   obtain ⟨t, htΩ, htc, hcov⟩ := TopologicalSpace.countable_cover_nhdsWithin
     (f := fun x => ball x (d x)) (s := Ω)
     (fun x hx => mem_nhdsWithin_of_mem_nhds (ball_mem_nhds x (hd0 x hx)))
-  haveI := htc.to_subtype
+  have := htc.to_subtype
   have hΩU : Ω = ⋃ q : t, ball (q : Rn n) (d q) := by
     refine Subset.antisymm (fun x hx => ?_) (iUnion_subset fun q => ?_)
     · obtain ⟨q, hq, hxq⟩ := mem_iUnion₂.1 (hcov hx)
@@ -260,10 +261,10 @@ theorem eq_withDensity_upperDensity (hn : 2 ≤ n)
   set B := ball (q : Rn n) (d q)
   have hq := hd0 q (htΩ q.2)
   have hBm : MeasurableSet B := measurableSet_ball
-  haveI : IsFiniteMeasure (ρ.restrict B) := ⟨by
+  have : IsFiniteMeasure (ρ.restrict B) := ⟨by
     rw [Measure.restrict_apply_univ]
     exact (hbd q (d q) hq (hdΩ q (htΩ q.2))).trans_lt ENNReal.ofReal_lt_top⟩
-  haveI : IsFiniteMeasure (σ.restrict B) := ⟨by
+  have : IsFiniteMeasure (σ.restrict B) := ⟨by
     rw [Measure.restrict_apply_univ, Measure.restrict_apply hBm]
     refine (measure_mono (inter_subset_inter_left _ ball_subset_closedBall)).trans_lt
       (hfin _ (isCompact_closedBall _ _) ?_)
@@ -271,7 +272,7 @@ theorem eq_withDensity_upperDensity (hn : 2 ≤ n)
   have hacB : ρ.restrict B ≪ σ.restrict B := fun A hA => by
     rw [Measure.restrict_apply' hBm] at hA ⊢
     exact hac _ hA
-  haveI : (ρ.restrict B).HaveLebesgueDecomposition (σ.restrict B) :=
+  have : (ρ.restrict B).HaveLebesgueDecomposition (σ.restrict B) :=
     Measure.haveLebesgueDecomposition_of_sigmaFinite _ _
   have hRN := Measure.withDensity_rnDeriv_eq _ _ hacB
   have hBes := Besicovitch.ae_tendsto_rnDeriv (ρ.restrict B) (σ.restrict B)

@@ -9,7 +9,8 @@ public import GMTFoundations.Perimeter.GaussGreenPair
 public import GMTFoundations.BV.Compactness
 import GMTFoundations.Perimeter.Mollify
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.Separation.CompletelyRegular
 
 /-!
@@ -243,7 +244,7 @@ theorem totalVariationOn_mul_le {χ ζ : Rn n → ℝ} (hχm : AEStronglyMeasura
     have htest : IsTVTestField W 1 ζψ := by
       refine ⟨hζψ, hζc.smul_right, hζψT.trans hζW, fun x ↦ ?_⟩
       simp only [ζψ, Pi.one_apply, norm_smul, Real.norm_eq_abs, abs_of_nonneg (hζ01 x).1]
-      exact mul_le_one₀ (hζ01 x).2 (norm_nonneg _) (hψη x)
+      exact (mul_le_of_le_one_left (norm_nonneg _) (hζ01 x).2).trans (hψη x)
     rw [← setIntegral_mul_divergence_eq_integral χ (hζψT.trans hζW)]
     exact le_iSup₂ (f := fun ψ (_ : IsTVTestField W 1 ψ) ↦
       ENNReal.ofReal (∫ x in W, χ x * divergence ψ x)) ζψ htest
@@ -284,7 +285,7 @@ theorem exists_forall_le_ofReal_of_eventually {f : ℕ → ℝ≥0∞} (hf : ∀
 /-- **Limits of indicators are indicators.** If `χ_{S_k} → χ₀` in `L¹_loc(ℝⁿ)`, then
 `χ₀ = χ_F` a.e. for the measurable set `F = {χ₀ = 1}`, so `χ_{S_k} → χ_F` in `L¹_loc(ℝⁿ)`. -/
 theorem exists_measurableSet_tendstoLpLoc_indicator {S : ℕ → Set (Rn n)}
-    (hS : ∀ k, MeasurableSet (S k)) {χ₀ : Rn n → ℝ} (hχ₀ : Measurable χ₀)
+    (_hS : ∀ k, MeasurableSet (S k)) {χ₀ : Rn n → ℝ} (hχ₀ : Measurable χ₀)
     (hconv : TendstoLpLoc 1 volume univ (fun k ↦ (S k).indicator (1 : Rn n → ℝ)) χ₀ atTop) :
     ∃ F : Set (Rn n), MeasurableSet F ∧ F.indicator (1 : Rn n → ℝ) =ᵐ[volume] χ₀ ∧
       TendstoLpLoc 1 volume univ (fun k ↦ (S k).indicator (1 : Rn n → ℝ)) (F.indicator 1)
@@ -296,8 +297,7 @@ theorem exists_measurableSet_tendstoLpLoc_indicator {S : ℕ → Set (Rn n)}
       have hTIM : TendstoInMeasure ((volume : Measure (Rn n)).restrict (closedBall 0 m))
           (fun k ↦ (S k).indicator (1 : Rn n → ℝ)) atTop χ₀ :=
         tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero
-          (fun k ↦ (measurable_const.indicator (hS k)).aestronglyMeasurable)
-          hχ₀.aestronglyMeasurable (hconv _ (subset_univ _) (isCompact_closedBall 0 _))
+          (hconv _ (subset_univ _) (isCompact_closedBall 0 _))
       obtain ⟨ns, -, hae⟩ := hTIM.exists_seq_tendsto_ae
       filter_upwards [hae] with y hy
       refine (Finite.isClosed (by simp : ({0, 1} : Set ℝ).Finite)).mem_of_tendsto hy
@@ -406,7 +406,7 @@ theorem exists_blowup_subseq_tendstoLpLoc (hn : 1 ≤ n) (hΩ : IsOpen Ω) (hE :
       |>.aestronglyMeasurable)
     ⟨1, fun k y _ ↦ by
       rw [abs_mul, abs_of_nonneg (ζ k).nonneg]
-      exact mul_le_one₀ (ζ k).le_one (abs_nonneg _) (hχ1 k y)⟩
+      exact (mul_le_of_le_one_left (abs_nonneg _) (ζ k).le_one).trans (hχ1 k y)⟩
     (fun V hV hVc ↦ by
       obtain ⟨L, hL, hsub⟩ := hVc.1.isBounded.subset_ball_lt 0 0
       exact exists_forall_le_ofReal_of_eventually (fun k ↦ hfin k V)

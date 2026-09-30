@@ -6,7 +6,8 @@ Authors: William M. Feldman
 module
 
 public import GMTFoundations.Reifenberg.Beta
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Function.L2Space
 
 /-!
@@ -236,7 +237,7 @@ private lemma bestPlane_prop (hn : 1 ≤ n) (μ : Measure (Rn n)) (x : Rn n) (r 
     ‖(bestPlane μ x r).2‖ = 1 ∧
       (0 < r → μ (ball x r) ≠ ∞ → planeBetaSq μ x r (bestPlane μ x r) = jonesBetaSq μ x r) := by
   have h := exists_bestPlane hn μ x r
-  rw [bestPlane, dif_pos h]
+  rw [bestPlane, dite_eq_left h]
   exact h.choose_spec
 
 /-- The normal of `bestPlane` is a unit vector. -/

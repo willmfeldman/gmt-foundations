@@ -68,11 +68,12 @@ theorem tendsto_setIntegral_mul_of_tendstoLpLoc {X ι : Type*} [MeasurableSpace 
       Integrable (fun x ↦ f x * g x) (μ.restrict K) := fun hf ↦
     (hf.integrableOn_compact_subset hgΩ hK).mul_bdd hg.aestronglyMeasurable
       (Eventually.of_forall hC)
-  refine tendsto_integral_of_L1' _ (hint hχ₀).aestronglyMeasurable
-    (Eventually.of_forall fun i ↦ hint (hχ i)) ?_
+  refine tendsto_integral_of_L1' _ (Eventually.of_forall fun i ↦ hint (hχ i)) ?_
   have hle : ∀ i, eLpNorm ((fun x ↦ χ i x * g x) - fun x ↦ χ₀ x * g x) 1 (μ.restrict K) ≤
       ENNReal.ofReal C * eLpNorm (χ i - χ₀) 1 (μ.restrict K) := fun i ↦ by
-    refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul (Eventually.of_forall fun x ↦ ?_) 1
+    refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul
+      ((hint (hχ i)).aestronglyMeasurable.sub (hint hχ₀).aestronglyMeasurable)
+      (Eventually.of_forall fun x ↦ ?_) 1
     simp only [Pi.sub_apply, ← sub_mul, norm_mul]
     rw [mul_comm]
     exact mul_le_mul_of_nonneg_right (hC x) (norm_nonneg _)
@@ -84,8 +85,8 @@ variable {d : ℕ}
 
 theorem continuous_trace_clm :
     Continuous fun L : E d →L[ℝ] E d ↦ LinearMap.trace ℝ (E d) L.toLinearMap := by
-  haveI : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
-  haveI : ContinuousSMul ℝ (E d →L[ℝ] E d) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (E d →L[ℝ] E d) := IsBoundedSMul.continuousSMul
   exact LinearMap.continuous_of_finiteDimensional
     ((LinearMap.trace ℝ (E d)).comp (ContinuousLinearMap.coeLM ℝ))
 
@@ -100,7 +101,7 @@ theorem tsupport_divergence_subset (ψ : E d → E d) : tsupport (divergence ψ)
 
 theorem fderivₓ_eq {ψ : E d × ℝ → E d} (hψ : Differentiable ℝ ψ) (p : E d × ℝ) :
     fderivₓ ψ p = (fderiv ℝ ψ p).comp (ContinuousLinearMap.inl ℝ (E d) ℝ) := by
-  haveI : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
   have h : HasFDerivAt (fun y ↦ ψ (y, p.2))
       ((fderiv ℝ ψ p).comp (ContinuousLinearMap.inl ℝ (E d) ℝ)) p.1 :=
     (hψ (p.1, p.2)).hasFDerivAt.comp p.1 (hasFDerivAt_prodMk_left p.1 p.2)

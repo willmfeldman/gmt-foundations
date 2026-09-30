@@ -10,7 +10,7 @@ The Lean files in this directory (`GMTFoundations/Vendor/Isoperimetric/`) are ve
 - License: Apache License, Version 2.0 (full text below)
 
 Upstream has no `NOTICE` file. Upstream targets Lean `v4.26.0-rc2`; the copies here were ported to
-Mathlib `v4.30.0`. Each file states, in the `## Provenance` section of its module docstring, the
+Mathlib `v4.30.0` and later updated to Mathlib `v4.34.1`. Each file states, in the `## Provenance` section of its module docstring, the
 upstream path it was copied from and the changes made during the port (Section 4(b) of the
 License). Declaration names are kept; all declarations were moved into the namespace
 `GMTFoundations.Vendor.Isoperimetric`. Only `Basic.lean`, `PrekopaLeindler.lean` and

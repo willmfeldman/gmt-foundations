@@ -10,7 +10,8 @@ public import GMTFoundations.Sobolev.LocalCompactness
 public import GMTFoundations.Sobolev.Rellich
 public import GMTFoundations.BV.TotalVariation
 public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.LinearAlgebra.FreeModule.PID
 import Mathlib.Topology.UniformSpace.Uniformizable
 import Mathlib.Analysis.Calculus.Gradient.Basic
@@ -60,21 +61,22 @@ variable {d : ℕ}
 
 theorem divergence_smul_const {φ : E d → ℝ} {x : E d} (hφ : DifferentiableAt ℝ φ x) (k : E d) :
     divergence (fun y ↦ φ y • k) x = fderiv ℝ φ x k := by
-  haveI : Module.Free ℝ (E d) := Module.Free.of_divisionRing ℝ (E d)
+  have : Module.Free ℝ (E d) := Module.Free.of_divisionRing ℝ (E d)
   rw [divergence, fderiv_smul_const hφ k]
   exact LinearMap.trace_smulRight _ _
 
 theorem divergence_smul {ζ : E d → ℝ} {ψ : E d → E d} {x : E d} (hζ : DifferentiableAt ℝ ζ x)
     (hψ : DifferentiableAt ℝ ψ x) :
     divergence (fun y ↦ ζ y • ψ y) x = ζ x * divergence ψ x + fderiv ℝ ζ x (ψ x) := by
-  haveI : Module.Free ℝ (E d) := Module.Free.of_divisionRing ℝ (E d)
-  rw [divergence, fderiv_fun_smul hζ hψ, ContinuousLinearMap.coe_add, LinearMap.map_add,
-    ContinuousLinearMap.coe_smul, LinearMap.map_smul, smul_eq_mul, divergence]
+  have : Module.Free ℝ (E d) := Module.Free.of_divisionRing ℝ (E d)
+  rw [divergence, fderiv_fun_smul hζ hψ, ContinuousLinearMap.toLinearMap_add, LinearMap.map_add,
+    ContinuousLinearMap.toLinearMap_smul, LinearMap.map_smul, smul_eq_mul, divergence]
   congr 1
   exact LinearMap.trace_smulRight _ _
 
 private theorem divergence_zero_apply (x : E d) : divergence (0 : E d → E d) x = 0 := by
-  rw [divergence, fderiv_zero, Pi.zero_apply, ContinuousLinearMap.coe_zero, LinearMap.map_zero]
+  rw [divergence, fderiv_zero, Pi.zero_apply, ContinuousLinearMap.toLinearMap_zero,
+    LinearMap.map_zero]
 
 /-! ### A smooth clamp -/
 
@@ -138,7 +140,7 @@ theorem integral_abs_le_of_forall_integral_mul_le {g : E d → ℝ}
       ∫ x, g x * φ x ≤ A) :
     ∫ x, |g x| ≤ A := by
   have hMg0 : 0 ≤ Mg := (abs_nonneg _).trans (hMg 0)
-  haveI : IsFiniteMeasure (volume.restrict S) := isFiniteMeasure_restrict.2 hS.measure_lt_top.ne
+  have : IsFiniteMeasure (volume.restrict S) := isFiniteMeasure_restrict.2 hS.measure_lt_top.ne
   have hgi : Integrable g volume := by
     have h1 : IntegrableOn g S := Measure.integrableOn_of_bounded hS.measure_lt_top.ne
       hg (Eventually.of_forall fun x ↦ (Real.norm_eq_abs _).symm ▸ hMg x)
@@ -165,12 +167,12 @@ theorem integral_abs_le_of_forall_integral_mul_le {g : E d → ℝ}
     filter_upwards [hg.ae_eq_mk] with x hx
     simp only [hs, indicator]
     by_cases hxS : x ∈ S
-    · rw [if_pos hxS]
+    · rw [ite_eq_left hxS]
       simp only [hs0]
       split_ifs with h
       · rw [mul_one, abs_of_nonneg (by rw [hx]; exact h)]
       · rw [abs_of_neg (by rw [hx]; exact not_le.1 h)]; ring
-    · rw [if_neg hxS, hgS x hxS]; simp
+    · rw [ite_eq_right hxS, hgS x hxS]; simp
   obtain ⟨K, hK⟩ := exists_lipschitzWith_clamp
   have hcs : ∀ x, clamp (s x) = s x := fun x ↦ by
     simp only [hs, indicator, hs0]; split_ifs <;> simp [clamp_zero, clamp_one, clamp_neg_one]
@@ -188,7 +190,8 @@ theorem integral_abs_le_of_forall_integral_mul_le {g : E d → ℝ}
     memLp_one_iff_integrable.1 (hsL1.sub (hφ₀.continuous.memLp_of_hasCompactSupport hφ₀c))
   have hsφr : ∫ x, |s x - φ₀ x| ≤ η := by
     have h1 := hφ₀s
-    rw [eLpNorm_one_eq_lintegral_enorm, ← ofReal_integral_norm_eq_lintegral_enorm hsφ] at h1
+    rw [eLpNorm_one_eq_lintegral_enorm hsφ.aestronglyMeasurable,
+      ← ofReal_integral_norm_eq_lintegral_enorm hsφ] at h1
     simpa [Real.norm_eq_abs] using (ENNReal.ofReal_le_ofReal_iff hη.le).1 h1
   have hgsi : Integrable (fun x ↦ g x * s x) volume :=
     hgi.mul_bdd (c := 1) hsm.aestronglyMeasurable
@@ -262,7 +265,7 @@ theorem abs_integral_comp_add_sub_mul_le_of_TV {w : E d → ℝ} (hw : LocallyIn
     have hψc : HasCompactSupport fun y ↦ φ (y - t • h) • k := (hφtc t).smul_right
     have hψ1 : ∀ y, ‖φ (y - t • h) • k‖ ≤ 1 := fun y ↦ by
       rw [norm_smul, Real.norm_eq_abs]
-      exact mul_le_one₀ (hφ1 _) (norm_nonneg _) hk
+      exact (mul_le_of_le_one_left (norm_nonneg _) (hφ1 _)).trans hk
     have := hTV _ hψ hψc hψ1
     convert this using 3 with y
     rw [divergence_smul_const, fderiv_comp_sub]
@@ -326,7 +329,8 @@ theorem integral_abs_comp_add_sub_le_of_TV {w : E d → ℝ} (hwm : AEStronglyMe
 
 theorem eLpNorm_one_eq_ofReal_integral_abs {g : E d → ℝ} (hg : Integrable g volume) :
     eLpNorm g 1 volume = ENNReal.ofReal (∫ x, |g x|) := by
-  rw [eLpNorm_one_eq_lintegral_enorm, ← ofReal_integral_norm_eq_lintegral_enorm hg]
+  rw [eLpNorm_one_eq_lintegral_enorm hg.aestronglyMeasurable,
+    ← ofReal_integral_norm_eq_lintegral_enorm hg]
   rfl
 
 /-- A function bounded on a compact `T`, a.e.-strongly measurable there, times a continuous
@@ -351,7 +355,7 @@ theorem exists_tendstoLpLoc_subseq_of_TV {U : Set (E d)} (hU : IsOpen U) (χ : �
       totalVariationOn V (χ n) ≤ ENNReal.ofReal P) :
     ∃ φ : ℕ → ℕ, StrictMono φ ∧ ∃ χ₀ : E d → ℝ, Measurable χ₀ ∧
       TendstoLpLoc 1 volume U (fun n ↦ χ (φ n)) χ₀ atTop := by
-  haveI : Fact ((1 : ℝ≥0∞) ≤ 1) := ⟨le_rfl⟩
+  have : Fact ((1 : ℝ≥0∞) ≤ 1) := ⟨le_rfl⟩
   obtain ⟨M₁, hM₁⟩ := hbdd
   set M := max M₁ 0
   have hM : ∀ n, ∀ x ∈ U, |χ n x| ≤ M := fun n x hx ↦ (hM₁ n x hx).trans (le_max_left _ _)
@@ -419,7 +423,7 @@ theorem exists_tendstoLpLoc_subseq_of_TV {U : Set (E d)} (hU : IsOpen U) (χ : �
       have htest : IsTVTestField V 1 ζψ := by
         refine ⟨hζψ, hζc.smul_right, hζψT.trans hTV', fun x ↦ ?_⟩
         simp only [ζψ, Pi.one_apply, norm_smul, Real.norm_eq_abs, abs_of_nonneg (hζ01 x).1]
-        exact mul_le_one₀ (hζ01 x).2 (norm_nonneg _) (hψ1 x)
+        exact (mul_le_of_le_one_left (norm_nonneg _) (hζ01 x).2).trans (hψ1 x)
       have hle : ENNReal.ofReal (∫ x in V, χ n x * divergence ζψ x) ≤ ENNReal.ofReal (max P 0) :=
         calc ENNReal.ofReal (∫ x in V, χ n x * divergence ζψ x)
             ≤ totalVariationOn V (χ n) := by

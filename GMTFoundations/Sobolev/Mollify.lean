@@ -14,7 +14,8 @@ public import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
 public import Mathlib.MeasureTheory.Function.ContinuousMapDense
 public import Mathlib.Analysis.Normed.Lp.SmoothApprox
 public import Mathlib.MeasureTheory.Integral.MeanInequalities
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
@@ -280,8 +281,10 @@ theorem eLpNorm_convolution_le {p : ℝ} (hp : 1 ≤ p) {ρ : E d → ℝ}
             ENNReal.rpow_le_rpow hol hp0.le
         _ = ∫⁻ t, ‖h t‖ₑ ^ p * ‖ρ (x - t)‖ₑ ∂volume := by
             rw [← ENNReal.rpow_mul, one_div, inv_mul_cancel₀ hp0.ne', ENNReal.rpow_one]
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hP0 hPtop,
-    eLpNorm_eq_lintegral_rpow_enorm_toReal hP0 hPtop, hPreal]
+  have hconvm : AEStronglyMeasurable (h ⋆[lsmul ℝ ℝ, volume] ρ) volume :=
+    hh.aestronglyMeasurable.convolution _ hρm
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hP0 hPtop hconvm,
+    eLpNorm_eq_lintegral_rpow_enorm_toReal hP0 hPtop hh.aestronglyMeasurable, hPreal]
   refine ENNReal.rpow_le_rpow ?_ (one_div_nonneg.mpr hp0.le)
   calc ∫⁻ x, ‖(h ⋆[lsmul ℝ ℝ, volume] ρ) x‖ₑ ^ p ∂volume
       ≤ ∫⁻ x, ∫⁻ t, ‖h t‖ₑ ^ p * ‖ρ (x - t)‖ₑ ∂volume ∂volume := lintegral_mono key
@@ -368,13 +371,16 @@ theorem tendsto_eLpNorm_bump_convolution_sub {p : ℝ} (hp : 1 ≤ p)
     have hcx : (((φ i).normed volume) ⋆[lsmul ℝ ℝ, volume] w) x = 0 :=
       Function.notMem_support.mp fun hxs ↦ hxS1 (hsuppconv hxs)
     rw [Pi.sub_apply, hwx, hcx, sub_zero]
+  have hdm : AEStronglyMeasurable ((((φ i).normed volume) ⋆[lsmul ℝ ℝ, volume] w) - w) volume :=
+    ((φ i).continuous_normed.aestronglyMeasurable.convolution _
+      hwc.aestronglyMeasurable).sub hwc.aestronglyMeasurable
   rw [hcomm]
   calc eLpNorm ((((φ i).normed volume) ⋆[lsmul ℝ ℝ, volume] w) - w) (ENNReal.ofReal p) volume
       = eLpNorm ((((φ i).normed volume) ⋆[lsmul ℝ ℝ, volume] w) - w)
           (ENNReal.ofReal p) (volume.restrict S1) :=
-        (eLpNorm_restrict_eq_of_support_subset hsupp).symm
+        (eLpNorm_restrict_eq_of_support_subset hdm hsupp).symm
     _ ≤ (volume.restrict S1) Set.univ ^ ((ENNReal.ofReal p).toReal⁻¹) * ENNReal.ofReal ε :=
-        eLpNorm_le_of_ae_bound (Eventually.of_forall fun x ↦ by
+        eLpNorm_le_of_ae_bound hdm.restrict (Eventually.of_forall fun x ↦ by
           rw [Pi.sub_apply, ← dist_eq_norm]; exact hpt x)
     _ = volume S1 ^ p⁻¹ * ENNReal.ofReal ε := by
         rw [Measure.restrict_apply_univ, ENNReal.toReal_ofReal hp0.le]
@@ -452,12 +458,12 @@ theorem tendsto_eLpNorm_convolution_sub {p : ℝ} (hp : 1 ≤ p)
       ≤ eLpNorm ((h - w) ⋆[lsmul ℝ ℝ, volume] ((φ i).normed volume)) (ENNReal.ofReal p) volume
         + eLpNorm ((w ⋆[lsmul ℝ ℝ, volume] ((φ i).normed volume) - w) + (w - h))
             (ENNReal.ofReal p) volume :=
-        eLpNorm_add_le ha1m (ha2m.add ha3m) hq1
+        eLpNorm_add_le hq1
     _ ≤ eLpNorm ((h - w) ⋆[lsmul ℝ ℝ, volume] ((φ i).normed volume)) (ENNReal.ofReal p) volume
         + (eLpNorm (w ⋆[lsmul ℝ ℝ, volume] ((φ i).normed volume) - w) (ENNReal.ofReal p) volume
           + eLpNorm (w - h) (ENNReal.ofReal p) volume) := by
         gcongr
-        exact eLpNorm_add_le ha2m ha3m hq1
+        exact eLpNorm_add_le hq1
     _ ≤ ENNReal.ofReal δ + (ENNReal.ofReal δ + ENNReal.ofReal δ) := by
         gcongr
     _ = η := by
@@ -495,7 +501,7 @@ theorem fderiv_convolution_indicator_eq {B : Set (E d)} (hB : MeasurableSet B)
     (ρ : ContDiffBump (0 : E d)) (v : E d) {x : E d} (hx : closedBall x ρ.rOut ⊆ B) :
     fderiv ℝ (B.indicator u ⋆[lsmul ℝ ℝ, volume] ρ.normed volume) x v =
       (B.indicator (fun y ↦ inner ℝ (G y) v) ⋆[lsmul ℝ ℝ, volume] ρ.normed volume) x := by
-  haveI : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
   set L := (lsmul ℝ ℝ : ℝ →L[ℝ] ℝ →L[ℝ] ℝ) with hL_def
   set k := ρ.normed volume with hk_def
   have hk_cs : HasCompactSupport k := ρ.hasCompactSupport_normed
@@ -516,7 +522,7 @@ theorem fderiv_convolution_indicator_eq {B : Set (E d)} (hB : MeasurableSet B)
       exact not_le.2 hy
     have h0 : fderiv ℝ k y = 0 :=
       Function.notMem_support.1 fun h ↦ this (support_fderiv_subset ℝ h)
-    rw [h0, ContinuousLinearMap.zero_apply]
+    rw [h0, zero_apply]
   have hderiv := hk_cs.hasFDerivAt_convolution_right (L := L) huB_li hk_cd1 x
   have step2 : fderiv ℝ (B.indicator u ⋆[L, volume] k) x v
       = (B.indicator u ⋆[L, volume] fun a ↦ fderiv ℝ k a v) x := by

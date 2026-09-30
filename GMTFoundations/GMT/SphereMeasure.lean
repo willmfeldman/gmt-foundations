@@ -7,7 +7,8 @@ module
 
 public import GMTFoundations.Defs.Setup
 import GMTFoundations.GMT.HausdorffLebesgue
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Measure.RegularityCompacts
 import Mathlib.Topology.EMetricSpace.Paracompact
 import Mathlib.Topology.UniformSpace.Uniformizable
@@ -201,7 +202,7 @@ lemma sphere_inter_closedBall_north {r : ℝ} (hr : 0 ≤ r) :
     sphere (0 : Rn (m + 1)) 1 ∩ closedBall north r = cap m (1 - r ^ 2 / 2) := by
   ext ω
   simp only [mem_inter_iff, mem_sphere_zero_iff_norm, mem_closedBall, dist_eq_norm, cap,
-    mem_setOf_eq]
+    mem_ofPred_eq]
   refine and_congr_right fun hω => ?_
   have h1 := norm_sq_eq_headCoords ω
   have h2 := norm_sq_eq_headCoords (ω - north)
@@ -351,7 +352,7 @@ lemma cone_subset_closedBall :
     (abs_le_of_sq_le_sq (by linarith [sq_nonneg ‖headCoords ω‖]) zero_le_one)
   have hhead : ‖headCoords ω‖ ≤ √(1 - h ^ 2) :=
     Real.le_sqrt_of_sq_le (by linarith [pow_le_pow_left₀ hh0.le hωh 2])
-  simp only [mem_setOf_eq, PiLp.smul_apply, smul_eq_mul, headCoords_smul,
+  simp only [mem_ofPred_eq, PiLp.smul_apply, smul_eq_mul, headCoords_smul,
     mem_closedBall_zero_iff, norm_smul, Real.norm_eq_abs, abs_of_pos ha0, mem_Ioo]
   refine ⟨⟨mul_pos ha0 (hh0.trans_le hωh), (mul_le_of_le_one_right ha0.le hωn).trans_lt ha1⟩, ?_⟩
   rw [div_mul_eq_mul_div, le_div_iff₀ hh0]
@@ -638,8 +639,8 @@ lemma eventually_mul_closedBall_le (h02 : hausdorffN m m = (volume : Measure (Rn
 /-- The sphere measure is `ℋ^m⌊S^m` in `ℝ^{m+1}`, given `ℋ^m = ℒ^m` on `ℝ^m`. -/
 theorem sigmaN_eq_tauN (h02 : hausdorffN m m = (volume : Measure (Rn m))) :
     sigmaN m = tauN m := by
-  haveI := isLocallyFiniteMeasure_tauN h02
-  haveI : IsFiniteMeasure (sphereMeasure (m + 1)) := by unfold sphereMeasure; infer_instance
+  have := isLocallyFiniteMeasure_tauN h02
+  have : IsFiniteMeasure (sphereMeasure (m + 1)) := by unfold sphereMeasure; infer_instance
   refine le_antisymm (le_of_frequently_mul_closedBall_le fun a ha x => ?_)
     (le_of_frequently_mul_closedBall_le fun a ha x => ?_)
   · exact ((eventually_mul_closedBall_le h02 ha x).mono fun _ h => h.1).frequently

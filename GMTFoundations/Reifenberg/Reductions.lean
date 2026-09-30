@@ -12,7 +12,8 @@ public import GMTFoundations.GMT.Packing
 import GMTFoundations.GMT.Polar
 import Mathlib.Algebra.Order.Ring.Star
 import Mathlib.Analysis.Complex.ExponentialBounds
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.EMetricSpace.Paracompact
 import Mathlib.Topology.Separation.CompletelyRegular
 
@@ -504,7 +505,7 @@ theorem pow_roundLevel_le {ρ r : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hr : 0 <
     ρ ^ roundLevel ρ r ≤ r := by
   have h := exists_pow_le_of_pos hρ0 hρ1 hr
   unfold roundLevel
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact (Nat.find_spec h).2
 
 /-- **R1** (ii): for `r ≤ 2`, `r ≤ (2/ρ) ρ^{m(r)}`. -/
@@ -512,7 +513,7 @@ theorem le_pow_roundLevel {ρ r : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hr : 0 <
     r ≤ 2 / ρ * ρ ^ roundLevel ρ r := by
   have h := exists_pow_le_of_pos hρ0 hρ1 hr
   unfold roundLevel
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   have hm1 : 1 ≤ Nat.find h := (Nat.find_spec h).1
   rcases eq_or_lt_of_le hm1 with h1 | h1
   · rw [← h1, pow_one, div_mul_cancel₀ _ hρ0.ne']
@@ -824,7 +825,7 @@ theorem miskiewiczBound_of_claimOne (hn : 1 ≤ n) {ρ CM : ℝ} {M : ℝ → �
     refine ⟨fun z => if hz : ∃ i ∈ S₁, x i = z then roundLevel ρ (r hz.choose) else 1,
       fun i hi => ?_⟩
     have hz : ∃ i' ∈ S₁, x i' = x i := ⟨i, hi, rfl⟩
-    simp only [dif_pos hz]
+    simp only [dite_eq_left hz]
     rw [hinj₁ hz.choose_spec.1 hi hz.choose_spec.2]
   set Z := S₁.image x
   have hμ' : levMeasure ρ Z lev = ballFamilyMeasure S₁ x fun i => ρ ^ roundLevel ρ (r i) := by

@@ -12,7 +12,8 @@ public import Mathlib.MeasureTheory.Function.LocallyIntegrable
 public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 public import Mathlib.Analysis.InnerProductSpace.Calculus
 public import Mathlib.Analysis.Calculus.Gradient.Basic
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
@@ -149,7 +150,7 @@ theorem exists_cutoff (z : E d) {s t : ℝ} (hs : 0 ≤ s) (hst : s < t) :
     exact ⟨image_eq_zero_of_notMem_tsupport hxt, gradient_eq_zero_of_notMem_tsupport hxt⟩
   · exact (isCompact_closedBall z m).of_isClosed_subset (isClosed_tsupport _) htsupp
   · by_cases hx : x ∈ ball z t
-    · haveI : ContinuousSMul ℝ (E d) := inferInstance
+    · have : ContinuousSMul ℝ (E d) := inferInstance
       rw [norm_gradient_eq]
       have hd1 := ((hasFDerivAt_id x).sub_const z).norm_sq
       set L : E d →L[ℝ] ℝ := 2 • (innerSL ℝ (x - z)).comp (ContinuousLinearMap.id ℝ (E d))

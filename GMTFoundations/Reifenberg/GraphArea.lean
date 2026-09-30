@@ -8,7 +8,8 @@ module
 public import GMTFoundations.Reifenberg.ReifenbergMap
 import GMTFoundations.GMT.Basic
 import GMTFoundations.GMT.HausdorffLebesgue
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Area bounds for plane pieces, graphs and Reifenberg maps
@@ -205,7 +206,7 @@ theorem hausdorffN_le_of_le_mul_dist (k : ℕ) {σ : Rn n → Rn n} {A : Set (Rn
     hausdorffN n k A ≤ (L : ℝ≥0∞) ^ k * hausdorffN n k (σ '' A) := by
   rcases A.eq_empty_or_nonempty with rfl | ⟨a₀, ha₀⟩
   · simp
-  haveI : Nonempty (Rn n) := ⟨a₀⟩
+  have : Nonempty (Rn n) := ⟨a₀⟩
   have hinj : InjOn σ A := fun a ha b hb hab => by
     have := h a ha b hb
     rw [hab, dist_self, mul_zero] at this

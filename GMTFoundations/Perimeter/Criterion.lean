@@ -115,7 +115,7 @@ theorem subset_iUnion_lowDensitySet (A : Set (Rn n)) {c : ℝ≥0∞} (hc : c �
   obtain ⟨k, hk⟩ := exists_nat_one_div_lt (mem_Ioi.1 hδ)
   refine mem_iUnion.2 ⟨k, fun ρ hρ hρk => ?_⟩
   have := hδU ⟨hρ, hρk.trans (by simpa [one_div] using hk)⟩
-  simp only [mem_setOf_eq] at this
+  simp only [mem_ofPred_eq] at this
   rwa [ENNReal.div_le_iff (ENNReal.ofReal_pos.2 (pow_pos hρ n)).ne' ENNReal.ofReal_ne_top] at this
 
 /-- `G(k) ∩ H(k) = ∅` when `2c < |B_1|`. -/
@@ -131,9 +131,9 @@ theorem disjoint_lowDensitySet (A : Set (Rn n)) {c : ℝ≥0∞}
     rw [Measure.addHaar_ball_of_pos volume x hρ, finrank_euclideanSpace_fin]
   have hle : volume (ball x ρ) ≤ ENNReal.ofReal (ρ ^ n) * (2 * c) :=
     calc volume (ball x ρ) ≤ volume (ball x ρ ∩ A) + volume (ball x ρ \ A) :=
-          measure_le_inter_add_diff _ _ _
+          measure_le_inter_add_sdiff _ _ _
       _ = volume (A ∩ ball x ρ) + volume (Aᶜ ∩ ball x ρ) := by
-          rw [inter_comm, diff_eq, inter_comm (ball x ρ)]
+          rw [inter_comm, sdiff_eq, inter_comm (ball x ρ)]
       _ ≤ c * ENNReal.ofReal (ρ ^ n) + c * ENNReal.ofReal (ρ ^ n) :=
           add_le_add (h1 ρ hρ hρk) (h2 ρ hρ hρk)
       _ = ENNReal.ofReal (ρ ^ n) * (2 * c) := by ring
@@ -374,28 +374,28 @@ theorem ae_line_dichotomy {E : Set (Rn (m + 1))} (hE : NullMeasurableSet E volum
     intro k t ht ε hε
     obtain ⟨l, hl⟩ := hℓε ε hε
     have hnot : L t ∉ Gp k l := fun hmem => (hzR k l).1.1.1 ⟨L t, hmem, hLproj t⟩
-    simp only [Gp, mem_setOf_eq, not_and, not_forall] at hnot
+    simp only [Gp, mem_ofPred_eq, not_and, not_forall] at hnot
     obtain ⟨s, hs, hsl, hsO⟩ := hnot ht
     exact ⟨t + s, ⟨by linarith, by linarith⟩, by simpa [Oz, hLadd] using hsO⟩
   have hGl : ∀ k, ∀ t ∈ Gz k, ∀ ε > 0, ∃ y ∈ Ioo (t - ε) t, y ∉ Oz := by
     intro k t ht ε hε
     obtain ⟨l, hl⟩ := hℓε ε hε
     have hnot : L t ∉ Gm k l := fun hmem => (hzR k l).1.1.2 ⟨L t, hmem, hLproj t⟩
-    simp only [Gm, mem_setOf_eq, not_and, not_forall] at hnot
+    simp only [Gm, mem_ofPred_eq, not_and, not_forall] at hnot
     obtain ⟨s, hs, hsl, hsO⟩ := hnot ht
     exact ⟨t - s, ⟨by linarith, by linarith⟩, by simpa [Oz, hLsub] using hsO⟩
   have hHr : ∀ k, ∀ t ∈ Hz k, ∀ ε > 0, ∃ y ∈ Ioo t (t + ε), y ∉ Iz := by
     intro k t ht ε hε
     obtain ⟨l, hl⟩ := hℓε ε hε
     have hnot : L t ∉ Hp k l := fun hmem => (hzR k l).1.2 ⟨L t, hmem, hLproj t⟩
-    simp only [Hp, compl_compl, mem_setOf_eq, not_and, not_forall] at hnot
+    simp only [Hp, compl_compl, mem_ofPred_eq, not_and, not_forall] at hnot
     obtain ⟨s, hs, hsl, hsI⟩ := hnot ht
     exact ⟨t + s, ⟨by linarith, by linarith⟩, by simpa [Iz, hLadd] using hsI⟩
   have hHl : ∀ k, ∀ t ∈ Hz k, ∀ ε > 0, ∃ y ∈ Ioo (t - ε) t, y ∉ Iz := by
     intro k t ht ε hε
     obtain ⟨l, hl⟩ := hℓε ε hε
     have hnot : L t ∉ Hm k l := fun hmem => (hzR k l).2 ⟨L t, hmem, hLproj t⟩
-    simp only [Hm, compl_compl, mem_setOf_eq, not_and, not_forall] at hnot
+    simp only [Hm, compl_compl, mem_ofPred_eq, not_and, not_forall] at hnot
     obtain ⟨s, hs, hsl, hsI⟩ := hnot ht
     exact ⟨t - s, ⟨by linarith, by linarith⟩, by simpa [Iz, hLsub] using hsI⟩
   -- `U` is an interval on the line

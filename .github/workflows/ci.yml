@@ -28,6 +28,7 @@ jobs:
           key: lake-build-${{ runner.os }}-${{ hashFiles('lake-manifest.json', 'lean-toolchain') }}-${{ hashFiles('GMTFoundations.lean', 'GMTFoundations/**/*.lean') }}
           restore-keys: |
             lake-build-${{ runner.os }}-${{ hashFiles('lake-manifest.json', 'lean-toolchain') }}-
+            lake-build-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-
       - name: Fetch mathlib cache
         run: lake exe cache get
       # Warnings are errors: the release gate requires a warning-free build.

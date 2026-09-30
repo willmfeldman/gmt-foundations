@@ -254,7 +254,7 @@ theorem par_spec {i : ℕ} (hi : D.j ≤ i) {y : Rn n} (hy : y ∈ D.avail i (D.
       |⟪y - (D.V i (D.par i y)).1, (D.V i (D.par i y)).2⟫| < D.ρ ^ (i + 1) / 4 := by
   classical
   have h := exists_parent hi hy
-  rw [par, dif_pos h]
+  rw [par, dite_eq_left h]
   exact h.choose_spec
 
 theorem tilt_nonneg (i : ℕ) (y : Rn n) : 0 ≤ D.tilt i y := NNReal.coe_nonneg _
@@ -283,10 +283,10 @@ theorem tilt_le {i : ℕ} {y : Rn n} {η : ℝ} (hη : 0 ≤ η)
 theorem d1_of_le {i : ℕ} (hi : i ≤ D.j) (y : Rn n) : D.d1 i y = 0 := by
   cases i with
   | zero => rfl
-  | succ i => simp only [d1]; rw [if_neg (by omega)]
+  | succ i => simp only [d1]; rw [ite_eq_right (by omega)]
 
 theorem d1_succ {i : ℕ} (hi : D.j ≤ i) (y : Rn n) : D.d1 (i + 1) y = D.tilt i y := by
-  simp only [d1]; rw [if_pos hi]
+  simp only [d1]; rw [ite_eq_left hi]
 
 theorem d1_nonneg (i : ℕ) (y : Rn n) : 0 ≤ D.d1 i y := by
   cases i with
@@ -302,10 +302,10 @@ theorem sigma_eq (i : ℕ) : D.sigma i = reifenbergMap (D.ρ ^ i) (D.good i) (D.
 theorem surf_of_le {i : ℕ} (hi : i ≤ D.j) : D.surf i = affPlane (D.V D.j D.p) := by
   cases i with
   | zero => rfl
-  | succ i => simp only [surf]; rw [if_pos hi]
+  | succ i => simp only [surf]; rw [ite_eq_left hi]
 
 theorem surf_succ {i : ℕ} (hi : D.j ≤ i) : D.surf (i + 1) = D.sigma (i + 1) '' D.surf i := by
-  simp only [surf]; rw [if_neg (by omega)]
+  simp only [surf]; rw [ite_eq_right (by omega)]
 
 theorem delta0_nonneg (i : ℕ) (y : Rn n) (hρ : 0 < D.ρ) : 0 ≤ D.delta0 i y := by
   unfold delta0
@@ -397,7 +397,7 @@ theorem stepHyp {i : ℕ} (hi : D.j ≤ i) (hc : D.ChartInv i) :
     have hex := hc z hz
     have hspec : IsChart (D.surf i) (D.V i z) (D.chartFn i z) z (5 / 2 * D.ρ ^ i) (D.ρ ^ i)
         (6 * C_sq n * D.d1 i z) := by
-      rw [chartFn, dif_pos hex]
+      rw [chartFn, dite_eq_left hex]
       exact hex.choose_spec
     have hρ := h.ρ_pos
     have hri := h.pow_pos i

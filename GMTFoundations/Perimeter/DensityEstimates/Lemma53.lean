@@ -13,7 +13,8 @@ import GMTFoundations.Perimeter.Poincare
 import GMTFoundations.GMT.Polar
 import GMTFoundations.BV.TotalVariation
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Function.L2Space
 import Mathlib.Topology.UniformSpace.Uniformizable
 
@@ -268,7 +269,6 @@ theorem pow_le_of_rpow_le_mul_integral {n : ℕ} (hn : 1 ≤ n) {g F : ℝ → �
         linarith)
       (right_mem_Icc.2 hε.2.le)
     have hhε := hhpos ε (hsub (left_mem_Icc.2 hε.2.le))
-    simp only at key
     linarith
   -- Step 5: `ε → 0`.
   intro r hr
@@ -414,7 +414,7 @@ theorem IsGaussGreenPair.exists_ae_measure_ball_le_sphereIntegral [NeZero n]
   -- `μ(B_r)/2 < ⟪v, ∫ ν⟫ = -(sphere term) ≤ F(r)`.
   have hm : 0 < (μ (ball x r)).toReal := ENNReal.toReal_pos (hpos r hr0).ne' hμfin.ne
   have h12 := hr₁s ⟨hr0, hrr₁⟩
-  simp only [mem_setOf_eq, real_inner_smul_right] at h12
+  simp only [mem_ofPred_eq, real_inner_smul_right] at h12
   rw [lt_inv_mul_iff₀ hm] at h12
   have := neg_abs_le (sphereIntegral (fun y => E.indicator 1 y * ⟪φ y, r⁻¹ • (y - x)⟫) x r)
   linarith
@@ -435,7 +435,7 @@ theorem IsGaussGreenPair.exists_forall_measure_ball_le (hn : 1 ≤ n)
       (𝓝 v)) :
     ∃ r₀ > 0, ∀ r, 0 < r → r < r₀ →
       μ (ball x r) ≤ ENNReal.ofReal (densityConstA₄ n * r ^ (n - 1)) := by
-  haveI : NeZero n := ⟨by omega⟩
+  have : NeZero n := ⟨by omega⟩
   obtain ⟨r₀, hr₀, hr₀Ω, hae⟩ :=
     h.exists_ae_measure_ball_le_sphereIntegral hΩ hE hx hpos hv hlim
   refine ⟨r₀, hr₀, fun r hr hrr₀ => ?_⟩
@@ -461,7 +461,7 @@ theorem IsGaussGreenPair.exists_forall_volume_inter_ball_ge (hn : 2 ≤ n)
       (𝓝 v)) :
     ∃ r₀ > 0, closedBall x r₀ ⊆ Ω ∧ ∀ r, 0 < r → r < r₀ →
       ENNReal.ofReal (densityConstA₁ n * r ^ n) ≤ volume (E ∩ ball x r) := by
-  haveI : NeZero n := ⟨by omega⟩
+  have : NeZero n := ⟨by omega⟩
   obtain ⟨r₀, hr₀, hr₀Ω, hae⟩ :=
     h.exists_ae_measure_ball_le_sphereIntegral hΩ hE hx hpos hv hlim
   refine ⟨r₀, hr₀, hr₀Ω, fun r hr hrr₀ => ?_⟩
@@ -541,7 +541,7 @@ theorem IsGaussGreenPair.exists_forall_volume_ball_diff_ge (hn : 2 ≤ n)
   obtain ⟨r₀, hr₀, hr₀Ω, hb⟩ := (h.compl hE).exists_forall_volume_inter_ball_ge hn hΩ hE.compl
     hx hpos (by rwa [norm_neg]) hlim'
   refine ⟨r₀, hr₀, hr₀Ω, fun r hr hrr₀ => ?_⟩
-  rw [diff_eq_compl_inter]
+  rw [sdiff_eq_compl_inter]
   exact hb r hr hrr₀
 
 /-- **EG Lemma 5.3 (iii)**. At a reduced-boundary point `x` (for the pair

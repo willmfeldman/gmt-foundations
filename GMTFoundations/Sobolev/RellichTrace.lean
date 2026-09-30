@@ -13,8 +13,8 @@ import GMTFoundations.Sobolev.Rellich
 import GMTFoundations.Sobolev.WeakL2
 import GMTFoundations.Sobolev.L2Inner
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.Hom
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
@@ -62,7 +62,7 @@ outside `K` is integrable. -/
 private lemma integrable_of_bound_of_isCompact {g : Rn n → ℝ} {K : Set (Rn n)} (hK : IsCompact K)
     (hgm : AEStronglyMeasurable g (volume.restrict K)) (C : ℝ) (hC : ∀ x ∈ K, ‖g x‖ ≤ C)
     (h0 : ∀ x ∉ K, g x = 0) : Integrable g := by
-  haveI : IsFiniteMeasure (volume.restrict K) := isFiniteMeasure_restrict.2 hK.measure_lt_top.ne
+  have : IsFiniteMeasure (volume.restrict K) := isFiniteMeasure_restrict.2 hK.measure_lt_top.ne
   have : IntegrableOn g K :=
     (MemLp.of_bound hgm C ((ae_restrict_mem hK.measurableSet).mono hC)).integrable le_top
   exact this.integrable_of_forall_notMem_eq_zero h0
@@ -142,9 +142,9 @@ section L2
 variable {α F : Type*} [MeasurableSpace α] [NormedAddCommGroup F] {μ : Measure α}
 
 /-- `‖g‖²_{L²} = ∫ |g|²`, as extended reals. -/
-private lemma sq_eLpNorm_two (g : α → F) :
+private lemma sq_eLpNorm_two (g : α → F) (hg : AEStronglyMeasurable g μ) :
     eLpNorm g 2 μ ^ 2 = ∫⁻ x, ENNReal.ofReal (‖g x‖ ^ 2) ∂μ := by
-  have h := eLpNorm_nnreal_pow_eq_lintegral (f := g) (μ := μ) (p := 2) two_ne_zero
+  have h := eLpNorm_nnreal_pow_eq_lintegral (f := g) (μ := μ) (p := 2) two_ne_zero hg
   have e1 : ((2 : ℝ≥0) : ℝ≥0∞) = 2 := rfl
   have e2 : ((2 : ℝ≥0) : ℝ) = 2 := by norm_num
   rw [e1, e2, ENNReal.rpow_two] at h
@@ -153,16 +153,16 @@ private lemma sq_eLpNorm_two (g : α → F) :
   rw [ENNReal.rpow_two, ← ofReal_norm, ENNReal.ofReal_pow (norm_nonneg _)]
 
 /-- `‖g‖²_{L²} = ∫ g²` for real `g`, as extended reals. -/
-private lemma sq_eLpNorm_two_real (g : α → ℝ) :
+private lemma sq_eLpNorm_two_real (g : α → ℝ) (hg : AEStronglyMeasurable g μ) :
     eLpNorm g 2 μ ^ 2 = ∫⁻ x, ENNReal.ofReal (g x ^ 2) ∂μ := by
-  rw [sq_eLpNorm_two]
+  rw [sq_eLpNorm_two _ hg]
   simp_rw [Real.norm_eq_abs, sq_abs]
 
 /-- `∫ g² = ‖g‖²_{L²}` for real `g`. -/
 private lemma integral_sq_eq (g : α → ℝ) (hg : AEStronglyMeasurable g μ) :
     ∫ x, g x ^ 2 ∂μ = (eLpNorm g 2 μ).toReal ^ 2 := by
   rw [integral_eq_lintegral_of_nonneg_ae (ae_of_all _ fun x => sq_nonneg _) (hg.pow 2),
-    ← sq_eLpNorm_two_real, ENNReal.toReal_pow]
+    ← sq_eLpNorm_two_real _ hg, ENNReal.toReal_pow]
 
 /-- From `a² ≤ C` to `a ≤ √C`. -/
 private lemma le_ofReal_sqrt {a : ℝ≥0∞} {C : ℝ} (hC : 0 ≤ C) (h : a ^ 2 ≤ ENNReal.ofReal C) :
@@ -177,12 +177,13 @@ private lemma exists_memLp_tendsto_integral_sq (f : ℕ → α → ℝ) (hf : �
     (hc : ∀ ε : ℝ, 0 < ε → ∃ N, ∀ j ≥ N, ∀ k ≥ N,
       ∫⁻ x, ENNReal.ofReal ((f j x - f k x) ^ 2) ∂μ ≤ ENNReal.ofReal ε) :
     ∃ F : α → ℝ, MemLp F 2 μ ∧ Tendsto (fun k => ∫ x, (f k x - F x) ^ 2 ∂μ) atTop (𝓝 0) := by
-  haveI : Fact ((1 : ℝ≥0∞) ≤ 2) := ⟨by norm_num⟩
+  have : Fact ((1 : ℝ≥0∞) ≤ 2) := ⟨by norm_num⟩
   set v : ℕ → Lp ℝ 2 μ := fun k => (hf k).toLp (f k) with hvdef
   have hdist : ∀ j k, dist (v j) (v k) ^ 2 =
       (∫⁻ x, ENNReal.ofReal ((f j x - f k x) ^ 2) ∂μ).toReal := by
     intro j k
-    rw [Lp.dist_def, ← ENNReal.toReal_pow, sq_eLpNorm_two_real]
+    rw [Lp.dist_def, ← ENNReal.toReal_pow,
+      sq_eLpNorm_two_real _ ((Lp.aestronglyMeasurable _).sub (Lp.aestronglyMeasurable _))]
     congr 1
     refine lintegral_congr_ae ?_
     filter_upwards [(hf j).coeFn_toLp, (hf k).coeFn_toLp] with x h1 h2
@@ -218,7 +219,9 @@ private lemma tendsto_integral_mul {u : ℕ → α → ℝ} {F d : α → ℝ} (
   have hint : ∀ {g : α → ℝ}, MemLp g 2 μ → Integrable (fun x => g x * d x) μ := fun hg => by
     simpa only [Real.inner_apply] using integrable_inner_of_memLp hg hd
   have hsq : Tendsto (fun k => √(∫ x, (u k x - F x) ^ 2 ∂μ)) atTop (𝓝 0) := by
-    simpa using (Real.continuous_sqrt.tendsto 0).comp h
+    have h' : Tendsto (fun k => √(∫ x, (u k x - F x) ^ 2 ∂μ)) atTop (𝓝 √0) :=
+      (Real.continuous_sqrt.tendsto 0).comp h
+    simpa using h'
   refine tendsto_iff_norm_sub_tendsto_zero.2 (squeeze_zero (fun k => norm_nonneg _)
     (fun k => ?_) (by simpa using hsq.mul_const (eLpNorm d 2 μ).toReal))
   have hdiff : MemLp (fun x => u k x - F x) 2 μ := (hu k).sub hF
@@ -227,7 +230,7 @@ private lemma tendsto_integral_mul {u : ℕ → α → ℝ} {F d : α → ℝ} (
     congr 1; funext x; ring
   rw [e]
   refine (abs_integral_mul_le_L2 hdiff hd).trans (le_of_eq ?_)
-  rw [integral_sq_eq _ hdiff.1, Real.sqrt_sq ENNReal.toReal_nonneg]
+  rw [integral_sq_eq _ hdiff.aestronglyMeasurable, Real.sqrt_sq ENNReal.toReal_nonneg]
 
 end L2
 
@@ -261,7 +264,7 @@ private lemma ball_facts {f : Rn n → ℝ} {K : ℝ≥0} (hf : LipschitzOnWith 
       MemLp (gradient f) 2 (volume.restrict (ball (0 : Rn n) 1)) ∧
       ∫⁻ y in ball (0 : Rn n) 1, ENNReal.ofReal (f y ^ 2) ≤ ENNReal.ofReal C ∧
       ∫⁻ y in ball (0 : Rn n) 1, ENNReal.ofReal (‖gradient f y‖ ^ 2) ≤ ENNReal.ofReal C := by
-  haveI : IsFiniteMeasure (volume.restrict (ball (0 : Rn n) 1)) :=
+  have : IsFiniteMeasure (volume.restrict (ball (0 : Rn n) 1)) :=
     isFiniteMeasure_restrict.2 measure_ball_lt_top.ne
   obtain ⟨M, hM⟩ := (isCompact_closedBall (0 : Rn n) 1).exists_bound_of_continuousOn
     hf.continuousOn
@@ -279,7 +282,7 @@ private lemma ball_facts {f : Rn n → ℝ} {K : ℝ≥0} (hf : LipschitzOnWith 
       ((ae_restrict_mem measurableSet_ball).mono hgb)
   have hint : Integrable (fun y => f y ^ 2 + ‖gradient f y‖ ^ 2)
       (volume.restrict (ball (0 : Rn n) 1)) :=
-    hf2.integrable_sq.add ((memLp_two_iff_integrable_sq_norm hg2.1).1 hg2)
+    hf2.integrable_sq.add ((memLp_two_iff_integrable_sq_norm hg2.aestronglyMeasurable).1 hg2)
   have hle : ∫⁻ y in ball (0 : Rn n) 1, ENNReal.ofReal (f y ^ 2 + ‖gradient f y‖ ^ 2) ≤
       ENNReal.ofReal C := by
     rw [← ofReal_integral_eq_lintegral_ofReal hint (ae_of_all _ fun y => by positivity)]
@@ -382,7 +385,7 @@ private lemma annulus_density_le {g : Rn n → ℝ} {lam : ℝ} (hlam : 0 < lam)
         rw [lintegral_add_right' _ hm, lintegral_const_mul' _ _ ENNReal.ofReal_ne_top,
           lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
     _ ≤ _ := by
-        gcongr <;> exact diff_subset
+        gcongr <;> exact sdiff_subset
 
 /-- The traces of a function Lipschitz on the closed ball are in `L²(σ)`. -/
 private lemma memLp_sphere {f : Rn n → ℝ} {K : ℝ≥0} (hf : LipschitzOnWith K f (closedBall 0 1)) :
@@ -398,7 +401,7 @@ private lemma memLp_sphere {f : Rn n → ℝ} {K : ℝ≥0} (hf : LipschitzOnWit
 private lemma memLp_two_ball {F : Type*} [NormedAddCommGroup F] {g : Rn n → F}
     (hc : Continuous g) (hs : HasCompactSupport g) :
     MemLp g 2 (volume.restrict (ball (0 : Rn n) 1)) := by
-  haveI : IsFiniteMeasure (volume.restrict (ball (0 : Rn n) 1)) :=
+  have : IsFiniteMeasure (volume.restrict (ball (0 : Rn n) 1)) :=
     isFiniteMeasure_restrict.2 measure_ball_lt_top.ne
   obtain ⟨M, hM⟩ := hc.bounded_above_of_compact_support hs
   exact MemLp.of_bound hc.aestronglyMeasurable M (ae_of_all _ hM)
@@ -435,15 +438,17 @@ theorem rellich_trace_weak_compactness [NeZero n] :
     RellichTraceStatement n := by
   intro f C hLip hbd
   choose L hL using hLip
-  haveI : IsFiniteMeasure (volume.restrict (ball (0 : Rn n) 1)) :=
+  have : IsFiniteMeasure (volume.restrict (ball (0 : Rn n) 1)) :=
     isFiniteMeasure_restrict.2 measure_ball_lt_top.ne
   have hC0 : 0 ≤ C := (integral_nonneg fun y => by positivity).trans (hbd 0)
   have hfacts := fun k => ball_facts (hL k) (hbd k)
   have hfL2 : ∀ k, eLpNorm (f k) 2 (volume.restrict (ball (0 : Rn n) 1)) ≤ ENNReal.ofReal √C :=
-    fun k => le_ofReal_sqrt hC0 (by rw [sq_eLpNorm_two_real]; exact (hfacts k).2.2.1)
+    fun k => le_ofReal_sqrt hC0 (by
+      rw [sq_eLpNorm_two_real _ (hfacts k).1.aestronglyMeasurable]; exact (hfacts k).2.2.1)
   have hgL2 : ∀ k, eLpNorm (gradient (f k)) 2 (volume.restrict (ball (0 : Rn n) 1)) ≤
       ENNReal.ofReal √C :=
-    fun k => le_ofReal_sqrt hC0 (by rw [sq_eLpNorm_two]; exact (hfacts k).2.2.2)
+    fun k => le_ofReal_sqrt hC0 (by
+      rw [sq_eLpNorm_two _ (hfacts k).2.1.aestronglyMeasurable]; exact (hfacts k).2.2.2)
   -- Step 2: `L²_loc(B₁)` convergence (local Rellich on the open ball).
   obtain ⟨φ₁, hφ₁, u₀, hu₀, hconv⟩ := exists_tendstoLpLoc_subseq_of_H1Loc isOpen_ball f
     (fun k => gradient (f k))
@@ -489,11 +494,11 @@ theorem rellich_trace_weak_compactness [NeZero n] :
         funext y; simp [hgdef]
       have hle : eLpNorm g 2 (volume.restrict K) ≤ ENNReal.ofReal (2 * η) := by
         rw [hsplit]
-        refine (eLpNorm_sub_le (hm j) (hm k) (by norm_num)).trans
+        refine (eLpNorm_sub_le (by norm_num)).trans
           ((add_le_add (hN j hj) (hN k hk)).trans_eq ?_)
         rw [← ENNReal.ofReal_add hη0.le hη0.le]
         ring_nf
-      rw [← sq_eLpNorm_two_real]
+      rw [← sq_eLpNorm_two_real _ (by rw [hsplit]; exact (hm j).sub (hm k))]
       calc eLpNorm g 2 (volume.restrict K) ^ 2 ≤ ENNReal.ofReal (2 * η) ^ 2 :=
             pow_le_pow_left₀ bot_le hle 2
         _ = ENNReal.ofReal ((2 * η) ^ 2) := (ENNReal.ofReal_pow (by positivity) 2).symm
@@ -522,7 +527,7 @@ theorem rellich_trace_weak_compactness [NeZero n] :
         _ ≤ ENNReal.ofReal (ε / 2) := ENNReal.ofReal_le_ofReal hδε
     calc ∫⁻ y in ball (0 : Rn n) 1, ENNReal.ofReal ((f (φ₁ j) y - f (φ₁ k) y) ^ 2)
         = ∫⁻ y in K ∪ (ball 0 1 \ K), ENNReal.ofReal (g y ^ 2) := by
-          rw [union_diff_cancel hKsub]
+          rw [union_sdiff_cancel hKsub]
       _ ≤ (∫⁻ y in K, ENNReal.ofReal (g y ^ 2)) +
           ∫⁻ y in ball 0 1 \ K, ENNReal.ofReal (g y ^ 2) := lintegral_union_le _ _ _
       _ ≤ ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) := add_le_add hKpart hshell

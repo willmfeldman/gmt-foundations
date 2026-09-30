@@ -8,7 +8,8 @@ module
 public import GMTFoundations.Perimeter.EssentialBoundary
 public import GMTFoundations.GMT.FlatPiece
 import GMTFoundations.Reifenberg.Exhaustion
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # The cone condition and Lipschitz graphs (EG Thm 5.15 step 3)
@@ -54,7 +55,7 @@ variable {n : ℕ}
 theorem IsCountablyRectifiable.mono {k : ℕ} {S T : Set (Rn n)} (h : IsCountablyRectifiable n k T)
     (hST : S ⊆ T) : IsCountablyRectifiable n k S := by
   obtain ⟨f, hf, h0⟩ := h
-  exact ⟨f, hf, measure_mono_null (diff_subset_diff_left hST) h0⟩
+  exact ⟨f, hf, measure_mono_null (sdiff_subset_sdiff_left hST) h0⟩
 
 /-- Countable rectifiability from a cover indexed by any countable type. -/
 theorem IsCountablyRectifiable.of_countable {k : ℕ} {ι : Type*} [Countable ι] {S : Set (Rn n)}
@@ -66,7 +67,7 @@ theorem IsCountablyRectifiable.of_countable {k : ℕ} {ι : Type*} [Countable ι
     rcases h : e m with _ | i
     · exact ⟨0, by simp [Option.elim]⟩
     · simpa [Option.elim] using hf i
-  · refine diff_subset_diff_right (iUnion_subset fun i => ?_)
+  · refine sdiff_subset_sdiff_right (iUnion_subset fun i => ?_)
     obtain ⟨m, hm⟩ := he (some i)
     refine (subset_of_eq ?_).trans (subset_iUnion _ m)
     simp [hm]
@@ -159,7 +160,7 @@ theorem abs_inner_le_of_uniform_halfSpace (hn : 1 ≤ n) {E K : Set (Rn n)} {ν 
       · rintro z ⟨hzE, hz⟩
         obtain ⟨hzx, hzi⟩ := hball z hz
         refine ⟨Or.inl ⟨hzE, ?_⟩, hzx⟩
-        simp only [mem_setOf_eq, not_lt]
+        simp only [mem_ofPred_eq, not_lt]
         rw [abs_lt] at hzi
         linarith [hzi.1]
       · rintro z ⟨hzH, hz⟩
@@ -173,16 +174,16 @@ theorem abs_inner_le_of_uniform_halfSpace (hn : 1 ≤ n) {E K : Set (Rn n)} {ν 
       · rintro z ⟨hz, hzE⟩
         obtain ⟨hzx, hzi⟩ := hball z hz
         refine ⟨Or.inr ⟨?_, hzE⟩, hzx⟩
-        simp only [mem_setOf_eq]
+        simp only [mem_ofPred_eq]
         rw [abs_lt] at hzi
         linarith [hzi.2]
       · rintro z ⟨hzH, hz⟩
         by_cases hzE : z ∈ E
         · refine Or.inr ⟨Or.inl ⟨hzE, ?_⟩, hz⟩
-          simp only [mem_setOf_eq, not_lt]
+          simp only [mem_ofPred_eq, not_lt]
           exact le_of_lt hzH
         · exact Or.inl ⟨hz, hzE⟩
-      · exact ((measure_mono diff_subset).trans_lt measure_ball_lt_top).ne
+      · exact ((measure_mono sdiff_subset).trans_lt measure_ball_lt_top).ne
   -- the volume contradiction: `½ ≤ η (2/ε)ⁿ + η = ¼ + η < ½`
   have hcomb : s ^ n * W / 2 ≤ η * ((2 * d) ^ n * W) + η * (s ^ n * W) := by linarith
   set X := ε ^ n * d ^ n * W with hX_def

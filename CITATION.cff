@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this Lean formalization, please cite it using this metadata."
 title: "GMT Foundations: sets of finite perimeter, Reifenberg theorems, and Sobolev compactness in Lean"
-version: "0.1.0"
+version: "0.2.0"
 license: "Apache-2.0"
 repository-code: "https://github.com/willmfeldman/gmt-foundations"
 authors:

@@ -101,7 +101,7 @@ isoperimetric and relative isoperimetric inequalities, and a De Giorgi iteration
 
 ## Build
 
-The project uses Lean `v4.30.0` and Mathlib `v4.30.0`
+The project uses Lean `v4.34.1` and Mathlib `v4.34.1`
 ([leanprover-community/mathlib4](https://github.com/leanprover-community/mathlib4)), as pinned in
 `lean-toolchain`, `lakefile.toml` and `lake-manifest.json`. Mathlib is the only dependency.
 

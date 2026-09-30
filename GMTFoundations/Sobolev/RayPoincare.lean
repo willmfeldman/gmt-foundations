@@ -11,7 +11,8 @@ public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 public import Mathlib.MeasureTheory.Integral.Prod
 public import Mathlib.Analysis.Calculus.Deriv.Mul
 public import Mathlib.Analysis.Calculus.Deriv.Add
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Poincaré inequality outside a ball, for `C¹` functions vanishing far out
@@ -55,7 +56,8 @@ theorem sq_intervalIntegral_le {g : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b) (hg
     simp_rw [hexp]
     rw [intervalIntegral.integral_add
         ((by fun_prop : Continuous fun t ↦ g t ^ 2 - 2 * m * g t).intervalIntegrable a b)
-        intervalIntegrable_const, intervalIntegral.integral_sub ((hg.pow 2).intervalIntegrable a b)
+        intervalIntegrable_const, intervalIntegral.integral_sub
+        ((by fun_prop : Continuous fun t ↦ g t ^ 2).intervalIntegrable a b)
         ((by fun_prop : Continuous fun t ↦ 2 * m * g t).intervalIntegrable a b),
       intervalIntegral.integral_const_mul, intervalIntegral.integral_const, smul_eq_mul]
     ring
@@ -72,7 +74,7 @@ theorem sq_le_integral_ray {v : E d → ℝ} (hv : ContDiff ℝ 1 v) (x y : E d)
     (h0 : v (x + Λ • (y - x)) = 0) :
     v y ^ 2 ≤ (Λ - 1) * (‖y - x‖ ^ 2 *
       ∫ μ in (1 : ℝ)..Λ, ‖fderiv ℝ v (x + μ • (y - x))‖ ^ 2) := by
-  haveI : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
+  have : ContinuousSMul ℝ (E d) := IsBoundedSMul.continuousSMul
   set γ : ℝ → E d := fun μ ↦ x + μ • (y - x) with hγdef
   have hγ : ∀ μ, HasDerivAt γ (y - x) μ := fun μ ↦ by
     have h1 := (HasDerivAt.smul_const (hasDerivAt_id μ) (y - x)).const_add x
@@ -197,7 +199,7 @@ theorem lintegral_sq_compl_ball_le {v : E d → ℝ} (hv : ContDiff ℝ 1 v) {x 
         rw [lintegral_lintegral_swap hjoint]
     _ ≤ ENNReal.ofReal ((Λ - 1) * R' ^ 2) *
           ∫⁻ _μ in Ioc 1 Λ, ∫⁻ z in (ball x r)ᶜ, f z := by
-        gcongr ?_ * ?_
+        gcongr ENNReal.ofReal ((Λ - 1) * R' ^ 2) * ?_
         exact setLIntegral_mono' measurableSet_Ioc fun μ hμ ↦
           lintegral_compl_ball_comp_dilate_le hfm x r hμ.1.le
     _ = ENNReal.ofReal ((Λ - 1) * R' ^ 2) *

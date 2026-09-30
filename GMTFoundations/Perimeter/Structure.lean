@@ -10,7 +10,8 @@ public import GMTFoundations.Statements.Perimeter
 import GMTFoundations.Measure.Lusin
 import GMTFoundations.GMT.Density
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 import Mathlib.MeasureTheory.Measure.RegularityCompacts
 import Mathlib.Topology.UniformSpace.Uniformizable
@@ -99,6 +100,7 @@ theorem measurable_volume_symmDiff_halfSpace_inter_ball {E : Set (Rn n)} (hE : M
       (hν.comp measurable_fst)) measurable_const)).inter
       (measurableSet_lt (measurable_snd.dist measurable_fst) measurable_const)
   convert measurable_measure_prodMk_left (ν := (volume : Measure (Rn n))) hT using 2
+  rfl
 
 /-! ### Egorov and Lusin pieces (EG Thm 5.15, steps 1–2) -/
 
@@ -164,11 +166,12 @@ private theorem IsGaussGreenPair.exists_uniform_piece (hn : 2 ≤ n) {Ω E : Set
     filter_upwards [h.ae_hasDensity_symmDiff_normal hn hΩ hE] with x hx _
     exact hx.2.comp hρ
   obtain ⟨t, hts, htm, hμt, hunif⟩ :=
-    tendstoUniformlyOn_of_ae_tendsto hfm stronglyMeasurable_const hs hμs hae (half_pos hε)
+    tendstoUniformlyOn_of_ae_tendsto hfm stronglyMeasurable_const hs hμs hae
+      (ENNReal.ofReal_pos.2 (half_pos hε))
   obtain ⟨K, hKst, hK, hμK, hcont⟩ := h.measurable_normal.exists_isCompact_continuousOn
-    (μ := μ) (hs.diff htm) (ne_top_of_le_ne_top hμs (measure_mono diff_subset))
+    (μ := μ) (hs.diff htm) (ne_top_of_le_ne_top hμs (measure_mono sdiff_subset))
     (ENNReal.ofReal_pos.2 (half_pos hε)).ne'
-  refine ⟨K, hKst.trans diff_subset, hK, ?_, hcont, ?_⟩
+  refine ⟨K, hKst.trans sdiff_subset, hK, ?_, hcont, ?_⟩
   · calc μ (s \ K) ≤ μ (t ∪ (s \ t) \ K) := measure_mono fun x ⟨hxs, hxK⟩ => by
           by_cases hxt : x ∈ t
           · exact Or.inl hxt
@@ -244,7 +247,7 @@ theorem IsGaussGreenPair.exists_cone_pieces (hn : 2 ≤ n) {Ω E : Set (Rn n)} {
     have hlim : Tendsto (fun i : ℕ => ENNReal.ofReal (1 / ((i : ℝ) + 1))) atTop (𝓝 0) := by
       simpa using ENNReal.tendsto_ofReal tendsto_one_div_add_atTop_nhds_zero_nat
     refine le_antisymm (ge_of_tendsto' hlim fun i => ?_) bot_le
-    exact (measure_mono (diff_subset_diff_right (subset_iUnion (fun i => K (m, i)) i))).trans
+    exact (measure_mono (sdiff_subset_sdiff_right (subset_iUnion (fun i => K (m, i)) i))).trans
       (hμK (m, i))
   have hcover : Ω \ ⋃ k, K k ⊆ (⋃ m, s m \ ⋃ i, K (m, i)) ∪ {x | ‖ν x‖ = 1}ᶜ := by
     rintro x ⟨hxΩ, hxK⟩
@@ -275,7 +278,7 @@ theorem IsGaussGreenPair.isCountablyRectifiable_essentialBoundary (hn : 2 ≤ n)
   choose F hFL hFK using hcov
   refine IsCountablyRectifiable.of_countable (fun p : (ℕ × ℕ) × ℕ => F p.1 p.2)
     (fun p => hFL _ _) ?_
-  refine h.hausdorffN_eq_zero_of_subset_essentialBoundary hn hΩ hE diff_subset
+  refine h.hausdorffN_eq_zero_of_subset_essentialBoundary hn hΩ hE sdiff_subset
     (measure_mono_null ?_ hKμ)
   rintro x ⟨⟨hxΩ, -⟩, hx⟩
   refine ⟨hxΩ, fun hxK => hx ?_⟩
@@ -432,7 +435,7 @@ theorem IsGaussGreenPair.restrict_stratum_eq (hn : 2 ≤ n) {Ω E : Set (Rn n)} 
   set V := exhaustOpen Ω (j + 1) with hV_def
   have hVfin : μ V < ∞ :=
     h.lt_top_of_isCompact _ (isCompact_exhaustOpen Ω (j + 1)) (exhaustOpen_subset Ω _)
-  haveI : IsFiniteMeasure (μ.restrict V) := isFiniteMeasure_restrict.2 hVfin.ne
+  have : IsFiniteMeasure (μ.restrict V) := isFiniteMeasure_restrict.2 hVfin.ne
   have hSV : S ⊆ V := hSj.trans (exhaustOpen_mono Ω (Nat.le_succ j))
   have hdens := ae_tendsto_measure_inter_ball_div (μ.restrict V) S
   rw [Measure.restrict_restrict hSm, inter_eq_left.2 hSV] at hdens
@@ -441,14 +444,14 @@ theorem IsGaussGreenPair.restrict_stratum_eq (hn : 2 ≤ n) {Ω E : Set (Rn n)} 
   have hN : μ N = 0 := by
     have := ae_iff.1 ((ae_restrict_iff' hSm).1 hdens)
     refine measure_mono_null (fun x hx => ?_) this
-    simp only [mem_setOf_eq, Classical.not_imp]
+    simp only [mem_ofPred_eq, Classical.not_imp]
     exact hx
   have hNℋ : hausdorffN n (n - 1) N = 0 :=
     h.hausdorffN_eq_zero_of_subset_essentialBoundary hn hΩ hE (fun x hx => hSess hx.1) hN
   have hθ : (fun x => limsup (fun r => μ.restrict S (ball x r) /
       ENNReal.ofReal (ω * r ^ (n - 1))) (𝓝[>] 0)) =ᵐ[(hausdorffN n (n - 1)).restrict S] 1 := by
     refine (ae_restrict_iff' hSm).2 (ae_iff.2 (measure_mono_null (fun x hx => ?_) hNℋ))
-    simp only [mem_setOf_eq, Classical.not_imp] at hx
+    simp only [mem_ofPred_eq, Classical.not_imp] at hx
     refine ⟨hx.1, fun hT => hx.2 ?_⟩
     have hxb := hSb hx.1
     have hDensOne := h.tendsto_measure_ball_div_of_mem_reducedBoundary hn hΩ hE hxb
@@ -535,7 +538,7 @@ theorem IsGaussGreenPair.eq_hausdorffN_reducedBoundary (hn : 2 ≤ n) {Ω E : Se
   have hℋ : (hausdorffN n (n - 1)).restrict S =
       (hausdorffN n (n - 1)).restrict (reducedBoundary Ω E) := by
     refine Measure.restrict_congr_set (ae_eq_set.2 ⟨?_, ?_⟩)
-    · rw [diff_eq_empty.2 hSb, measure_empty]
+    · rw [sdiff_eq_empty.2 hSb, measure_empty]
     · exact h.hausdorffN_eq_zero_of_subset_essentialBoundary hn hΩ hE
         (fun x hx => ⟨hx.1.1, reducedBoundary_subset_essentialBoundary hn hΩ hE hx.1⟩) hdiff
   rw [← hℋ, ← hrestr, hμS]

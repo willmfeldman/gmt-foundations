@@ -9,7 +9,8 @@ public import GMTFoundations.Perimeter.Mollify
 import GMTFoundations.GMT.Polar
 import Mathlib.Algebra.Order.Ring.Star
 import Mathlib.Analysis.FunctionalSpaces.SobolevInequality
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
@@ -74,7 +75,7 @@ theorem volume_rpow_le_totalVariationOn (hn : 2 ≤ n) {F : Set (Rn n)} (hF : Me
     have hcd : ContDiff ℝ 1 (u k) := (contDiff_mollify _ hli).of_le (by simp)
     have hcs : HasCompactSupport (u k) := hasCompactSupport_mollify _ hFc
     refine (eLpNorm_le_eLpNorm_fderiv_one volume hcd hcs hp).trans (mul_le_mul' (le_of_eq rfl) ?_)
-    rw [eLpNorm_one_eq_lintegral_enorm]
+    rw [eLpNorm_one_eq_lintegral_enorm (hcd.continuous_fderiv one_ne_zero).aestronglyMeasurable]
     have := lintegral_norm_fderiv_mollify_indicator_le_totalVariationOn isOpen_univ hF
       (mollifierBump k) MeasurableSet.univ (fun _ _ ↦ subset_univ _)
     rwa [Measure.restrict_univ] at this
@@ -82,14 +83,16 @@ theorem volume_rpow_le_totalVariationOn (hn : 2 ≤ n) {F : Set (Rn n)} (hF : Me
     (Eventually.of_forall fun k ↦ mollifierBump_rOut_le k) hli
   have hmeas : ∀ k, AEStronglyMeasurable (u k) volume := fun k ↦
     (contDiff_mollify _ hli).continuous.aestronglyMeasurable
-  have hFatou := Lp.eLpNorm_lim_le_liminf_eLpNorm (p := (p : ℝ≥0∞)) hmeas _ hlim
+  have hFatou := Lp.eLpNorm_lim_le_liminf_eLpNorm (p := (p : ℝ≥0∞)) hmeas _
+    (measurable_one.indicator hF).aestronglyMeasurable hlim
   have hind : eLpNorm (F.indicator (1 : Rn n → ℝ)) p volume =
       volume F ^ (((n : ℝ) - 1) / n) := by
     have hp0 : ((p : ℝ≥0∞)) ≠ 0 := by
       rw [ENNReal.coe_ne_zero]
       exact hp.symm.pos.ne'
     rw [show F.indicator (1 : Rn n → ℝ) = F.indicator fun _ ↦ (1 : ℝ) from rfl,
-      eLpNorm_indicator_const hF hp0 ENNReal.coe_ne_top, one_div_toReal_conjExponent hn]
+      eLpNorm_indicator_const hF.nullMeasurableSet hp0 ENNReal.coe_ne_top,
+      one_div_toReal_conjExponent hn]
     simp
   rw [← hind]
   exact hFatou.trans (liminf_le_of_frequently_le' (Frequently.of_forall hbound))

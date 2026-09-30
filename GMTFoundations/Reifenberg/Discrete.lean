@@ -8,7 +8,8 @@ module
 public import GMTFoundations.Statements.Reifenberg
 public import GMTFoundations.Reifenberg.EngineMass
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Discrete Reifenberg theorem

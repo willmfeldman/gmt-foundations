@@ -13,7 +13,7 @@ on:
 jobs:
   comparator:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 180   # PARAM: raise for large repos (IV uses 300)
     permissions:
       contents: read
     steps:
@@ -28,10 +28,13 @@ jobs:
           df -h /
       # Build the trusted library once, outside the sandbox. The challenge workspaces share its
       # dependency folder (`packagesDir`), which Comparator's sandbox can read but not write.
+      # `--no-cache`: tracked dependencies are built from source, never taken from prebuilt
+      # release archives. The Mathlib cache is fetched separately and is not affected.
       - uses: leanprover/lean-action@v1
         with:
           use-mathlib-cache: true
           build: true
+          build-args: "--no-cache"
           test: false
       - name: Remove downloaded Mathlib cache archives
         run: |
@@ -45,13 +48,14 @@ jobs:
       - name: Install pinned Comparator tools
         run: bash scripts/release-comparator.sh install
       # Lake writes `.hash` files the first time it replays some downloaded Mathlib artifacts,
-      # which the sandbox cannot do. Building the trusted Statement and Challenge targets here
-      # writes them first. Solution files are built only inside the sandbox.
+      # which the sandbox cannot do. Building the trusted Challenge targets (with their vocabulary
+      # files Challenge/*.lean) here writes them first. Solution files are built only inside the
+      # sandbox.
       - name: Build trusted Challenge targets outside the sandbox
         run: |
           for workspace in challenges/*/; do
             echo "==> ${workspace}Challenge"
-            (cd "$workspace" && lake build Statement Challenge)
+            (cd "$workspace" && lake build Statement Challenge)   # PARAM: `Statement Challenge` if workspaces have Statement.lean
           done
       - name: Run Comparator on every challenge
         run: bash scripts/release-comparator.sh run

@@ -88,6 +88,7 @@ theorem eps_le_chartWeight {s : ℕ} {y x : Rn n} (hy : y ∈ D.good (s + 1))
   have := Finset.single_le_sum
     (f := fun y => (ball y (6 * D.ρ ^ (s + 1))).indicator (fun _ => D.eps s y) x)
     (fun y _ => indicator_nonneg (fun _ _ => eps_nonneg s y) x) hy
+  unfold CoverData.chartWeight
   simpa only [indicator_of_mem hx] using this
 
 theorem measurable_chartWeight (s : ℕ) : Measurable (D.chartWeight s) :=
@@ -297,7 +298,7 @@ theorem dist_limitMap_le_of_stopFun {u u' : Rn n} (hu : u ∈ D.surf 0) (hu' : u
       rw [← ENNReal.ofReal_le_ofReal_iff ha, ENNReal.ofReal_sum_of_nonneg fun t _ => hw t]
       exact (ENNReal.sum_le_tsum _).trans hA
     calc ∏ t ∈ Finset.range s, (1 + w t) ≤ ∏ t ∈ Finset.range s, Real.exp (w t) :=
-          Finset.prod_le_prod (fun t _ => by linarith [hw t])
+          Finset.prod_le_prod₀ (fun t _ => by linarith [hw t])
             fun t _ => by linarith [Real.add_one_le_exp (w t)]
       _ = Real.exp (∑ t ∈ Finset.range s, w t) := (Real.exp_sum _ _).symm
       _ ≤ Real.exp a := Real.exp_le_exp.2 hsum

@@ -8,7 +8,8 @@ module
 public import GMTFoundations.GMT.Rectifiable
 import Mathlib.MeasureTheory.Covering.BesicovitchVectorSpace
 import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Measure.RegularityCompacts
 import Mathlib.Topology.EMetricSpace.Paracompact
 import Mathlib.Topology.UniformSpace.Uniformizable
@@ -47,7 +48,7 @@ variable {n : ℕ}
 theorem _root_.GMTFoundations.IsCountablyRectifiable.mono {k : ℕ} {S T : Set (Rn n)}
     (h : IsCountablyRectifiable n k T) (hST : S ⊆ T) : IsCountablyRectifiable n k S := by
   obtain ⟨f, hf, hnull⟩ := h
-  exact ⟨f, hf, measure_mono_null (diff_subset_diff_left hST) hnull⟩
+  exact ⟨f, hf, measure_mono_null (sdiff_subset_sdiff_left hST) hnull⟩
 
 /-! ### Negligible sets -/
 
@@ -109,7 +110,7 @@ theorem measure_closedBall_diff_le_of_tendsto {k : ℕ} {ν : Measure (Rn n)} {T
     exact (not_lt_of_ge (by simp)) h3r
   have hq : q r * b = a := ENNReal.div_mul_cancel hb0 hfinr
   have hdiff : ν (closedBall x r \ T) = b - a := by
-    rw [← diff_inter_self_eq_diff, measure_diff inter_subset_right
+    rw [← sdiff_inter_self_eq_sdiff, measure_sdiff inter_subset_right
       (hT.inter measurableSet_closedBall).nullMeasurableSet (ne_top_of_le_ne_top hfinr hab)]
   have hb2 : b ≤ 2 * a := by
     have : 2⁻¹ * b ≤ a := ENNReal.mul_le_of_le_div h3r.le
@@ -179,11 +180,11 @@ theorem measure_not_isGoodPiece (hn : 2 ≤ n) {S G : Set (Rn n)}
         {x | x ∈ G ∧ ¬ IsNegligibleAt k (hyperplane ν \ projH ν '' G) (projH ν x)} := by
     rintro x ⟨hxG, hx⟩
     by_contra hc
-    simp only [mem_union, mem_setOf_eq, not_or, not_and, not_not] at hc
+    simp only [mem_union, mem_ofPred_eq, not_or, not_and, not_not] at hc
     exact hx ⟨hxG, hGS, hGm, hν, hflat, hc.1 hxG, hc.2 hxG⟩
   refine measure_mono_null hsub (measure_union_null ?_ ?_)
   · -- `S \ G` is negligible: Besicovitch for `μ⌊S`
-    haveI : IsFiniteMeasure (μ.restrict S) :=
+    have : IsFiniteMeasure (μ.restrict S) :=
       ⟨by rw [Measure.restrict_apply_univ]; exact hSfin.lt_top⟩
     have hae := Besicovitch.ae_tendsto_measure_inter_div (μ.restrict S) G
     rw [Measure.restrict_restrict hGm, inter_eq_left.2 hGS, ae_restrict_iff' hGm] at hae
@@ -208,10 +209,10 @@ theorem measure_not_isGoodPiece (hn : 2 ≤ n) {S G : Set (Rn n)}
     rw [Measure.restrict_apply (measurableSet_closedBall.diff hGm)]
     congr 1
     ext y
-    simp only [mem_inter_iff, mem_diff]
+    simp only [mem_inter_iff, Set.mem_sdiff]
     tauto
   · -- `ν^⊥ \ π(G)` is negligible: Besicovitch for `μ⌊ν^⊥`
-    haveI := isLocallyFiniteMeasure_restrict_hyperplane hn hν
+    have := isLocallyFiniteMeasure_restrict_hyperplane hn hν
     have hπm : MeasurableSet (projH ν '' G) := hflat.measurableSet_image_projH hν hε hGm
     have hπH : projH ν '' G ⊆ hyperplane ν := by
       rintro _ ⟨y, -, rfl⟩
@@ -249,7 +250,7 @@ theorem measure_not_isGoodPiece (hn : 2 ≤ n) {S G : Set (Rn n)}
       rw [Measure.restrict_apply (measurableSet_closedBall.diff hπm)]
       congr 1
       ext y
-      simp only [mem_inter_iff, mem_diff]
+      simp only [mem_inter_iff, Set.mem_sdiff]
       tauto
     refine measure_mono_null hsub2 ?_
     refine le_antisymm ((hflat.measure_le k hν hε inter_subset_left).trans ?_) (by simp)
@@ -307,7 +308,7 @@ theorem measure_not_exists_isGoodPiece (hn : 2 ≤ n) {Ω S : Set (Rn n)} (hΩ :
       refine le_trans (le_of_eq ?_) hr
       congr 1
       ext z
-      simp only [T, mem_inter_iff, mem_diff, mem_closedBall]
+      simp only [T, mem_inter_iff, Set.mem_sdiff, mem_closedBall]
       constructor
       · rintro ⟨⟨hzS, hzG⟩, hzr⟩
         refine ⟨⟨⟨hzS, ?_⟩, hzG⟩, hzr⟩
@@ -636,7 +637,7 @@ theorem IsGoodPiece.blowup_bounds (hn : 2 ≤ n) {S G : Set (Rn n)} {ν x : Rn n
   have hsplit : ∫⁻ y in S, ENNReal.ofReal (φ (r⁻¹ • (y - x))) ∂μ =
       ∫⁻ y in G, ENNReal.ofReal (φ (r⁻¹ • (y - x))) ∂μ +
         ∫⁻ y in S \ G, ENNReal.ofReal (φ (r⁻¹ • (y - x))) ∂μ := by
-    rw [← lintegral_inter_add_diff _ S hG.measurableSet, inter_eq_right.2 hG.subset]
+    rw [← lintegral_inter_add_sdiff _ S hG.measurableSet, inter_eq_right.2 hG.subset]
   set F := ∫⁻ y in S, ENNReal.ofReal (φ (r⁻¹ • (y - x))) ∂μ
   set A := ∫⁻ y in G, ENNReal.ofReal (φ (r⁻¹ • (y - x))) ∂μ
   have hA : A ≤ ENNReal.ofReal (c * (r ^ k * (I + ω * C))) := by
