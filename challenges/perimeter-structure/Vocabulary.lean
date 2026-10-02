@@ -1,4 +1,6 @@
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Trusted statements: structure theory of sets of locally finite perimeter
@@ -32,6 +34,8 @@ All notions are defined below from Mathlib's measure theory and calculus. The am
 * `IsCountablyRectifiable n k S`: up to an `ℋ^k`-null set, `S` is covered by countably many
   Lipschitz images of `ℝ^k`.
 -/
+
+@[expose] public section
 
 noncomputable section
 
@@ -154,3 +158,5 @@ def TrivialOfNullEssentialBoundaryClaim (n : ℕ) : Prop :=
     volume (E ∩ ball c r) = 0 ∨ volume (ball c r \ E) = 0
 
 end GMTChallenge
+
+end

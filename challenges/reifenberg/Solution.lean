@@ -1,12 +1,16 @@
-import Statement
-import GMTFoundations
+module
+
+public import Vocabulary
+public import GMTFoundations
 
 /-!
 # Solution: discrete and rectifiable Reifenberg theorems
 
-The trusted vocabulary of `Statement.lean` is definitionally the library's, so the claims are the
+The trusted vocabulary of `Vocabulary.lean` is definitionally the library's, so the claims are the
 library theorems `GMTFoundations.discrete_reifenberg` and `GMTFoundations.rectifiable_reifenberg`.
 -/
+
+@[expose] public section
 
 theorem challenge_discrete_reifenberg (n : ℕ) : GMTChallenge.DiscreteReifenbergClaim n :=
   fun hn => GMTFoundations.discrete_reifenberg hn

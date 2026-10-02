@@ -1,4 +1,6 @@
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Trusted statements: discrete and rectifiable Reifenberg theorems for hyperplanes
@@ -32,6 +34,8 @@ Vocabulary, all from Mathlib:
 * `IsCountablyRectifiable n k S`: up to an `ℋ^k`-null set, `S` is covered by countably many
   Lipschitz images of `ℝ^k`.
 -/
+
+@[expose] public section
 
 noncomputable section
 
@@ -104,3 +108,5 @@ def RectifiableReifenbergClaim (n : ℕ) : Prop :=
       IsCountablyRectifiable n (n - 1) (S ∩ ball 0 1)
 
 end GMTChallenge
+
+end

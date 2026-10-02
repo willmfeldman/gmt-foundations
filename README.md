@@ -101,7 +101,7 @@ isoperimetric and relative isoperimetric inequalities, and a De Giorgi iteration
 
 ## Build
 
-The project uses Lean `v4.34.1` and Mathlib `v4.34.1`
+The project uses Lean `v4.35.0-rc3` and Mathlib `v4.35.0-rc3`
 ([leanprover-community/mathlib4](https://github.com/leanprover-community/mathlib4)), as pinned in
 `lean-toolchain`, `lakefile.toml` and `lake-manifest.json`. Mathlib is the only dependency.
 
@@ -128,8 +128,9 @@ plain-language statements), the pinned toolchain, the expected axioms, the AI-as
 disclosure and the comparator challenge inventory.
 
 `challenges/` contains three standalone [Comparator](https://github.com/leanprover/comparator)
-workspaces covering the nine theorems. In each, `Statement.lean` imports Mathlib only and states
-the theorems with every notion defined inline, `Challenge.lean` states them with `sorry`, and
+workspaces covering the nine theorems. In each, `Vocabulary.lean` imports Mathlib only and states
+the theorems with every notion defined inline, `Challenge.lean` is a self-contained copy of that
+vocabulary (importing Mathlib only) that states them with `sorry`, and
 `Solution.lean` proves them from the library. Ordinary CI only elaborates these files. Exact
 statement equality and the permitted-axiom check are established by the release workflow
 `.github/workflows/release-comparator.yml`, which runs Comparator with pinned tool revisions and

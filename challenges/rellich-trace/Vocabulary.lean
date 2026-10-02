@@ -1,4 +1,6 @@
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Trusted statement: Rellich–Kondrachov compactness with compact boundary trace
@@ -24,6 +26,8 @@ Vocabulary, all from Mathlib:
 * the weak gradient is expressed by integration by parts against smooth compactly supported
   vector fields.
 -/
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,3 +74,5 @@ def RellichTraceClaim (n : ℕ) [NeZero n] : Prop :=
           -∫ y in ball (0 : Rn n) 1, ⟪G y, ψ y⟫)
 
 end GMTChallenge
+
+end

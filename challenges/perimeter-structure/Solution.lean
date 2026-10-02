@@ -1,10 +1,12 @@
-import Statement
-import GMTFoundations
+module
+
+public import Vocabulary
+public import GMTFoundations
 
 /-!
 # Solution: structure theory of sets of locally finite perimeter
 
-The trusted vocabulary of `Statement.lean` agrees with the library's: `hausdorffN`, `divergence`,
+The trusted vocabulary of `Vocabulary.lean` agrees with the library's: `hausdorffN`, `divergence`,
 `IsSmoothTestField`, `IsCountablyRectifiable`, `HasDensity` and `essentialBoundary` are
 definitionally equal to their `GMTFoundations` counterparts; `IsGaussGreenPair` has the same
 fields (`isGaussGreenPair_iff`), hence the two `reducedBoundary` sets agree; and
@@ -12,6 +14,8 @@ fields (`isGaussGreenPair_iff`), hence the two `reducedBoundary` sets agree; and
 `GMTFoundations.hasLocallyFinitePerimeter_of_local`, whose conclusion is the library's
 `HasLocallyFinitePerimeter` (existence of a Gauss–Green pair).
 -/
+
+@[expose] public section
 
 open MeasureTheory
 

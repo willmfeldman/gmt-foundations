@@ -14,8 +14,8 @@ project:
   license: "Apache-2.0"
   language: "Lean"
   theorem_prover: "Lean 4"
-  lean_toolchain: "leanprover/lean4:v4.34.1"
-  mathlib: "v4.34.1"
+  lean_toolchain: "leanprover/lean4:v4.35.0-rc3"
+  mathlib: "v4.35.0-rc3"
 
 build:
   package_file: "lakefile.toml"
@@ -209,15 +209,16 @@ comparator:
   external_challenges:
     directory: "challenges"
     purpose: >-
-      Standalone comparator challenge workspaces. In each, Statement.lean imports Mathlib only
-      and defines the trusted claims; Challenge.lean states them with `sorry`; Solution.lean
-      imports GMTFoundations and proves the same statements.
+      Standalone comparator challenge workspaces. In each, Vocabulary.lean imports Mathlib only
+      and defines the trusted claims; Challenge.lean is self-contained (a generated copy of the
+      vocabulary, importing Mathlib only) and states them with `sorry`; Solution.lean imports
+      Vocabulary and GMTFoundations and proves the same statements.
     release_workflow: ".github/workflows/release-comparator.yml"
-    comparator_revision: "575674928e239f5bc452aab72d1dd7b0f1326494"
-    lean4export_revision: "076e8e57707e813375e8f9da8bf989799ace9680"
+    comparator_revision: "fd5d5bcf14177b187f66d4502071268d877887c3"
+    lean4export_revision: "66f1fb4bc256072069767fce52d39480e4524869"
     landrun_revision: "811cfff51ceaf3d9843708aa6d22e9b84ccac8b4"
-    toolchain: "leanprover/lean4:v4.34.1"
-    mathlib: "v4.34.1"
+    toolchain: "leanprover/lean4:v4.35.0-rc3"
+    mathlib: "v4.35.0-rc3"
     permitted_axioms:
       - "propext"
       - "Classical.choice"
@@ -263,7 +264,7 @@ ci:
   expected_check: >-
     lake build with warnings as errors, API smoke-test target, formalization.yaml validation,
     Lean-name resolution, exact axiom check on the nine targets, proof-integrity scan, and
-    elaboration of every challenge workspace's Statement, Challenge and Solution sources.
+    elaboration of every challenge workspace's Vocabulary, Challenge and Solution sources.
   release_workflow: ".github/workflows/release-comparator.yml"
   release_check: >-
     Comparator execution over every challenges/*/config.json with pinned tool revisions,

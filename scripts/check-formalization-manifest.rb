@@ -3,8 +3,9 @@
 #
 # Metadata checks (no Lean): every target names an existing lean_file that contains the
 # declaration; the external challenge inventory equals challenges/*/config.json; each workspace
-# is complete, on the root toolchain, trusted-only by default, with a Mathlib-only Statement.lean
-# and a Challenge.lean importing only Statement; config theorem names and permitted axioms agree
+# is complete, on the root toolchain, trusted-only by default, with a Mathlib-only Vocabulary.lean
+# and a Mathlib-only Challenge.lean (its generated-block layout is checked by
+# scripts/challenge-prep.py check); config theorem names and permitted axioms agree
 # with the manifest; every target's challenge theorem is listed; the pinned Comparator tool
 # revisions agree with scripts/release-comparator.sh; the recorded Mathlib rev agrees with
 # lakefile.toml and lake-manifest.json; and each workspace's lake-manifest.json locks exactly
@@ -88,7 +89,7 @@ end
 entries.each do |entry|
   path = entry.fetch('path')
   next unless File.directory?(path)
-  %w[Statement.lean Challenge.lean Solution.lean config.json lakefile.toml lake-manifest.json lean-toolchain].each do |f|
+  %w[Vocabulary.lean Challenge.lean Solution.lean config.json lakefile.toml lake-manifest.json lean-toolchain].each do |f|
     failures << "#{path}: missing #{f}" unless File.file?(File.join(path, f))
   end
   toolchain = File.join(path, 'lean-toolchain')
@@ -102,12 +103,13 @@ entries.each do |entry|
       unless revs == root_revs
   end
   imports = lambda do |f|
-    File.file?(f) ? File.read(f).scan(/^\s*import\s+(\S+)/).flatten : []
+    File.file?(f) ? File.read(f).scan(/^\s*(?:public\s+)?(?:meta\s+)?import\s+(\S+)/).flatten : []
   end
-  failures << "#{path}: Statement.lean must import Mathlib only" \
-    unless imports.call(File.join(path, 'Statement.lean')) == ['Mathlib']
-  failures << "#{path}: Challenge.lean must import Statement only" \
-    unless imports.call(File.join(path, 'Challenge.lean')) == ['Statement']
+  mathlib_only = ->(names) { !names.empty? && names.all? { |n| n == 'Mathlib' || n.start_with?('Mathlib.') } }
+  failures << "#{path}: Vocabulary.lean must import Mathlib only" \
+    unless mathlib_only.call(imports.call(File.join(path, 'Vocabulary.lean')))
+  failures << "#{path}: Challenge.lean must import Mathlib only" \
+    unless mathlib_only.call(imports.call(File.join(path, 'Challenge.lean')))
   lakefile = File.join(path, 'lakefile.toml')
   if File.file?(lakefile)
     defaults = File.read(lakefile)[/^defaultTargets\s*=\s*\[([^\]]*)\]/, 1].to_s
