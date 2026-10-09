@@ -428,13 +428,6 @@ theorem exists_isOpen_subset_measure_le_add {μ : Measure (Rn n)} {Ω A : Set (R
 noncomputable def reducedBoundaryHausdorffConst (n : ℕ) : ℝ :=
   unitBallVolume (n - 1) / 2 ^ (n - 1) * 8 ^ (n - 1) / densityConstA₃ n
 
-theorem reducedBoundaryHausdorffConst_pos {n : ℕ} (hn : 1 ≤ n) :
-    0 < reducedBoundaryHausdorffConst n := by
-  have := unitBallVolume_pos (n - 1)
-  have := densityConstA₃_pos hn
-  unfold reducedBoundaryHausdorffConst
-  positivity
-
 /-- **(c), EG Lemma 5.4**. For a Gauss–Green pair `(μ, ν)` of a measurable `E`
 in the open set `Ω` and any `B ⊆ ∂*E = reducedBoundary Ω E` (no measurability of `B`),
 `ℋ^{n-1}(B) ≤ C_n μ(B)`, `C_n = reducedBoundaryHausdorffConst n`.

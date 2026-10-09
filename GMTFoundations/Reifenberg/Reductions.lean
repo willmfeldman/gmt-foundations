@@ -30,7 +30,7 @@ it has no lower-mass cutoff `ε_n`, and `J` need not be small.
 
 Miś's §4 begins with several reductions "without loss of generality" (rounding the radii to powers
 of `ρ`, supporting `μ` in `B₁`, finite truncation); each changes constants, and each is proved
-here as a separate lemma (R0–R6 below). Miś proves Claim 4.1 for `j = A, …, 0`, but the step
+here as a separate lemma (R0–R5 below). Miś proves Claim 4.1 for `j = A, …, 0`, but the step
 `j = 0` uses β-numbers on balls far outside `B₂`, where (1.3) gives no information. We prove the
 claim only for `j ≥ 1` and replace the last step by a covering argument (R5).
 
@@ -50,8 +50,7 @@ claim only for `j ≥ 1` and replace the last step by a covering argument (R5).
 * `IsReducedFamily ρ Z lev`: the family after R1–R3 (radii `ρ^{lev z}`, `lev ≥ 1`, centers in `B₁`,
   disjoint balls).
 * `ClaimAt ρ M Z lev j`: the centered Claim(j): `μ(B_{ρ^j}(p)) ≤ M (ρ^j)^k` for every center `p` of
-  level `> j`. `MisClaimAt`: Miś's form of Claim 4.1 (balls disjoint from the centers of level
-  `≤ j`); the two are equivalent up to a factor `3ⁿ` (R6).
+  level `> j`.
 * `ClaimOneStatement n ρ M`: Claim(1) for all reduced families (what the downward induction in
   `Discrete.lean` yields).
 
@@ -62,12 +61,12 @@ claim only for `j ≥ 1` and replace the last step by a covering argument (R5).
   `ballFamilyMeasure_le_of_radius_le`, `ballFamilyMeasure_apply_le_of_radius`;
   R2 `ballFamilyMeasure_filter_le`,
   `ballFamilyMeasure_filter_apply_of_subset`; R3 `claimAt_of_sup_le`; R5
-  `levMeasure_ball_one_le_of_claimAt_one`; R6 `ClaimAt.of_misClaimAt`, `MisClaimAt.of_claimAt`.
+  `levMeasure_ball_one_le_of_claimAt_one`.
 * `miskiewiczBound_of_claimOne`: `ClaimOneStatement ⇒ MiskiewiczBound` (R1, R2, R3, R5 chained).
 * `discreteReifenbergStatement_of_claimOne`: with the above `ρ` and `M(J)`,
   `ClaimOneStatement` implies `DiscreteReifenbergStatement n` (`δ = 1`, `D = ledgerD`).
-* `levMeasure_inter_le_of_claimAt`: the covering bound shared by the upper-bound lemma, R5 and
-  R6. The upper-bound lemma (`levMeasure_ball_le_of_claimAt_succ` in `Covering.lean`; it is not in
+* `levMeasure_inter_le_of_claimAt`: the covering bound shared by the upper-bound lemma and
+  R5. The upper-bound lemma (`levMeasure_ball_le_of_claimAt_succ` in `Covering.lean`; it is not in
   Miś) is the upper-bound transfer: if Claim(l+1) holds and `M ≥ ω_k ρ^{−k}`, then
   `μ(B_{ρ^{l+1}}(w)) ≤ K M (ρ^{l+1})^k` for every `w` within `ρ^l` of a center of level `> l`,
   with `K = 3ⁿ + 1` independent of `ρ`. It supplies the upper mass hypothesis of the tilt lemma,
@@ -136,19 +135,8 @@ def ledgerD (n : ℕ) (C₂ C₃ ε : ℝ) : ℝ :=
 
 theorem ledgerK_pos (n : ℕ) : 0 < ledgerK n := by unfold ledgerK; positivity
 
-theorem one_le_ledgerK (n : ℕ) : 1 ≤ ledgerK n := by
-  unfold ledgerK; have : (0 : ℝ) < 3 ^ n := by positivity
-  linarith
-
-theorem ledgerC0_pos (n : ℕ) : 0 < ledgerC0 n := by
-  have := unitBallVolume_pos (n - 1); unfold ledgerC0; positivity
-
 theorem ledgerC1_pos (n : ℕ) : 0 < ledgerC1 n := by
   have := unitBallVolume_pos (n - 1); unfold ledgerC1; positivity
-
-theorem ledgerC1_mul_ledgerC0 (n : ℕ) : ledgerC1 n * ledgerC0 n = 2 := by
-  have := (unitBallVolume_pos (n - 1)).ne'
-  unfold ledgerC1 ledgerC0; field_simp
 
 theorem ledgerTau_pos (n : ℕ) : 0 < ledgerTau n := by unfold ledgerTau; positivity
 
@@ -191,10 +179,6 @@ theorem ledgerRho_le_half (n : ℕ) : ledgerRho n ≤ 1 / 2 :=
 
 theorem ledgerRho_lt_one (n : ℕ) : ledgerRho n < 1 :=
   (ledgerRho_le_hundredth n).trans_lt (by norm_num)
-
-/-- `ρ ≤ 1/R₀`, so `B_{R₀ ρ^j}(p) ⊆ B₂` for `p ∈ B₁`, `j ≥ 1` (R5). -/
-theorem ledgerRho_le_inv_R0 (n : ℕ) : ledgerRho n ≤ 1 / ledgerR0 :=
-  (ledgerRho_le_hundredth n).trans (by norm_num [ledgerR0])
 
 /-- The tilt lemma's condition in the form used with `a = τM` (goodness) and `b = KM`
 (the upper-bound lemma): `ρ ≤ a / (2 A_n b)`. -/
@@ -241,9 +225,6 @@ theorem ledgerKappa_le (n : ℕ) : ledgerKappa n ≤ 100 / 99 := by
   unfold ledgerKappa
   rw [div_le_iff₀ (one_sub_ledgerRho_pos n)]
   linarith [ledgerRho_le_hundredth n]
-
-theorem ledgerKappa_mul_one_sub (n : ℕ) : ledgerKappa n * (1 - ledgerRho n) = 1 := by
-  unfold ledgerKappa; field_simp [(one_sub_ledgerRho_pos n).ne']
 
 section Mass
 
@@ -618,12 +599,6 @@ def ClaimAt (ρ M : ℝ) (Z : Finset (Rn n)) (lev : Rn n → ℕ) (j : ℕ) : Pr
   ∀ p ∈ Z, j < lev p →
     levMeasure ρ Z lev (ball p (ρ ^ j)) ≤ ENNReal.ofReal (M * (ρ ^ j) ^ (n - 1))
 
-/-- Miś's Claim 4.1 at scale `j`: every ball `B_{ρ^j}(y) ⊆ B₂` containing no center of
-level `≤ j` has `μ ≤ M (ρ^j)^k`. Only used through R6. -/
-def MisClaimAt (ρ M : ℝ) (Z : Finset (Rn n)) (lev : Rn n → ℕ) (j : ℕ) : Prop :=
-  ∀ y : Rn n, ball y (ρ ^ j) ⊆ ball 0 2 → (∀ z ∈ Z, lev z ≤ j → z ∉ ball y (ρ ^ j)) →
-    levMeasure ρ Z lev (ball y (ρ ^ j)) ≤ ENNReal.ofReal (M * (ρ ^ j) ^ (n - 1))
-
 /-- Claim(1) for every reduced family satisfying (1.3) with constant `J`, with `M = M(J)`. This is
 what the downward induction in `Discrete.lean` delivers (Claim(j) for `j = A, …, 1`);
 `miskiewiczBound_of_claimOne` turns it into the Miś form. -/
@@ -665,7 +640,7 @@ private lemma card_mul_ofReal_le {N : ℕ} {c y : ℝ} (hN : (N : ℝ) ≤ c) :
   · rw [← ENNReal.ofReal_natCast, ← ENNReal.ofReal_mul (Nat.cast_nonneg _)]
     exact ENNReal.ofReal_le_ofReal (mul_le_mul_of_nonneg_right hN hy.le)
 
-/-- **Covering bound from Claim(j)** (shared by the upper-bound lemma, R5 and R6). If
+/-- **Covering bound from Claim(j)** (shared by the upper-bound lemma and R5). If
 `A ⊆ B̄_R(c)`, the atoms of level `> j` in `A` carry mass at most `(2R/ρ^j + 1)ⁿ M (ρ^j)^k`: a
 maximal `ρ^j`-separated subset of them has at most `(2R/ρ^j + 1)ⁿ` points, and the balls
 `B_{ρ^j}(q)` around it cover them. -/
@@ -758,41 +733,6 @@ theorem levMeasure_ball_one_le_of_claimAt_one (hρ0 : 0 < ρ) (hρ1 : ρ ≤ 1)
         have e1 := pow_le_pow_left₀ (by positivity) h3 n
         have e2 := pow_le_pow_left₀ (by positivity) h3' n
         nlinarith [mul_le_mul_of_nonneg_right e1 hMρ, mul_le_mul_of_nonneg_right e2 hMρ]
-
-/-- **R6** (a): Miś's Claim 4.1 at scale `j` implies the centered Claim(j) with the same
-`M` (for `ρ ≤ 1`, centers in `B₁`). -/
-theorem ClaimAt.of_misClaimAt (hρ0 : 0 < ρ) (hρ1 : ρ ≤ 1) (hred : IsReducedFamily ρ Z lev)
-    {j : ℕ} (h : MisClaimAt ρ M Z lev j) : ClaimAt ρ M Z lev j := by
-  intro p hp hlt
-  refine h p ?_ fun z hz hzj hzb => ?_
-  · refine ball_subset_ball' ?_
-    have := mem_ball_zero_iff.1 (hred.mem_ball p hp)
-    rw [dist_zero_right]
-    have : ρ ^ j ≤ 1 := pow_le_one₀ hρ0.le hρ1
-    linarith
-  · have hne : z ≠ p := by rintro rfl; omega
-    have hd := add_le_dist_of_disjoint hρ0 hred.disjoint hz hp hne
-    have h1 : ρ ^ j ≤ ρ ^ lev z := pow_le_pow_of_le_one hρ0.le hρ1 hzj
-    have h2 : 0 < ρ ^ lev p := pow_pos hρ0 _
-    have := mem_ball.1 hzb
-    linarith
-
-/-- **R6** (b): the centered Claim(j) implies Miś's Claim 4.1 at scale `j` with `M`
-replaced by `3ⁿ M`. -/
-theorem MisClaimAt.of_claimAt (hρ0 : 0 < ρ) {j : ℕ} (h : ClaimAt ρ M Z lev j) :
-    MisClaimAt ρ (3 ^ n * M) Z lev j := by
-  intro y _ hy
-  have ha : 0 < ρ ^ j := pow_pos hρ0 j
-  calc levMeasure ρ Z lev (ball y (ρ ^ j))
-      ≤ levMeasure ρ Z lev (ball y (ρ ^ j) ∩ {z | j < lev z}) := by
-        unfold levMeasure ballFamilyMeasure
-        refine atomMeasure_mono_of_atoms fun z hz hzb => ⟨hzb, ?_⟩
-        by_contra hle
-        exact hy z hz (not_lt.1 hle) hzb
-    _ ≤ ENNReal.ofReal ((2 * ρ ^ j / ρ ^ j + 1) ^ n * (M * (ρ ^ j) ^ (n - 1))) :=
-        levMeasure_inter_le_of_claimAt hρ0 h ha.le ball_subset_closedBall
-    _ = ENNReal.ofReal (3 ^ n * M * (ρ ^ j) ^ (n - 1)) := by
-        rw [mul_div_assoc, div_self ha.ne']; ring_nf
 
 end Reduced
 
@@ -887,6 +827,5 @@ theorem discreteReifenbergStatement_of_claimOne {C₂ C₃ ε : ℝ} (hC₂ : 0 
   discreteReifenbergStatement_of_miskiewiczBound fun hn =>
     miskiewiczBound_of_claimOne (by omega) (ledgerRho_pos (by omega)) (ledgerRho_lt_one n)
       (fun _ _ => omega_le_ledgerMass) (fun J _ => ledgerMass_le hC₂ hC₃ hε) (h hn)
-
 
 end GMTFoundations.DiscreteReifenberg

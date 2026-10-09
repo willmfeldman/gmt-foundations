@@ -62,8 +62,7 @@ level `i+1` in `A_i`; `good (i+1) ∪ bad (i+1)` is a maximal `ρ^{i+1}`-separat
 
 Below, (a), (b), (c) label the three assertions of Miś Claim 4.2, in Miś's order.
 
-* `subset_cover`: `P ⊆ ⋃_{y ∈ good N} B_{ρ^N}(y) ∪ rem N` for `N ≥ j` (covering);
-  `subset_leaves_cover` states it with the leaves and the excess sets.
+* `subset_cover`: `P ⊆ ⋃_{y ∈ good N} B_{ρ^N}(y) ∪ rem N` for `N ≥ j` (covering).
 * `pairwiseDisjoint_halfBalls`: the half-balls `B_{ρ^l/2}(y)` of the leaves
   (`bad l`, `fin l` for `j < l ≤ N`, and `good N`) are pairwise disjoint.
 * `not_mem_ball_good_of_lev_le`: good balls at scale `i` contain no center of level `≤ i`.
@@ -313,7 +312,6 @@ theorem state_succ {i : ℕ} (h : D.j ≤ i) : D.state (i + 1) = D.step i (D.sta
   simp only [state, ite_eq_right (show ¬ i + 1 ≤ D.j by omega)]
 
 theorem good_top : D.good D.j = {D.p} := by simp [good, state_of_le D le_rfl, init]
-theorem bad_top : D.bad D.j = ∅ := by simp [bad, state_of_le D le_rfl, init]
 theorem fin_top : D.fin D.j = ∅ := by simp [fin, state_of_le D le_rfl, init]
 theorem rem_top : D.rem D.j = D.excess D.j D.p := by simp [rem, state_of_le D le_rfl, init]
 
@@ -421,9 +419,6 @@ theorem mem_sepCand_of_mem_bad_succ {i : ℕ} (h : D.j ≤ i) {y : Rn n} (hy : y
 
 theorem lev_of_mem_good_succ {i : ℕ} (h : D.j ≤ i) {y : Rn n} (hy : y ∈ D.good (i + 1)) :
     ((i + 1 : ℕ) : ℕ∞) < D.lev y := (mem_sepCand_of_mem_good_succ h hy).2
-
-theorem lev_of_mem_bad_succ {i : ℕ} (h : D.j ≤ i) {y : Rn n} (hy : y ∈ D.bad (i + 1)) :
-    ((i + 1 : ℕ) : ℕ∞) < D.lev y := (mem_sepCand_of_mem_bad_succ h hy).2
 
 /-- `R_{≤N}` explicitly: the bad and final balls of the scales `(j, N]` and the excess sets of the
 scales `[j, N]`. -/
@@ -673,23 +668,6 @@ theorem pairwiseDisjoint_halfBalls {N : ℕ} (hN : D.j ≤ N) :
     have h2 : D.ρ ^ q.1 ≤ D.ρ ^ q'.1 := pow_le_pow_of_le_one hρ0.le hρ1 hle
     rw [dist_comm] at h1
     linarith
-
-/-- **Claim 4.2 (a)**, leaf form: every center is in a leaf ball `B_{ρ^l}(y)` or in
-an excess set `E_l`, `j ≤ l ≤ N`. -/
-theorem subset_leaves_cover {N : ℕ} (hN : D.j ≤ N) :
-    D.P ⊆ (⋃ q ∈ D.leaves N, ball q.2 (D.ρ ^ q.1)) ∪
-      ⋃ l ∈ Finset.Icc D.j N, D.excessUnion l (D.good l) := by
-  intro x hx
-  rcases subset_cover hD hN hx with h | h
-  · obtain ⟨y, hy, hxy⟩ := mem_iUnion₂.1 h
-    exact Or.inl (mem_iUnion₂.2 ⟨(N, y), mem_leaves.2 (Or.inr ⟨rfl, hy⟩), hxy⟩)
-  · rw [rem_eq hN] at h
-    rcases h with h | h
-    · obtain ⟨l, hl, h⟩ := mem_iUnion₂.1 h
-      obtain ⟨y, hy, hxy⟩ := mem_iUnion₂.1 h
-      have hl' := Finset.mem_Ioc.1 hl
-      exact Or.inl (mem_iUnion₂.2 ⟨(l, y), mem_leaves.2 (Or.inl ⟨hl'.1, hl'.2, hy⟩), hxy⟩)
-    · exact Or.inr h
 
 /-- All centers of the construction lie in the top ball. -/
 theorem mem_ball_top_of_mem_succ {i : ℕ} (h : D.j ≤ i) {y : Rn n}

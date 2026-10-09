@@ -37,7 +37,7 @@ isoperimetric and Poincaré inequalities.
   `IsGaussGreenPair.totalVariationOn_indicator_eq` this is the two-way bridge.
 * `totalVariationOn_indicator_eq_iSup`: `TV(E; Ω)` is also the supremum over `C^∞_c` fields.
 * `IsGaussGreenPair.sigmaFinite`: the measure of a pair on an open set is σ-finite.
-* `mollify ρ f = f ⋆ ρ` (bump on the right), `contDiff_mollify`, `mollify_indicator_mem_Icc`.
+* `mollify ρ f = f ⋆ ρ` (bump on the right), `contDiff_mollify`.
 * `fderiv_mollify_indicator_apply`: for a pair `(μ, ν)` of `E` on `Ω` and `B̄_R(x) ⊆ Ω`
   (`R = ρ.rOut`), `D(χ_E ⋆ ρ)(x) v = -∫ ρ(x - y) ⟪v, ν(y)⟫ dμ(y)`.
 * `lintegral_norm_fderiv_mollify_indicator_le`: `∫_V |D(χ_E ⋆ ρ)| ≤ μ(V + B_R)`, and
@@ -292,32 +292,6 @@ theorem support_normed_sub_subset (ρ : ContDiffBump (0 : Rn n)) (x : Rn n) :
   rw [ρ.support_normed_eq, mem_ball, dist_zero_right] at this
   rwa [mem_ball, dist_eq_norm, ← norm_neg, neg_sub]
 
-theorem integral_normed_sub (ρ : ContDiffBump (0 : Rn n)) (x : Rn n) :
-    ∫ y, ρ.normed volume (x - y) = 1 := by
-  rw [integral_sub_left_eq_self (ρ.normed volume) volume x, ρ.integral_normed]
-
-theorem integrable_normed_sub (ρ : ContDiffBump (0 : Rn n)) (x : Rn n) :
-    Integrable (fun y ↦ ρ.normed volume (x - y)) :=
-  (ρ.integrable_normed (μ := volume)).comp_sub_left x
-
-/-- The mollification of an indicator takes values in `[0, 1]`. -/
-theorem mollify_indicator_mem_Icc (ρ : ContDiffBump (0 : Rn n)) {E : Set (Rn n)}
-    (hE : MeasurableSet E) (x : Rn n) : mollify ρ (E.indicator 1) x ∈ Icc (0 : ℝ) 1 := by
-  rw [mollify_apply]
-  have hi : Integrable fun y ↦ E.indicator (1 : Rn n → ℝ) y * ρ.normed volume (x - y) :=
-    (integrable_normed_sub ρ x).bdd_mul ((measurable_const.indicator hE).aestronglyMeasurable)
-      (c := 1) (Eventually.of_forall fun y ↦ by
-        by_cases hy : y ∈ E <;> simp [hy])
-  constructor
-  · exact integral_nonneg fun y ↦ mul_nonneg (by by_cases hy : y ∈ E <;> simp [hy])
-      (ρ.nonneg_normed _)
-  · calc ∫ y, E.indicator (1 : Rn n → ℝ) y * ρ.normed volume (x - y)
-        ≤ ∫ y, ρ.normed volume (x - y) := integral_mono hi (integrable_normed_sub ρ x) fun y ↦ by
-          by_cases hy : y ∈ E
-          · simp [hy]
-          · simp [hy, ρ.nonneg_normed]
-      _ = 1 := integral_normed_sub ρ x
-
 variable {Ω E : Set (Rn n)} {μ : Measure (Rn n)} {ν : Rn n → Rn n}
 
 /-- **Derivative of the mollified indicator.** For a Gauss–Green pair `(μ, ν)` of `E` on `Ω` and
@@ -466,10 +440,6 @@ section Convergence
   ⟨1 / (2 * (k + 1)), 1 / (k + 1), by positivity, by
     rw [div_lt_div_iff₀ (by positivity) (by positivity)]
     linarith⟩
-
-theorem mollifierBump_rOut (k : ℕ) :
-    (mollifierBump k : ContDiffBump (0 : Rn n)).rOut = 1 / (k + 1) :=
-  rfl
 
 theorem mollifierBump_rOut_le (k : ℕ) :
     (mollifierBump k : ContDiffBump (0 : Rn n)).rOut ≤

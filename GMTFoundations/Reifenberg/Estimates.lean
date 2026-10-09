@@ -354,10 +354,6 @@ theorem pow_le_dist_of_mem_good {i : ℕ} (hi : D.j ≤ i) {y y' : Rn n} (hy : y
       (Finset.mem_union_left _ (Finset.mem_union_left _ hy))
       (Finset.mem_union_left _ (Finset.mem_union_left _ hy')) hne
 
-theorem pairwise_good {i : ℕ} (hi : D.j ≤ i) :
-    ((D.good i : Set (Rn n))).Pairwise fun a b => D.ρ ^ i ≤ dist a b :=
-  fun _ ha _ hb hne => pow_le_dist_of_mem_good h hi ha hb hne
-
 /-- Packing count: a subfamily of `Good_i` inside a closed ball `B̄_R(w)` has at most
 `(2R/ρ^i + 1)ⁿ` elements. -/
 theorem card_good_le {i : ℕ} (hi : D.j ≤ i) {F : Finset (Rn n)} (hF : F ⊆ D.good i) {w : Rn n}

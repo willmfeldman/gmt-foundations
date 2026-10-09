@@ -100,13 +100,6 @@ theorem volume_ball_inter_eq (x : Rn n) {r : ℝ} (hr : 0 < r) (L : ℝ) (S : Se
   rw [h, ← mul_assoc, ← ENNReal.ofReal_mul (by positivity), mul_inv_cancel₀ (by positivity),
     ENNReal.ofReal_one, one_mul]
 
-/-- `|B_{rL}(x) ∖ S| = rⁿ |B_L ∖ S_{x,r}|`. -/
-theorem volume_ball_diff_eq (x : Rn n) {r : ℝ} (hr : 0 < r) (L : ℝ) (S : Set (Rn n)) :
-    volume (ball x (r * L) \ S) =
-      ENNReal.ofReal (r ^ n) * volume (ball 0 L \ blowupSet x r S) := by
-  rw [sdiff_eq, volume_ball_inter_eq x hr L, sdiff_eq]
-  rfl
-
 end Volume
 
 /-! ### `L¹` distance of indicators -/

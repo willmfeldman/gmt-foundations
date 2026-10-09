@@ -52,10 +52,6 @@ def projCoord (i : Fin (m + 1)) (x : Rn (m + 1)) (j : Fin m) : ℝ := x (i.succA
 theorem splitCoord_apply (i : Fin (m + 1)) (x : Rn (m + 1)) :
     splitCoord i x = (x i, projCoord i x) := rfl
 
-theorem splitCoord_symm_apply_self (i : Fin (m + 1)) (t : ℝ) (z : Fin m → ℝ) :
-    (splitCoord i).symm (t, z) i = t := by
-  simp [splitCoord]
-
 theorem projCoord_splitCoord_symm (i : Fin (m + 1)) (t : ℝ) (z : Fin m → ℝ) :
     projCoord i ((splitCoord i).symm (t, z)) = z := by
   have := (splitCoord i).apply_symm_apply (t, z)

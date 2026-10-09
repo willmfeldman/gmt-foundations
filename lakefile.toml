@@ -1,5 +1,5 @@
 name = "gmt_foundations"
-version = "0.3.0"
+version = "0.3.1"
 description = "Lean 4 formalization of geometric measure theory and Sobolev foundations: De Giorgi–Federer structure theory of sets of locally finite perimeter, Naber–Valtorta Reifenberg theorems for hyperplanes, and Rellich–Kondrachov compactness with compact trace"
 keywords = ["math", "mathlib", "geometric-measure-theory", "finite-perimeter", "reifenberg", "sobolev"]
 defaultTargets = ["GMTFoundations"]

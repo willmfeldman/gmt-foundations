@@ -108,23 +108,9 @@ theorem euclideanHausdorffMeasure_eq_zero_iff {X : Type*} [EMetricSpace X] [Meas
   rw [euclideanHausdorffMeasure_apply, mul_eq_zero,
     or_iff_right (addHaarScalarFactor_hausdorffMeasure_ne_zero d)]
 
-theorem euclideanHausdorffMeasure_lt_top_iff {X : Type*} [EMetricSpace X] [MeasurableSpace X]
-    [BorelSpace X] {d : ℕ} {s : Set X} : (μHE[d] : Measure X) s < ∞ ↔ μH[(d : ℝ)] s < ∞ := by
-  rw [euclideanHausdorffMeasure_apply, ENNReal.mul_lt_top_iff]
-  constructor
-  · rintro (⟨-, h⟩ | h | h)
-    · exact h
-    · exact absurd h (addHaarScalarFactor_hausdorffMeasure_ne_zero d)
-    · exact h ▸ ENNReal.zero_lt_top
-  · exact fun h => Or.inl ⟨ENNReal.coe_lt_top, h⟩
-
 theorem hausdorffN_eq_zero_iff_euclidean {d : ℕ} {s : Set (Rn n)} :
     hausdorffN n d s = 0 ↔ (μHE[d] : Measure (Rn n)) s = 0 := by
   rw [hausdorffN_eq_zero_iff, euclideanHausdorffMeasure_eq_zero_iff]
-
-theorem hausdorffN_lt_top_iff_euclidean {d : ℕ} {s : Set (Rn n)} :
-    hausdorffN n d s < ∞ ↔ (μHE[d] : Measure (Rn n)) s < ∞ := by
-  rw [hausdorffN_lt_top_iff, euclideanHausdorffMeasure_lt_top_iff]
 
 /-- A Lipschitz map increases `μHE[d]` by at most the factor `K ^ d`. -/
 theorem _root_.LipschitzOnWith.euclideanHausdorffMeasure_image_le {X Y : Type*} [EMetricSpace X]

@@ -43,8 +43,7 @@ the partition of unity is the explicit Lipschitz one of `Reifenberg/PartitionOfU
 
 * (G1) `mem_disc_of_add_smul_mem_ball`, Lemma G `IsChart.exists_global`, restriction
   `IsChart.mono`, rescaling `IsChart.rescale`.
-* (2.1)–(2.3) `reifenbergMap_eq_self`, `norm_reifenbergMap_sub_le`, `reifenbergMap_of_subset`,
-  and `reifenbergMap_eq_psi_add` (Miś's form `ψ w + Σ λ_c π_c w`).
+* (2.1)–(2.3) `reifenbergMap_eq_self`, `norm_reifenbergMap_sub_le`, `reifenbergMap_of_subset`.
 * `perturbId`: `id + H` with `H` `ℓ`-Lipschitz, `ℓ < 1`, `H ⊥ ν`, is a homeomorphism
   preserving `⟪·, ν⟫`.
 * PL `norm_sum_smul_sub_le`, the product lemma.
@@ -75,8 +74,6 @@ theorem C_sq_pos (n : ℕ) : 0 < C_sq n := by rw [C_sq]; positivity
 theorem one_le_C_sq (n : ℕ) : 1 ≤ C_sq n := by
   rw [C_sq_eq]; linarith [one_le_pow₀ (M₀ := ℝ) (a := 9) (by norm_num) (n := n)]
 
-theorem δ_sq_pos (n : ℕ) : 0 < δ_sq n := by rw [δ_sq]; exact one_div_pos.2 (C_sq_pos n)
-
 /-! ### Graphs, discs, charts -/
 
 /-- The graph of `g : Rn n → ℝ` over the plane `P = (p, ν)`: `{x + g(x) ν | x ∈ affPlane P}`. -/
@@ -96,8 +93,6 @@ disc (max-form: `|g| ≤ δ r` and `Lip g ≤ δ`). -/
 
 variable {P : Rn n × Rn n} {x x' w w' c c' : Rn n} {t : ℝ} {g g' : Rn n → ℝ} {T : Set (Rn n)}
   {R R' r δ δ' : ℝ}
-
-theorem mem_graphOn : w ∈ graphOn P g ↔ ∃ x ∈ affPlane P, x + g x • P.2 = w := Iff.rfl
 
 theorem add_smul_mem_graphOn (hx : x ∈ affPlane P) : x + g x • P.2 ∈ graphOn P g :=
   ⟨x, hx, rfl⟩
@@ -221,11 +216,6 @@ theorem IsChart.mono (hP : ‖P.2‖ = 1) (h : IsChart T P g c R r δ) (hc : dis
     _ = graphOn P g ∩ ball c R ∩ ball c' R' := by rw [h.1]
     _ = _ := by rw [inter_assoc, e]
 
-theorem IsChart.mono_delta (h : IsChart T P g c R r δ) (hr : 0 ≤ r) (hδ : δ ≤ δ') :
-    IsChart T P g c R r δ' :=
-  ⟨h.1, fun u hu => (h.2.1 u hu).trans (mul_le_mul_of_nonneg_right hδ hr),
-    h.2.2.weaken (Real.toNNReal_le_toNNReal hδ)⟩
-
 /-- Rescaling: `‖g‖_{r'} ≤ (r / r') ‖g‖_r` for `0 < r' ≤ r`. -/
 theorem IsChart.rescale (h : IsChart T P g c R r δ) (hδ : 0 ≤ δ) {r' : ℝ} (hr' : 0 < r')
     (hrr : r' ≤ r) : IsChart T P g c R r' (δ * r / r') := by
@@ -268,14 +258,6 @@ theorem IsChart.exists_global (hP : ‖P.2‖ = 1) (h : IsChart T P g c R r δ) 
   w - ∑ c ∈ Y, (puLambda r Y c w * ⟪w - (Vp c).1, (Vp c).2⟫) • (Vp c).2
 
 variable {Y Y' : Finset (Rn n)} {Vp : Rn n → Rn n × Rn n}
-
-/-- Miś's form: `σ(w) = ψ(w) w + Σ_c λ_c(w) π_c(w)`. -/
-theorem reifenbergMap_eq_psi_add (r : ℝ) (Y : Finset (Rn n)) (Vp : Rn n → Rn n × Rn n)
-    (w : Rn n) :
-    reifenbergMap r Y Vp w = puPsi r Y w • w + ∑ c ∈ Y, puLambda r Y c w • affProj (Vp c) w := by
-  simp only [reifenbergMap, puPsi, affProj, sub_smul, one_smul, smul_sub, Finset.sum_sub_distrib,
-    Finset.sum_smul, smul_smul]
-  abel
 
 /-- (2.1) `σ = id` off `⋃_c B_{4r}(c)`. -/
 theorem reifenbergMap_eq_self (hr : 0 < r) (h : ∀ c ∈ Y, 4 * r ≤ dist w c) :

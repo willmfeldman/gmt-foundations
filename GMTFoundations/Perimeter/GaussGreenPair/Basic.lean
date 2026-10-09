@@ -176,17 +176,6 @@ private theorem norm_sub_retract_le {u v : Rn n} (hu : ‖u‖ = 1) : ‖v - ret
       _ ≤ ‖v - u‖ := norm_sub_norm_le v u
       _ = ‖u - v‖ := norm_sub_rev v u
 
-private theorem inner_retract_ge {u v : Rn n} (hu : ‖u‖ = 1) :
-    1 - 2 * ‖u - v‖ ≤ ⟪retract v, u⟫ := by
-  have h1 : ‖v - retract v‖ ≤ ‖u - v‖ := norm_sub_retract_le hu
-  have h2 : ⟪u - retract v, u⟫ ≤ ‖u - retract v‖ := by
-    have := real_inner_le_norm (u - retract v) u
-    rwa [hu, mul_one] at this
-  have h3 : ‖u - retract v‖ ≤ ‖u - v‖ + ‖v - retract v‖ := norm_sub_le_norm_sub_add_norm_sub _ _ _
-  have h4 : ⟪retract v, u⟫ = 1 - ⟪u - retract v, u⟫ := by
-    rw [inner_sub_left, real_inner_self_eq_norm_sq, hu, real_inner_comm]; ring
-  linarith
-
 /-- Exhaustion of an open set by compact sets. Not private: reused in
 `GaussGreenPair/WeightedTV.lean`. -/
 theorem measure_le_of_forall_isCompact {μ : Measure (Rn n)} {V : Set (Rn n)}

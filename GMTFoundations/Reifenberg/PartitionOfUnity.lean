@@ -29,11 +29,9 @@ centres `Y`.
 ## Main statements
 
 * (1.0) `card_filter_dist_lt_four_le`: at most `9ⁿ` centres of `Y` lie within `4r` of any point.
-* (1.1) `puLambda_nonneg`, `sum_puLambda_le_one`, `puPsi_nonneg`, `puPsi_eq_max`.
-* (1.2) `puLambda_eq_zero` (off `B_{4r}(c)`); `sum_puLambda_eq_one`, `puPsi_eq_zero`
-  (on `B̄_{3r}(c)`).
-* (1.3) `sum_abs_puLambda_sub_le`: `Σ_c |λ_c(z) − λ_c(z')| ≤ 4·9ⁿ |z − z'| / r`, and the
-  consequences `abs_puLambda_sub_le`, `abs_puPsi_sub_le`.
+* (1.1) `puLambda_nonneg`, `sum_puLambda_le_one`, `puPsi_eq_max`.
+* (1.2) `puLambda_eq_zero` (off `B_{4r}(c)`); `puPsi_eq_zero` (on `B̄_{3r}(c)`).
+* (1.3) `sum_abs_puLambda_sub_le`: `Σ_c |λ_c(z) − λ_c(z')| ≤ 4·9ⁿ |z − z'| / r`.
 * (1.4) `puSum_of_subset`, `puLambda_of_subset`: localization to a subfamily.
 -/
 
@@ -65,16 +63,9 @@ variable {r : ℝ} {Y Y' : Finset (Rn n)} {c z z' : Rn n}
 
 theorem puBump_nonneg : 0 ≤ puBump r c z := le_min zero_le_one (le_max_left _ _)
 
-theorem puBump_le_one : puBump r c z ≤ 1 := min_le_left _ _
-
 theorem puBump_eq_zero (hr : 0 < r) (h : 4 * r ≤ dist z c) : puBump r c z = 0 := by
   have h4 : 4 ≤ dist z c / r := by rwa [le_div_iff₀ hr]
   rw [puBump, max_eq_left (by linarith), min_eq_right zero_le_one]
-
-theorem dist_lt_of_puBump_pos (hr : 0 < r) (h : 0 < puBump r c z) : dist z c < 4 * r := by
-  by_contra h'
-  rw [puBump_eq_zero hr (not_lt.1 h')] at h
-  exact lt_irrefl _ h
 
 theorem puBump_eq_one (hr : 0 < r) (h : dist z c ≤ 3 * r) : puBump r c z = 1 := by
   have h3 : dist z c / r ≤ 3 := by rwa [div_le_iff₀ hr]
@@ -150,16 +141,10 @@ theorem abs_puSum_sub_le (hr : 0 < r)
 
 /-! ### (1.1), (1.2) Algebra and supports -/
 
-theorem puSum_nonneg : 0 ≤ puSum r Y z := Finset.sum_nonneg fun _ _ => puBump_nonneg
-
 theorem one_le_max_puSum : 1 ≤ max (puSum r Y z) 1 := le_max_right _ _
 
 theorem puLambda_nonneg : 0 ≤ puLambda r Y c z :=
   div_nonneg puBump_nonneg (zero_le_one.trans one_le_max_puSum)
-
-theorem puLambda_le_one : puLambda r Y c z ≤ 1 :=
-  (div_le_one (zero_lt_one.trans_le one_le_max_puSum)).2
-    (puBump_le_one.trans one_le_max_puSum)
 
 theorem sum_puLambda_eq : ∑ c ∈ Y, puLambda r Y c z = puSum r Y z / max (puSum r Y z) 1 := by
   rw [puSum, Finset.sum_div]
@@ -168,13 +153,6 @@ theorem sum_puLambda_eq : ∑ c ∈ Y, puLambda r Y c z = puSum r Y z / max (puS
 theorem sum_puLambda_le_one : ∑ c ∈ Y, puLambda r Y c z ≤ 1 := by
   rw [sum_puLambda_eq]
   exact (div_le_one (zero_lt_one.trans_le one_le_max_puSum)).2 (le_max_left _ _)
-
-theorem sum_puLambda_nonneg : 0 ≤ ∑ c ∈ Y, puLambda r Y c z :=
-  Finset.sum_nonneg fun _ _ => puLambda_nonneg
-
-theorem puPsi_nonneg : 0 ≤ puPsi r Y z := sub_nonneg.2 sum_puLambda_le_one
-
-theorem puPsi_le_one : puPsi r Y z ≤ 1 := sub_le_self _ sum_puLambda_nonneg
 
 theorem puPsi_add_sum : puPsi r Y z + ∑ c ∈ Y, puLambda r Y c z = 1 := sub_add_cancel _ _
 
@@ -201,13 +179,6 @@ theorem one_le_puSum (hr : 0 < r) (hc : c ∈ Y) (h : dist z c ≤ 3 * r) : 1 �
 /-- (1.2) `ψ = 0` on `B̄_{3r}(c)`, `c ∈ Y`. -/
 theorem puPsi_eq_zero (hr : 0 < r) (hc : c ∈ Y) (h : dist z c ≤ 3 * r) : puPsi r Y z = 0 := by
   rw [puPsi_eq_max, max_eq_right (by linarith [one_le_puSum hr hc h])]
-
-/-- (1.2) `Σ_c λ_c = 1` on `B̄_{3r}(c)`, `c ∈ Y` (Miś (1)). -/
-theorem sum_puLambda_eq_one (hr : 0 < r) (hc : c ∈ Y) (h : dist z c ≤ 3 * r) :
-    ∑ c ∈ Y, puLambda r Y c z = 1 := by
-  have := puPsi_add_sum (r := r) (Y := Y) (z := z)
-  rw [puPsi_eq_zero hr hc h, zero_add] at this
-  exact this
 
 /-! ### (1.3) Lipschitz bounds -/
 
@@ -242,22 +213,6 @@ theorem sum_abs_puLambda_sub_le (hr : 0 < r)
   have h1 : (∑ c ∈ Y, puLambda r Y c z') * |m - m'| ≤ |m - m'| :=
     mul_le_of_le_one_left (abs_nonneg _) sum_puLambda_le_one
   linarith
-
-/-- (1.3) `|λ_c(z) − λ_c(z')| ≤ L_n |z − z'| / r` for `c ∈ Y` (Miś (3)). -/
-theorem abs_puLambda_sub_le (hr : 0 < r)
-    (hY : (Y : Set (Rn n)).Pairwise fun a b => r ≤ dist a b) (hc : c ∈ Y) (z z' : Rn n) :
-    |puLambda r Y c z - puLambda r Y c z'| ≤ 4 * 9 ^ n * (dist z z' / r) :=
-  (Finset.single_le_sum (f := fun c => |puLambda r Y c z - puLambda r Y c z'|)
-    (fun _ _ => abs_nonneg _) hc).trans (sum_abs_puLambda_sub_le hr hY z z')
-
-/-- (1.3) `|ψ(z) − ψ(z')| ≤ L_n |z − z'| / r` (Miś (4)). -/
-theorem abs_puPsi_sub_le (hr : 0 < r)
-    (hY : (Y : Set (Rn n)).Pairwise fun a b => r ≤ dist a b) (z z' : Rn n) :
-    |puPsi r Y z - puPsi r Y z'| ≤ 4 * 9 ^ n * (dist z z' / r) := by
-  rw [puPsi, puPsi, sub_sub_sub_cancel_left, ← Finset.sum_sub_distrib, ← abs_neg,
-    ← Finset.sum_neg_distrib]
-  simp only [neg_sub]
-  exact (Finset.abs_sum_le_sum_abs _ _).trans (sum_abs_puLambda_sub_le hr hY z z')
 
 /-! ### (1.4) Localization -/
 

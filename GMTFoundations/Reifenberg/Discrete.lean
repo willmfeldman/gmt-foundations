@@ -152,8 +152,6 @@ variable {Z : Finset (Rn n)} {lev : Rn n → ℕ} {J M : ℝ} {p : Rn n} {j : �
 @[simp] theorem stepCover_j : (stepCover Z lev M p j).j = j := rfl
 @[simp] theorem stepCover_P :
     (stepCover Z lev M p j).P = (Z : Set (Rn n)) ∩ ball p (ledgerRho n ^ j) := rfl
-theorem stepCover_V (i : ℕ) (y : Rn n) : (stepCover Z lev M p j).V i y =
-    bestPlane (levMeasure (ledgerRho n) Z lev) y (ledgerKappa n * ledgerRho n ^ i) := rfl
 @[simp] theorem stepCover_lev (z : Rn n) : (stepCover Z lev M p j).lev z = (lev z : ℕ∞) := rfl
 @[simp] theorem stepCover_good_top : (stepCover Z lev M p j).good j = {p} :=
   CoverData.good_top _

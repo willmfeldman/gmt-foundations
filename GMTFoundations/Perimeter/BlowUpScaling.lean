@@ -88,9 +88,6 @@ theorem measurableSet_blowupSet (hE : MeasurableSet E) (x : Rn n) (r : ℝ) :
     MeasurableSet (blowupSet x r E) :=
   (measurable_const_add x |>.comp (measurable_const_smul r)) hE
 
-theorem mem_blowupSet {x : Rn n} {r : ℝ} {z : Rn n} : z ∈ blowupSet x r E ↔ x + r • z ∈ E :=
-  Iff.rfl
-
 /-- `B_L ⊆ Ω_{x,r}` as soon as `B_{rL}(x) ⊆ Ω`. -/
 theorem ball_subset_blowupSet {x : Rn n} {r L : ℝ} (hr : 0 < r) (h : ball x (r * L) ⊆ Ω) :
     ball 0 L ⊆ blowupSet x r Ω := by

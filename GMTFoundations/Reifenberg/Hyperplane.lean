@@ -33,11 +33,10 @@ up to absolute constants when one plane meets `B_{r/2}(x)`.
 ## Main statements
 
 * PD1 `planeDist_comm`; PD2 `planeDist_triangle`; PD3 `planeDist_le_of_center` (change of centre
-  and scale); PD4 `exists_sign_of_planeDist_le` (pointwise form); PD7 `abs_abs_sub_le_planeDist`;
-  PD8 `planeDist_self`, `planeDist_nonneg`. None of these needs unit normals.
+  and scale); PD4 `exists_sign_of_planeDist_le` (pointwise form); PD8 `planeDist_nonneg`. None of
+  these needs unit normals.
 * `affPlane P = {x | ⟪x − p, ν⟫ = 0}` and the affine projection `affProj P w = w − f_P(w) ν_P`
-  (bridges `affPlane_eq_preimage_hyperplane`, `affPlane_eq_image_hyperplane` to the linear
-  `GMT.hyperplane` of `GMT/FlatPiece`).
+  (a translate of the linear `GMT.hyperplane` of `GMT/FlatPiece`).
 * PD5 `norm_affProj_sub_affProj_le` (affine projections), PD6 `norm_projH_sub_projH_le` (linear
   projections), with the linear projection `GMT.projH ν w = w − ⟪w, ν⟫ ν` of `GMT/FlatPiece`.
 * The quadratic projection lemma (Miś Lemma 3.4, `‖π₁π₂ − id‖ ≤ Cδ²` on `V₁`). For hyperplanes
@@ -95,11 +94,6 @@ theorem planeDist_nonneg (hr : 0 ≤ r) : 0 ≤ planeDist x r P Q := by
   obtain ⟨s, -, h⟩ := exists_sign_planeDist_eq x r P Q
   rw [h]
   exact planeDistSign_nonneg hr s
-
-/-- PD8: `planeDist x r P P = 0` for `r ≥ 0`. -/
-theorem planeDist_self (hr : 0 ≤ r) : planeDist x r P P = 0 := by
-  rw [planeDist, sub_self, sub_self, norm_zero, abs_zero, zero_div, add_zero]
-  exact min_eq_left (add_nonneg (norm_nonneg _) (div_nonneg (abs_nonneg _) hr))
 
 /-- PD1: `planeDist` is symmetric. -/
 theorem planeDist_comm (x : Rn n) (r : ℝ) (P Q : Rn n × Rn n) :
@@ -205,15 +199,6 @@ theorem exists_sign_of_planeDist_le (hr : 0 < r) (h : planeDist x r P Q ≤ δ) 
     _ ≤ r * δ + ‖y - x‖ * δ := add_le_add hHδ (mul_le_mul_of_nonneg_left hAδ (norm_nonneg _))
     _ = (r + ‖y - x‖) * δ := by ring
 
-/-- PD7: the distances of a point to two planes differ by at most `(r + ‖y − x‖) planeDist`. -/
-theorem abs_abs_sub_le_planeDist (hr : 0 < r) (P Q : Rn n × Rn n) (y : Rn n) :
-    |(|⟪y - P.1, P.2⟫| - |⟪y - Q.1, Q.2⟫|)| ≤ (r + ‖y - x‖) * planeDist x r P Q := by
-  obtain ⟨s, hs, -, h⟩ := exists_sign_of_planeDist_le (x := x) hr (le_refl (planeDist x r P Q))
-  have habs : |s * ⟪y - Q.1, Q.2⟫| = |⟪y - Q.1, Q.2⟫| := by
-    rcases hs with rfl | rfl <;> simp
-  rw [← habs]
-  exact (abs_abs_sub_abs_le_abs_sub _ _).trans (h y)
-
 /-! ### Projections (PD5, PD6) and the quadratic projection lemma (7a), (7b) -/
 
 /-- The plane `P = (p, ν)` as a set: `{x | ⟪x − p, ν⟫ = 0}`. -/
@@ -225,21 +210,6 @@ theorem abs_abs_sub_le_planeDist (hr : 0 < r) (P Q : Rn n × Rn n) (y : Rn n) :
 
 @[simp] theorem mem_affPlane {P : Rn n × Rn n} {x : Rn n} :
     x ∈ affPlane P ↔ ⟪x - P.1, P.2⟫ = 0 := Iff.rfl
-
-/-- Bridge to the linear `GMT.hyperplane ν = {y | ⟪y, ν⟫ = 0}`: `affPlane P = P.1 + ν^⊥`. -/
-theorem affPlane_eq_preimage_hyperplane (P : Rn n × Rn n) :
-    affPlane P = (fun x => x - P.1) ⁻¹' GMT.hyperplane P.2 := rfl
-
-/-- Bridge to `GMT.hyperplane`: `affPlane P = P.1 + GMT.hyperplane P.2`. -/
-theorem affPlane_eq_image_hyperplane (P : Rn n × Rn n) :
-    affPlane P = (fun y => P.1 + y) '' GMT.hyperplane P.2 := by
-  ext x
-  simp only [mem_affPlane, Set.mem_image, GMT.mem_hyperplane]
-  constructor
-  · intro h
-    exact ⟨x - P.1, h, add_sub_cancel _ _⟩
-  · rintro ⟨y, hy, rfl⟩
-    rwa [add_sub_cancel_left]
 
 theorem affProj_eq_add_projH (P : Rn n × Rn n) (y : Rn n) :
     affProj P y = P.1 + GMT.projH P.2 (y - P.1) := by

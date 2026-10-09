@@ -104,19 +104,6 @@ theorem injOn_of_charts {L : Rn n → ℝ} (hε : ε < 1 / 2) (hr : 0 < r)
     rw [hab, dist_self, zero_sub, abs_neg, abs_of_nonneg dist_nonneg] at this
     linarith [mul_lt_mul_of_pos_right hε hr]
 
-/-- Scale-aware bi-Lipschitz bound at one scale: with a uniform chart constant
-`L ≥ 1`, pairs at distance `< r` are `L`-bi-Lipschitz. -/
-theorem bilipschitz_of_charts {L : ℝ} (hL : 1 ≤ L)
-    (hid : ∀ z, (∀ y ∈ Y, 4 * r ≤ dist z y) → σ z = z)
-    (hchart : ∀ y ∈ Y, ∀ a ∈ T ∩ ball y (5 * r), ∀ b ∈ T ∩ ball y (5 * r),
-      dist (σ a) (σ b) ≤ L * dist a b ∧ dist a b ≤ L * dist (σ a) (σ b))
-    {a b : Rn n} (ha : a ∈ T) (hb : b ∈ T) (hab : dist a b < r) :
-    dist (σ a) (σ b) ≤ L * dist a b ∧ dist a b ≤ L * dist (σ a) (σ b) := by
-  rcases dist_lt_cases hid hab with ⟨y, hy, hay, hby⟩ | ⟨hfa, hfb⟩
-  · exact hchart y hy a ⟨ha, hay⟩ b ⟨hb, hby⟩
-  · rw [hfa, hfb]
-    exact ⟨le_mul_of_one_le_left dist_nonneg hL, le_mul_of_one_le_left dist_nonneg hL⟩
-
 end Injectivity
 
 /-! ### The engine -/
