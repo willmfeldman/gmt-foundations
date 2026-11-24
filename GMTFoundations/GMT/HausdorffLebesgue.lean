@@ -114,7 +114,7 @@ theorem volume_ball_mul_hausdorffMeasure_ball_le :
         exact (measure_mono (by simp)).trans (measure_union_le _ _)
     _ ≤ ω * (∑' x : t, ENNReal.ofReal (2 * ρ x) ^ d + 0) := by
         gcongr
-        · refine (measure_biUnion_le _ htc _).trans (ENNReal.tsum_le_tsum fun x => ?_)
+        · refine (measure_biUnion_le _ htc _).trans (tsum_le_tsum fun x => ?_)
           refine (OuterMeasure.mkMetric'.pre_le ((hdiam x x.2).trans (hsmall x x.2))).trans ?_
           rw [hm, ← ENNReal.rpow_natCast]
           exact ENNReal.rpow_le_rpow (hdiam x x.2) (Nat.cast_nonneg d)
@@ -146,13 +146,13 @@ theorem two_pow_smul_volume_le_hausdorffMeasure :
   have hωt : ω ≠ ⊤ := measure_ball_lt_top.ne
   have h : (ω⁻¹ * 2 ^ d) • (volume : Measure (Rn d)) ≤ μH[d] := by
     refine le_hausdorffMeasure _ _ 1 zero_lt_one fun s _ => ?_
-    rw [Measure.smul_apply, smul_eq_mul, ENNReal.rpow_natCast, mul_assoc,
+    rw [smul_apply, smul_eq_mul, ENNReal.rpow_natCast, mul_assoc,
       ENNReal.inv_mul_le_iff hω0 hωt]
     exact two_pow_mul_volume_le_mul_ediam_pow s
   intro s
   have hs := h s
-  rw [Measure.smul_apply, smul_eq_mul, mul_assoc] at hs
-  rw [Measure.smul_apply, Measure.smul_apply, smul_eq_mul, smul_eq_mul]
+  rw [smul_apply, smul_eq_mul, mul_assoc] at hs
+  rw [smul_apply, smul_apply, smul_eq_mul, smul_eq_mul]
   calc 2 ^ d * volume s = ω * (ω⁻¹ * (2 ^ d * volume s)) := by
         rw [← mul_assoc, ENNReal.mul_inv_cancel hω0 hωt, one_mul]
     _ ≤ ω * μH[d] s := by gcongr
@@ -169,11 +169,11 @@ theorem volume_ball_smul_hausdorffMeasure :
     rfl
   have hup : ω * c ≤ 2 ^ d := by
     have h := volume_ball_mul_hausdorffMeasure_ball_le (d := d)
-    rw [hc, Measure.smul_apply, smul_eq_mul, ← mul_assoc] at h
+    rw [hc, smul_apply, smul_eq_mul, ← mul_assoc] at h
     exact (ENNReal.mul_le_mul_iff_left hω0 hωt).1 h
   have hlow : 2 ^ d ≤ ω * c := by
     have h := two_pow_smul_volume_le_hausdorffMeasure (d := d) (ball 0 1)
-    rw [hc, Measure.smul_apply, Measure.smul_apply, Measure.smul_apply, smul_eq_mul,
+    rw [hc, smul_apply, smul_apply, smul_apply, smul_eq_mul,
       smul_eq_mul, smul_eq_mul, ← mul_assoc] at h
     exact (ENNReal.mul_le_mul_iff_left hω0 hωt).1 h
   rw [hc, smul_smul, le_antisymm hup hlow]

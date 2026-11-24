@@ -87,7 +87,7 @@ private theorem exists_smooth_approx_of_contDiff_one {ψ : Rn n → Rn n} (hψ :
         convolution (ρ.normed volume) (fderiv ℝ ψ) (ContinuousLinearMap.lsmul ℝ ℝ) volume x := by
       rw [convolution_def, convolution_def]
       congr 1
-    have : CompleteSpace (Rn n →L[ℝ] Rn n) := FiniteDimensional.complete ℝ _
+    have : CompleteSpace (Rn n →L[ℝ] Rn n) := FiniteDimensional.completeSpace ℝ _
     rw [hderiv, hconv, ← dist_eq_norm]
     refine ρ.dist_normed_convolution_le hDcont.aestronglyMeasurable fun y hy ↦ (h₂ ?_).le
     exact (mem_ball.1 hy).trans_le ((min_le_left _ _).trans (min_le_right _ _))

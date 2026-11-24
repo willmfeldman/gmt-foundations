@@ -8,6 +8,8 @@ module
 public import GMTFoundations.Defs.Setup
 public import Mathlib.Analysis.Calculus.Gradient.Basic
 import Mathlib.Analysis.Calculus.Rademacher
+import Mathlib.Analysis.Calculus.Deriv.Comp
+import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 import Mathlib.MeasureTheory.Measure.RegularityCompacts
 import Mathlib.Topology.UniformSpace.Uniformizable
 

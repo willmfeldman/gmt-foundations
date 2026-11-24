@@ -14,8 +14,8 @@ project:
   license: "Apache-2.0"
   language: "Lean"
   theorem_prover: "Lean 4"
-  lean_toolchain: "leanprover/lean4:v4.35.0-rc3"
-  mathlib: "v4.35.0-rc3"
+  lean_toolchain: "leanprover/lean4:v4.36.0"
+  mathlib: "v4.36.0"
 
 build:
   package_file: "lakefile.toml"
@@ -214,11 +214,9 @@ comparator:
       vocabulary, importing Mathlib only) and states them with `sorry`; Solution.lean imports
       Vocabulary and GMTFoundations and proves the same statements.
     release_workflow: ".github/workflows/release-comparator.yml"
-    comparator_revision: "fd5d5bcf14177b187f66d4502071268d877887c3"
-    lean4export_revision: "66f1fb4bc256072069767fce52d39480e4524869"
-    landrun_revision: "811cfff51ceaf3d9843708aa6d22e9b84ccac8b4"
-    toolchain: "leanprover/lean4:v4.35.0-rc3"
-    mathlib: "v4.35.0-rc3"
+    engine: "lake comparator"
+    toolchain: "leanprover/lean4:v4.36.0"
+    mathlib: "v4.36.0"
     permitted_axioms:
       - "propext"
       - "Classical.choice"
@@ -267,5 +265,5 @@ ci:
     elaboration of every challenge workspace's Vocabulary, Challenge and Solution sources.
   release_workflow: ".github/workflows/release-comparator.yml"
   release_check: >-
-    Comparator execution over every challenges/*/config.json with pinned tool revisions,
+    The pinned toolchain's `lake comparator --paranoid` over every challenges/*/config.json,
     uploading an attestation artifact; required before any tag or GitHub release.

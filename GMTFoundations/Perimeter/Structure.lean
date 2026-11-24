@@ -59,7 +59,7 @@ variable {n : ℕ}
 
 /-- `closedBall 0 m` minus the `1/(m+1)`-neighbourhood of `Ωᶜ`: compact subsets of `Ω` increasing
 to `Ω` (for `Ω` open). -/
-def exhaustOpen (Ω : Set (Rn n)) (m : ℕ) : Set (Rn n) :=
+noncomputable def exhaustOpen (Ω : Set (Rn n)) (m : ℕ) : Set (Rn n) :=
   closedBall 0 m \ thickening (1 / ((m : ℝ) + 1)) Ωᶜ
 
 theorem isCompact_exhaustOpen (Ω : Set (Rn n)) (m : ℕ) : IsCompact (exhaustOpen Ω m) :=

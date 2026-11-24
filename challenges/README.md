@@ -1,7 +1,8 @@
 # Comparator challenges
 
-This directory contains standalone [Comparator](https://github.com/leanprover/comparator)
-workspaces for the nine headline theorems of `GMTFoundations`. Comparator checks that a solution
+This directory contains standalone comparator workspaces for the nine headline theorems of
+`GMTFoundations`, checked by `lake comparator`, which ships with the Lean toolchain. Comparator
+checks that a solution
 proves exactly the statement of a trusted challenge, passes the kernel, and uses only permitted
 axioms.
 
@@ -70,37 +71,32 @@ fresh GitHub-hosted Linux runner (`ubuntu-latest`). It:
 2. fetches the Mathlib cache and builds the trusted library;
 3. validates the challenge inventory against `formalization.yaml`
    (`scripts/check-formalization-manifest.rb --metadata-only`);
-4. installs the pinned tools (`scripts/release-comparator.sh install`);
-5. builds only the trusted `Challenge` target of each workspace, outside the sandbox (Comparator's
-   sandbox cannot write the shared dependency folder);
-6. runs Comparator on every `challenges/*/config.json` (`scripts/release-comparator.sh run`),
-   failing on any statement mismatch or unpermitted axiom; and
+4. prepares the comparator sandbox (`scripts/release-comparator.sh install`: bubblewrap and
+   unprivileged user namespaces);
+5. builds only the trusted `Vocabulary` and `Challenge` targets of each workspace, outside the
+   sandbox (the sandbox cannot write the shared dependency folder);
+6. runs the toolchain's `lake comparator --paranoid` on every `challenges/*/config.json`
+   (`scripts/release-comparator.sh run`), failing on any statement mismatch, unpermitted axiom,
+   or rejection by Lean's kernel or by any external checker bundled with the toolchain; and
 7. uploads the attestation artifact `comparator-attestation-<commit>`.
 
 Do not run `lake build Solution`, or otherwise compile `Solution.lean`, in the release workspace
 before Comparator has processed it. This ordering follows Comparator's documented threat model.
 
-Pinned release tools:
-
-- Lean and Mathlib: `v4.35.0-rc3` (Mathlib `c55e6e786f49471c72fbddbec5415808896aec1e`);
-- Comparator: `fd5d5bcf14177b187f66d4502071268d877887c3`;
-- `lean4export`: `66f1fb4bc256072069767fce52d39480e4524869`, built with this repository's
-  `lean-toolchain`; and
-- `landrun`: `811cfff51ceaf3d9843708aa6d22e9b84ccac8b4`.
-
-Comparator runs under `landrun` without the additional `systemd-run` containment that upstream
-recommends for a full adversarial guarantee. A passing run establishes Comparator's statement,
-kernel and permitted-axiom checks, not that stronger sandbox claim.
+Release tools: Lean and Mathlib `v4.36.0` (Mathlib `fc4f59e577feb1a4956671bc04ac18aaaf8cd842`).
+The comparator is `lake comparator`, which ships with the pinned Lean toolchain, so the toolchain
+pin is the only tool pin. It runs in Lake's bubblewrap sandbox; because that sandbox hides home
+directories, the script judges a copy of the checkout placed outside `/home`.
 
 The attestation artifact contains `attestation.json` (tested commit and tree SHA, Lean and
-Mathlib revisions, the three tool revisions, and each configuration with its result and axiom
-check) and the complete per-configuration logs. Before a version tag, dispatch the workflow on
+Mathlib revisions, the comparator engine with its Lake and bubblewrap versions and the
+`--paranoid` setting, and each configuration with its result and axiom check) and the complete per-configuration logs. Before a version tag, dispatch the workflow on
 the exact release commit, require it to pass, and attach the artifact to the GitHub release.
 
 ## Acceptance record
 
-No Comparator run has been recorded yet. The first release run will be summarized here (date,
-commit, tool revisions, per-workspace result).
+Each release records its comparator run in the attestation attached to the GitHub release (date,
+commit, toolchain, per-workspace result).
 
 Local checks at the time of writing: all three workspaces build `Vocabulary`, `Challenge` and
 `Solution`, and `#print axioms` on every solution theorem gives exactly `propext`,

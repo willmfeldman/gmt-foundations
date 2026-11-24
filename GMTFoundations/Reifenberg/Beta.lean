@@ -7,6 +7,7 @@ module
 
 public import GMTFoundations.Defs.GMT
 import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 import Mathlib.Order.CompletePartialOrder
@@ -322,8 +323,8 @@ theorem lintegral_Ioc_inv_ofReal {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     (fun t ht => (ENNReal.ofReal_inv_of_pos (ha.trans ht.1)).symm)]
   rw [← ofReal_integral_eq_lintegral_ofReal]
   · rw [← intervalIntegral.integral_of_le hab, integral_inv_of_pos ha (ha.trans_le hab)]
-  · exact ((continuousOn_inv₀.mono fun t ht => (ha.trans_le ht.1).ne').integrableOn_Icc).mono_set
-      Ioc_subset_Icc_self
+  · exact ((continuousOn_inv₀.mono fun t (ht : t ∈ Icc a b) =>
+      (ha.trans_le ht.1).ne').integrableOn_Icc).mono_set Ioc_subset_Icc_self
   · filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht
     exact inv_nonneg.2 (ha.trans ht.1).le
 
@@ -399,7 +400,7 @@ theorem sum_beta_le_integral (hn : 1 ≤ n) (μ : Measure (Rn n)) (z : Rn n) {ρ
   calc ∑' α : ℕ, jonesBetaSq μ z (c * ρ ^ (α + 1))
       ≤ ∑' α : ℕ, ENNReal.ofReal (ρ⁻¹ ^ (n + 1) / Real.log ρ⁻¹) *
           ∫⁻ t in Ico (f (α + 1)) (f α), jonesBetaSq μ z t / ENNReal.ofReal t :=
-        ENNReal.tsum_le_tsum hpiece
+        tsum_le_tsum hpiece
     _ = ENNReal.ofReal (ρ⁻¹ ^ (n + 1) / Real.log ρ⁻¹) *
           ∫⁻ t in ⋃ α, Ico (f (α + 1)) (f α), jonesBetaSq μ z t / ENNReal.ofReal t := by
         rw [ENNReal.tsum_mul_left, lintegral_iUnion (fun _ => measurableSet_Ico) hdisj]
@@ -453,7 +454,7 @@ theorem integral_le_sum_beta (hn : 1 ≤ n) (μ : Measure (Rn n)) (z : Rn n) {ρ
     _ ≤ ∑' α, ∫⁻ t in Ioc (f (α + 1)) (f α), jonesBetaSq μ z t / ENNReal.ofReal t :=
         lintegral_iUnion_le _ _
     _ ≤ ∑' α, ENNReal.ofReal (ρ⁻¹ ^ (n + 1) * Real.log ρ⁻¹) * jonesBetaSq μ z (f α) :=
-        ENNReal.tsum_le_tsum hpiece
+        tsum_le_tsum hpiece
     _ = _ := ENNReal.tsum_mul_left
 
 /-- The form used by the discrete Reifenberg estimates: the full sum from scale `c` down is
@@ -478,10 +479,10 @@ theorem tsum_beta_le_integral_two_mul (hn : 1 ≤ n) (μ : Measure (Rn n)) (z : 
   have h2 := sum_beta_le_integral hn μ z hρ0 hρ1 hc
   have hunion : I₁ + I₂ ≤ ∫⁻ t in Ioo 0 (2 * c), jonesBetaSq μ z t / ENNReal.ofReal t := by
     rw [add_comm, ← lintegral_union measurableSet_Ioo
-      (Set.disjoint_left.2 fun _ h h' => lt_asymm h.2 h'.1)]
+      (Set.disjoint_left.2 fun _ (h : _ ∈ Ioo (0 : ℝ) c) h' => lt_asymm h.2 h'.1)]
     exact lintegral_mono_set (union_subset (Ioo_subset_Ioo_right (by linarith))
       (Ioo_subset_Ioo_left hc.le))
-  rw [tsum_eq_zero_add' ENNReal.summable]
+  rw [tsum_eq_zero_add' CompleteLattice.summable]
   calc jonesBetaSq μ z (c * ρ ^ 0) + ∑' α : ℕ, jonesBetaSq μ z (c * ρ ^ (α + 1))
       ≤ ENNReal.ofReal A * I₁ + ENNReal.ofReal B * I₂ := add_le_add h1 h2
     _ ≤ ENNReal.ofReal (A + B) * I₁ + ENNReal.ofReal (A + B) * I₂ := by

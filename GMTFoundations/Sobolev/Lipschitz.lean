@@ -11,6 +11,7 @@ public import Mathlib.Analysis.Calculus.Rademacher
 public import Mathlib.Analysis.Calculus.FDeriv.Measurable
 public import Mathlib.Topology.MetricSpace.Lipschitz
 public import Mathlib.Analysis.Calculus.Gradient.Basic
+import Mathlib.Analysis.Calculus.ContDiff.RCLike
 
 /-!
 # Locally Lipschitz functions are `H¹_loc` with weak gradient `∇u`

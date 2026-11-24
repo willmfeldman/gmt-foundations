@@ -359,7 +359,7 @@ variable {ι : Type*} {S : Finset ι} {x : ι → Rn n} {w : ι → ℝ≥0∞}
 
 theorem atomMeasure_apply (A : Set (Rn n)) [DecidablePred fun i => x i ∈ A] :
     atomMeasure S x w A = ∑ i ∈ S with x i ∈ A, w i := by
-  simp only [atomMeasure, Measure.finsetSum_apply, Measure.smul_apply, Measure.dirac_apply,
+  simp only [atomMeasure, sum_apply, smul_apply, Measure.dirac_apply,
     smul_eq_mul, Finset.sum_filter]
   refine Finset.sum_congr rfl fun i _ => ?_
   by_cases h : x i ∈ A <;> simp [h]

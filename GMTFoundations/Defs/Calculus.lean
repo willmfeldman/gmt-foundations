@@ -7,6 +7,8 @@ module
 
 public import GMTFoundations.Defs.Setup
 public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
 import Mathlib.Analysis.Distribution.DerivNotation
 import Mathlib.Analysis.Calculus.Gradient.Basic
 

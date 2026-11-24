@@ -8,6 +8,7 @@ module
 public import GMTFoundations.Defs.Setup
 import GMTFoundations.Vendor.Isoperimetric.BrunnMinkowski
 import Mathlib.MeasureTheory.Measure.Haar.Unique
+import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 
 /-!
 # The isodiametric inequality

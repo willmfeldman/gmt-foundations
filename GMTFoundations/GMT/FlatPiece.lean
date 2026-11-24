@@ -127,7 +127,7 @@ theorem IsFlatPiece.map_restrict_le {ν : Rn n} {ε : ℝ} {G : Set (Rn n)} (h :
       flatConst ε ^ k • (μHE[k] : Measure (Rn n)).restrict (projH ν '' G) := by
   refine Measure.le_iff.2 fun B hB => ?_
   rw [Measure.map_apply (measurable_projH ν) hB, Measure.restrict_apply (measurable_projH ν hB),
-    Measure.smul_apply, Measure.restrict_apply hB, smul_eq_mul, ← image_preimage_inter]
+    smul_apply, Measure.restrict_apply hB, smul_eq_mul, ← image_preimage_inter]
   exact h.measure_le k hν hε inter_subset_right
 
 theorem le_map_restrict {ν : Rn n} (hν : ‖ν‖ = 1) (G : Set (Rn n)) :

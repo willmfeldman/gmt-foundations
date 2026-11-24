@@ -677,8 +677,8 @@ theorem prekopa_leindler
       * (∫⁻ x, f x) ^ (1 - θ) * (∫⁻ x, g x) ^ θ ≤ ∫⁻ x, h x := by
 
   induction d using Nat.case_strong_induction_on with
-  | hz => simpa only [CharP.cast_eq_zero, zero_add, one_mul] using prekopa_leindler_1d_fin1 hθfgh
-  | hi d hd =>
+  | zero => simpa only [CharP.cast_eq_zero, zero_add, one_mul] using prekopa_leindler_1d_fin1 hθfgh
+  | succ d hd =>
 
   -- The goal is to prove the result for Fin (d + 2) → ℝ.
   let ⟨hθ0, hθ1, hf_measurable, hg_measurable, hh_measurable, hfgh⟩ := hθfgh

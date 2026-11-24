@@ -465,7 +465,7 @@ theorem sum_sum_beta_le (h : D.EstHyp κ J) {s : ℝ} (hs1 : 1 ≤ s) (hs3 : s �
       congr 1
       ring
     rw [hre]
-    exact (ENNReal.sum_le_tsum _).trans
+    exact (sum_le_tsum _).trans
       (tsum_beta_le_integral_two_mul hn μ w hρ0 hρ1 (by have := h.pow_pos j; positivity))
   -- (d) the hypothesis (1.3) on `B_{12 ρ^j}(p) ⊆ B_{R₀ ρ^j}(p)`
   have hd : ∫⁻ w in U, (∫⁻ t in Ioo 0 (2 * (2 * (s * ρ ^ j))),

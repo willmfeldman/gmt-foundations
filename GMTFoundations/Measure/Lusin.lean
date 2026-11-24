@@ -97,7 +97,7 @@ theorem Measurable.exists_isCompact_continuousOn {g : X → Y} (hg : Measurable 
         · exact mem_iUnion.2 ⟨some (V, false), ⟨hxA, hgV⟩, hxV.2⟩
     calc μ (A \ (C none ∩ ⋂ V : b, (F V ∪ G V))) ≤ μ (⋃ j, (S j \ C j)) := measure_mono hsub
       _ ≤ ∑' j, μ (S j \ C j) := measure_iUnion_le _
-      _ ≤ ∑' j, (δ j : ℝ≥0∞) := ENNReal.tsum_le_tsum fun j => (hCμ j).le
+      _ ≤ ∑' j, (δ j : ℝ≥0∞) := tsum_le_tsum fun j => (hCμ j).le
       _ < ε := hδ
   · -- continuity: `g⁻¹ t ∩ K = (⋃_{V ⊆ t} G_Vᶜ) ∩ K`
     rw [continuousOn_iff']

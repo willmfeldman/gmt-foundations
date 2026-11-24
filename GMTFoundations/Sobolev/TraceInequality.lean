@@ -113,7 +113,7 @@ theorem mul_sq_le_of_ae_abs_deriv_le {γ D : ℝ → ℝ} {a b r : ℝ} (hab : a
           integral_mono_ae (hFint.mono_set hIoc).norm (hBint.1.mono_set hIoc)
             (ae_restrict_of_ae_restrict_of_subset hIoc hFbd)
         _ ≤ ∫ x in Ioc a b, 2 * |γ x| * D x :=
-          setIntegral_mono_set hBint.1 hBnn hIoc.eventuallyLE
+          setIntegral_mono_set hBint.1 hBnn (Filter.EventuallySubset.of_subset hIoc)
         _ = B := (intervalIntegral.integral_of_le hab.le).symm
     have e : γ r ^ 2 = γ t ^ 2 + ∫ x in t..r, F x := by
       rw [hFdef, hftc]; ring

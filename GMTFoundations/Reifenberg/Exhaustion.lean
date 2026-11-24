@@ -198,7 +198,7 @@ theorem preimage_smul_sub_ball {r : ℝ} (hr : 0 < r) (x y : Rn n) (s : ℝ) :
 theorem rescaleMeasure_apply {μ : Measure (Rn n)} {x : Rn n} {r : ℝ} (hr : 0 < r)
     (A : Set (Rn n)) :
     rescaleMeasure μ x r A = ENNReal.ofReal ((r ^ (n - 1))⁻¹) * μ ((fun z => x + r • z) '' A) := by
-  rw [rescaleMeasure, Measure.smul_apply, smul_eq_mul,
+  rw [rescaleMeasure, smul_apply, smul_eq_mul,
     (measurableEmbedding_smul_sub hr.ne' x).map_apply, preimage_smul_sub hr.ne']
 
 /-- `μ_{x,r}(B_s(y)) = r^{-(n-1)} μ(B_{rs}(x + r y))`. -/
@@ -211,7 +211,7 @@ theorem rescaleMeasure_ball {μ : Measure (Rn n)} {x : Rn n} {r : ℝ} (hr : 0 <
 instance isFiniteMeasure_rescaleMeasure (μ : Measure (Rn n)) [IsFiniteMeasure μ] (x : Rn n)
     (r : ℝ) : IsFiniteMeasure (rescaleMeasure μ x r) := by
   refine ⟨?_⟩
-  rw [rescaleMeasure, Measure.smul_apply, smul_eq_mul]
+  rw [rescaleMeasure, smul_apply, smul_eq_mul]
   exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top (measure_lt_top _ _)
 
 /-- β of the rescaled measure (`jonesBetaSq_smul_map`): `β_{μ_{x,r}}(z, t) = β_μ(x + r z, r t)`. -/

@@ -139,7 +139,7 @@ theorem hausdorffN_inter_ball_le_of_graph (hn : 2 ≤ n) {P : Rn n × Rn n} (hP 
     exact ⟨x, mem_disc_of_add_smul_mem_ball hP hx hw, rfl⟩
   refine (measure_mono hsub).trans ?_
   refine (hausdorffN_image_le_of_lipschitzOnWith
-    (lipschitzOnWith_graphMap hP (fun x hx => hx.1) hg) (n - 1)).trans ?_
+    (lipschitzOnWith_graphMap hP (fun x (hx : x ∈ disc P c R) => hx.1) hg) (n - 1)).trans ?_
   rw [hausdorffN_disc hn hP c hR]
 
 /-! ### (5c) Graph lower bound -/

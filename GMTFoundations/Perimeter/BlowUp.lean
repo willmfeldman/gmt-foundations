@@ -110,7 +110,7 @@ theorem eLpNorm_indicator_sub_indicator {A B K : Set (Rn n)} (hA : MeasurableSet
     (hB : MeasurableSet B) :
     eLpNorm (A.indicator (1 : Rn n → ℝ) - B.indicator 1) 1 (volume.restrict K) =
       volume (A ∆ B ∩ K) := by
-  rw [eLpNorm_one_eq_lintegral_enorm
+  rw [eLpNorm_one_eq_lintegral_eNorm
     ((measurable_one.indicator hA).sub (measurable_one.indicator hB)).aestronglyMeasurable]
   have hpt : ∀ y, ‖(A.indicator (1 : Rn n → ℝ) - B.indicator (1 : Rn n → ℝ)) y‖ₑ =
       (A ∆ B).indicator 1 y := by

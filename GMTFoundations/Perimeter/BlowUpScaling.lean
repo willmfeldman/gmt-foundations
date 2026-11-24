@@ -118,7 +118,7 @@ theorem measurable_blowupInv (x : Rn n) (r : ℝ) : Measurable fun y : Rn n ↦ 
 /-- `μ_{x,r}(B_L) = r^{-(n-1)} μ(B_{rL}(x))` (EG (⋆⋆⋆)). -/
 theorem blowupMeasure_ball (μ : Measure (Rn n)) (x : Rn n) {r : ℝ} (hr : 0 < r) (L : ℝ) :
     blowupMeasure μ x r (ball 0 L) = (ENNReal.ofReal (r ^ (n - 1)))⁻¹ * μ (ball x (r * L)) := by
-  rw [blowupMeasure, Measure.smul_apply, Measure.map_apply (measurable_blowupInv x r)
+  rw [blowupMeasure, smul_apply, Measure.map_apply (measurable_blowupInv x r)
     measurableSet_ball, preimage_ball_blowup x hr, smul_eq_mul]
 
 /-- **Upper bound for the blow-ups.** If `μ(B_s(x)) ≤ A s^{n-1}` for `0 < s < r₀` (EG Lemma 5.3

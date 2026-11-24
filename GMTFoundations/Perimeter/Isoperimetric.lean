@@ -75,7 +75,7 @@ theorem volume_rpow_le_totalVariationOn (hn : 2 ≤ n) {F : Set (Rn n)} (hF : Me
     have hcd : ContDiff ℝ 1 (u k) := (contDiff_mollify _ hli).of_le (by simp)
     have hcs : HasCompactSupport (u k) := hasCompactSupport_mollify _ hFc
     refine (eLpNorm_le_eLpNorm_fderiv_one volume hcd hcs hp).trans (mul_le_mul' (le_of_eq rfl) ?_)
-    rw [eLpNorm_one_eq_lintegral_enorm (hcd.continuous_fderiv one_ne_zero).aestronglyMeasurable]
+    rw [eLpNorm_one_eq_lintegral_eNorm (hcd.continuous_fderiv one_ne_zero).aestronglyMeasurable]
     have := lintegral_norm_fderiv_mollify_indicator_le_totalVariationOn isOpen_univ hF
       (mollifierBump k) MeasurableSet.univ (fun _ _ ↦ subset_univ _)
     rwa [Measure.restrict_univ] at this

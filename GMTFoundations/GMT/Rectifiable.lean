@@ -279,12 +279,12 @@ theorem hausdorffMeasure_image_critical_le (hn : 2 ≤ n) {f : Rn (n - 1) → Rn
     intro m
     calc ∑' i : ι m, ediam (T m i) ^ ((n - 1 : ℕ) : ℝ)
         ≤ ∑' i : ι m, ENNReal.ofReal ((2 * δ * r m i.1) ^ (n - 1)) := by
-          refine ENNReal.tsum_le_tsum fun i => ?_
+          refine tsum_le_tsum fun i => ?_
           rw [ENNReal.ofReal_pow (by have := (htr m i.1 i.1.2).1.1; positivity),
             ← ENNReal.rpow_natCast]
           exact ENNReal.rpow_le_rpow (hdiam m i) (Nat.cast_nonneg (n - 1))
       _ = ∑' x : t m, ∑' _c : ((Fs x (r m x) : Finset (Rn n)) : Set (Rn n)),
-            ENNReal.ofReal ((2 * δ * r m x) ^ (n - 1)) := ENNReal.tsum_sigma' _
+            ENNReal.ofReal ((2 * δ * r m x) ^ (n - 1)) := tsum_sigma' _
       _ = ∑' x : t m, ((Fs x (r m x)).card : ℝ≥0∞) *
             ENNReal.ofReal ((2 * δ * r m x) ^ (n - 1)) := by
           refine tsum_congr fun x => ?_
@@ -292,7 +292,7 @@ theorem hausdorffMeasure_image_critical_le (hn : 2 ≤ n) {f : Rn (n - 1) → Rn
           simp only [Finset.coe_sort_coe, Fintype.card_coe, nsmul_eq_mul]
       _ ≤ ∑' x : t m,
             ENNReal.ofReal (Bδ * (2 * δ) ^ (n - 1)) * ENNReal.ofReal (r m x ^ (n - 1)) := by
-          refine ENNReal.tsum_le_tsum fun x => ?_
+          refine tsum_le_tsum fun x => ?_
           have hr0 := (htr m x x.2).1.1
           rw [← ENNReal.ofReal_natCast, ← ENNReal.ofReal_mul (Nat.cast_nonneg _),
             ← ENNReal.ofReal_mul (by positivity)]

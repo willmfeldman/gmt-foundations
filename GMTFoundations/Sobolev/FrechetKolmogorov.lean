@@ -111,8 +111,8 @@ theorem frechetKolmogorov_uniform_translation (μ : Measure V) [μ.IsAddHaarMeas
   -- `∫ |f n - f₀| → 0`
   have hL1 : Tendsto (fun n ↦ ∫ x, |f n x - f₀ x| ∂μ) atTop (𝓝 0) := by
     have e : ∀ n, ∫ x, |f n x - f₀ x| ∂μ = (eLpNorm (f n - f₀) 1 μ).toReal := fun n ↦ by
-      rw [eLpNorm_one_eq_lintegral_enorm ((hf n).sub hf₀).aestronglyMeasurable,
-        ← integral_norm_eq_lintegral_enorm ((hf n).sub hf₀).aestronglyMeasurable]
+      rw [eLpNorm_one_eq_lintegral_eNorm ((hf n).sub hf₀).aestronglyMeasurable,
+        ← integral_norm_eq_lintegral_eNorm ((hf n).sub hf₀).aestronglyMeasurable]
       rfl
     simp_rw [e]
     exact (ENNReal.tendsto_toReal ENNReal.zero_ne_top).comp hconv

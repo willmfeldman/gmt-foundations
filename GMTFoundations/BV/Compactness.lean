@@ -124,9 +124,9 @@ theorem exists_lipschitzWith_clamp : ∃ K : NNReal, LipschitzWith K clamp := by
         ring
       rw [this.deriv_eq, deriv_const]
   obtain ⟨C, hC⟩ := hc.bounded_above_of_compact_support hcs
-  refine ⟨C.toNNReal, lipschitzWith_of_nnnorm_deriv_le
+  refine ⟨C.toNNReal, lipschitzWith_of_nnNorm_deriv_le
     (contDiff_clamp.differentiable (by simp)) fun x ↦ ?_⟩
-  rw [← NNReal.coe_le_coe, coe_nnnorm, Real.coe_toNNReal']
+  rw [← NNReal.coe_le_coe, coe_nnNorm, Real.coe_toNNReal']
   exact (hC x).trans (le_max_left _ _)
 
 /-! ### `L¹`–`L^∞` duality -/
@@ -159,7 +159,7 @@ theorem integral_abs_le_of_forall_integral_mul_le {g : E d → ℝ}
     · exact (hs01 x).le
     · simp
   have hsL1 : MemLp s 1 volume := by
-    rw [hs, memLp_indicator_iff_restrict hS.measurableSet]
+    rw [hs, memLp_indicator_iff_restrict hS.measurableSet.nullMeasurableSet]
     exact MemLp.of_bound hs0m.aestronglyMeasurable 1
       (Eventually.of_forall fun x ↦ by rw [Real.norm_eq_abs, hs01 x])
   have hgs : ∫ x, g x * s x = ∫ x, |g x| := by
@@ -190,8 +190,8 @@ theorem integral_abs_le_of_forall_integral_mul_le {g : E d → ℝ}
     memLp_one_iff_integrable.1 (hsL1.sub (hφ₀.continuous.memLp_of_hasCompactSupport hφ₀c))
   have hsφr : ∫ x, |s x - φ₀ x| ≤ η := by
     have h1 := hφ₀s
-    rw [eLpNorm_one_eq_lintegral_enorm hsφ.aestronglyMeasurable,
-      ← ofReal_integral_norm_eq_lintegral_enorm hsφ] at h1
+    rw [eLpNorm_one_eq_lintegral_eNorm hsφ.aestronglyMeasurable,
+      ← ofReal_integral_norm_eq_lintegral_eNorm hsφ] at h1
     simpa [Real.norm_eq_abs] using (ENNReal.ofReal_le_ofReal_iff hη.le).1 h1
   have hgsi : Integrable (fun x ↦ g x * s x) volume :=
     hgi.mul_bdd (c := 1) hsm.aestronglyMeasurable
@@ -329,8 +329,8 @@ theorem integral_abs_comp_add_sub_le_of_TV {w : E d → ℝ} (hwm : AEStronglyMe
 
 theorem eLpNorm_one_eq_ofReal_integral_abs {g : E d → ℝ} (hg : Integrable g volume) :
     eLpNorm g 1 volume = ENNReal.ofReal (∫ x, |g x|) := by
-  rw [eLpNorm_one_eq_lintegral_enorm hg.aestronglyMeasurable,
-    ← ofReal_integral_norm_eq_lintegral_enorm hg]
+  rw [eLpNorm_one_eq_lintegral_eNorm hg.aestronglyMeasurable,
+    ← ofReal_integral_norm_eq_lintegral_eNorm hg]
   rfl
 
 /-- A function bounded on a compact `T`, a.e.-strongly measurable there, times a continuous

@@ -594,7 +594,7 @@ theorem IsGaussGreenPair.totalVariationOn_inter_ball_le_ae [NeZero n]
     have hdom := tendsto_lintegral_of_dominated_convergence (μ := volume)
       (F := fun k y ↦ ‖χ k y - χ₀ y‖ₑ) (f := fun _ ↦ 0)
       ((closedBall x (r + δ)).indicator 1)
-      (fun k ↦ ((hχmeas k).sub hχ₀meas).enorm)
+      (fun k ↦ ((hχmeas k).sub hχ₀meas).eNorm)
       (fun k ↦ Eventually.of_forall fun y ↦ by
         change ‖χ k y - χ₀ y‖ₑ ≤ (closedBall x (r + δ)).indicator 1 y
         by_cases hyB : y ∈ closedBall x (r + δ)
@@ -614,19 +614,19 @@ theorem IsGaussGreenPair.totalVariationOn_inter_ball_le_ae [NeZero n]
           have hge : r + e k ≤ ‖y - x‖ := by linarith [heδ k]
           have h1 : χ k y = 0 := by
             simp only [hχ_def, radialCutoff_of_ge (he k) hge, zero_mul]
-          have h2 : χ₀ y = 0 := indicator_of_notMem (fun hy ↦ hyB
+          have h2 : χ₀ y = 0 := indicator_of_notMem (fun (hy : y ∈ E ∩ closedBall x r) ↦ hyB
             (closedBall_subset_closedBall (by linarith) hy.2)) _
           simp [h1, h2])
       (by
         rw [lintegral_indicator_one measurableSet_closedBall]
         exact measure_closedBall_lt_top.ne)
       (Eventually.of_forall fun y ↦ by
-        have := ((hχ_lim y).sub_const (χ₀ y)).enorm
+        have := ((hχ_lim y).sub_const (χ₀ y)).eNorm
         simpa using this)
     rw [lintegral_zero] at hdom
     refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hdom
       (fun _ ↦ zero_le) fun k ↦ ?_
-    rw [eLpNorm_one_eq_lintegral_enorm ((hχmeas k).sub hχ₀meas).aestronglyMeasurable]
+    rw [eLpNorm_one_eq_lintegral_eNorm ((hχmeas k).sub hχ₀meas).aestronglyMeasurable]
     exact lintegral_mono' Measure.restrict_le_self le_rfl
   have hbdd : ∀ g : Rn n → ℝ, Measurable g → (∀ y, ‖g y‖ ≤ 1) → LocallyIntegrableOn g univ :=
     fun g hg hg1 ↦ (locallyIntegrable_iff.2 fun K hK ↦ Measure.integrableOn_of_bounded
@@ -737,13 +737,14 @@ theorem sphereIntegral_indicator_eq_hausdorffN [NeZero n] {E : Set (Rn n)} (hE :
     have hmap := GMT.map_smul_sub_euclideanHausdorffMeasure (n := n) (n - 1) x hr
     rw [← GMT.hausdorffN_eq_euclideanHausdorffMeasure'] at hmap
     have := congrArg (fun m : Measure (Rn n) ↦ m (A ∩ sphere (0 : Rn n) 1)) hmap
-    simp only [Measure.smul_apply, smul_eq_mul] at this
+    simp only [smul_apply, smul_eq_mul] at this
     rw [Measure.map_apply (by fun_prop) (hAm.inter hS1)] at this
     rw [← this]
     congr 1
     ext y
-    rw [mem_preimage, mem_inter_iff, mem_inter_iff, hA_def, mem_ofPred_eq,
-      mem_sphere_zero_iff_norm, mem_sphere, dist_eq_norm, smul_smul, mul_inv_cancel₀ hr.ne',
+    rw [mem_preimage, mem_inter_iff, mem_inter_iff, hA_def,
+      mem_ofPred_eq (p := fun z ↦ x + r • z ∈ E), mem_sphere_zero_iff_norm, mem_sphere,
+      dist_eq_norm, smul_smul, mul_inv_cancel₀ hr.ne',
       one_smul, add_sub_cancel, norm_smul, norm_inv, Real.norm_of_nonneg hr.le]
     constructor
     · rintro ⟨hy, hyr⟩

@@ -136,7 +136,7 @@ theorem measure_eq_zero_of_hausdorffMeasure_eq_zero {k : ℕ} (hk : 1 ≤ k) {Ω
           exact mem_iUnion.2 ⟨i, hi, hx⟩
       _ ≤ ∑' i, ρ (t i ∩ E' j) := measure_iUnion_le _
       _ ≤ ∑' i, K * ⨆ _ : (t i).Nonempty, Metric.ediam (t i) ^ (k : ℝ) :=
-        ENNReal.tsum_le_tsum hpiece
+        tsum_le_tsum hpiece
       _ = K * ∑' i, ⨆ _ : (t i).Nonempty, Metric.ediam (t i) ^ (k : ℝ) := ENNReal.tsum_mul_left
       _ ≤ K * τ := by gcongr
   have hlim : Tendsto (fun m : ℕ => K * (m : ℝ≥0∞)⁻¹) atTop (𝓝 0) := by

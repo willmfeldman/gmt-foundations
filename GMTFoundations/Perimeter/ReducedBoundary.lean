@@ -9,6 +9,10 @@ public import GMTFoundations.Perimeter.GaussGreenPair.Basic
 public import GMTFoundations.Perimeter.GaussGreenPair.API
 public import GMTFoundations.Perimeter.GaussGreenPair.WeightedTV
 import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.MeasureTheory.Covering.Besicovitch
+public import Mathlib.MeasureTheory.Integral.Average
+import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+import Mathlib.MeasureTheory.Covering.BesicovitchVectorSpace
 import Mathlib.MeasureTheory.Measure.RegularityCompacts
 import Mathlib.Topology.EMetricSpace.Paracompact
 import Mathlib.Topology.UniformSpace.Uniformizable
@@ -336,7 +340,7 @@ theorem hasDensity_iff_tendsto_div {E : Set (Rn n)} {x : Rn n} {d : ℝ≥0∞} 
 /-- `HasDensity` depends on `E` only through its measurable hull. -/
 theorem hasDensity_toMeasurable_iff {E : Set (Rn n)} {x : Rn n} {d : ℝ} :
     HasDensity (toMeasurable volume E) x d ↔ HasDensity E x d := by
-  simp only [HasDensity, Measure.measure_toMeasurable_inter_of_sFinite measurableSet_ball]
+  simp only [HasDensity, Measure.measure_toMeasurable_inter_of_sfinite measurableSet_ball]
 
 /-- `volume (B_r(x)) = ω_n rⁿ` with `ω_n = volume (B_1(0))`, for `r > 0`. -/
 private theorem volume_ball_eq_ofReal_mul {x : Rn n} {r : ℝ} (hr : 0 < r) :

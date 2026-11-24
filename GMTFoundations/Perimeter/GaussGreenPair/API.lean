@@ -285,9 +285,9 @@ theorem IsGaussGreenPair.blowup (hn : 1 ≤ n) (h : IsGaussGreenPair Ω E μ ν)
   have hpre : ∀ S : Set (Rn n), A.symm ⁻¹' (A ⁻¹' S) = S := fun S ↦ by
     ext y; simp
   refine ⟨?_, ?_, ?_, ?_, ?_⟩
-  · rw [Measure.smul_apply, hemb.map_apply, ← preimage_compl, hpre, h.measure_compl, smul_zero]
+  · rw [smul_apply, hemb.map_apply, ← preimage_compl, hpre, h.measure_compl, smul_zero]
   · intro K hK hKΩ
-    rw [Measure.smul_apply, hemb.map_apply, Homeomorph.preimage_symm, smul_eq_mul]
+    rw [smul_apply, hemb.map_apply, Homeomorph.preimage_symm, smul_eq_mul]
     refine ENNReal.mul_lt_top hc_top (h.lt_top_of_isCompact _ (hK.image A.continuous) ?_)
     rintro _ ⟨z, hz, rfl⟩
     exact hKΩ hz

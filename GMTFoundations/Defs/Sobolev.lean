@@ -6,6 +6,8 @@ Authors: William M. Feldman
 module
 
 public import GMTFoundations.Defs.Setup
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
 
 /-!
 # Minimal Sobolev notions

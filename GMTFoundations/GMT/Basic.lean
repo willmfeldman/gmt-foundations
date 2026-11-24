@@ -52,7 +52,7 @@ theorem euclideanHausdorffMeasure_eq_smul {X : Type*} [EMetricSpace X] [Measurab
         μH[(d : ℝ)] := by
   rw [Measure.euclideanHausdorffMeasure_def]
   ext s _
-  rw [Measure.smul_apply, Measure.smul_apply, ENNReal.smul_def]
+  rw [smul_apply, smul_apply, ENNReal.smul_def]
 
 theorem addHaarScalarFactor_hausdorffMeasure_ne_zero (d : ℕ) :
     ((Measure.addHaarScalarFactor (volume : Measure (Rn d)) μH[d] : ℝ≥0) : ℝ≥0∞) ≠ 0 := by
@@ -71,7 +71,7 @@ theorem hausdorffN_eq_euclideanHausdorffMeasure {d : ℕ}
   have h := hHausVol.trans hvol.symm
   rw [hausdorffN, euclideanHausdorffMeasure_eq_smul] at h
   have hB := congrArg (fun μ : Measure (Rn d) => μ (ball 0 1)) h
-  simp only [Measure.smul_apply, smul_eq_mul] at hB
+  simp only [smul_apply, smul_eq_mul] at hB
   have h0 : (μH[(d : ℝ)] : Measure (Rn d)) (ball 0 1) ≠ 0 := (measure_ball_pos _ _ one_pos).ne'
   have htop : (μH[(d : ℝ)] : Measure (Rn d)) (ball 0 1) ≠ ∞ := measure_ball_lt_top.ne
   have hc : ENNReal.ofReal (unitBallVolume d / 2 ^ d) = c :=
@@ -80,7 +80,7 @@ theorem hausdorffN_eq_euclideanHausdorffMeasure {d : ℕ}
 
 theorem hausdorffN_apply (d : ℕ) (s : Set (Rn n)) :
     hausdorffN n d s = ENNReal.ofReal (unitBallVolume d / 2 ^ d) * μH[(d : ℝ)] s := by
-  rw [hausdorffN, Measure.smul_apply, smul_eq_mul]
+  rw [hausdorffN, smul_apply, smul_eq_mul]
 
 theorem hausdorffN_eq_zero_iff {d : ℕ} {s : Set (Rn n)} :
     hausdorffN n d s = 0 ↔ μH[(d : ℝ)] s = 0 := by
@@ -101,7 +101,7 @@ theorem euclideanHausdorffMeasure_apply {X : Type*} [EMetricSpace X] [Measurable
     (μHE[d] : Measure X) s =
       ((Measure.addHaarScalarFactor (volume : Measure (Rn d)) μH[d] : ℝ≥0) : ℝ≥0∞) *
         μH[(d : ℝ)] s := by
-  rw [euclideanHausdorffMeasure_eq_smul, Measure.smul_apply, smul_eq_mul]
+  rw [euclideanHausdorffMeasure_eq_smul, smul_apply, smul_eq_mul]
 
 theorem euclideanHausdorffMeasure_eq_zero_iff {X : Type*} [EMetricSpace X] [MeasurableSpace X]
     [BorelSpace X] {d : ℕ} {s : Set X} : (μHE[d] : Measure X) s = 0 ↔ μH[(d : ℝ)] s = 0 := by
@@ -209,7 +209,7 @@ theorem map_smul_sub_euclideanHausdorffMeasure (d : ℕ) (p : Rn n) {r : ℝ} (h
       ENNReal.ofReal (r ^ d) • (μHE[d] : Measure (Rn n)) := by
   have hmeas : Measurable fun y : Rn n => r⁻¹ • (y - p) := by fun_prop
   ext A hA
-  rw [Measure.map_apply hmeas hA, Measure.smul_apply, smul_eq_mul]
+  rw [Measure.map_apply hmeas hA, smul_apply, smul_eq_mul]
   have hpre : (fun y : Rn n => r⁻¹ • (y - p)) ⁻¹' A = (fun y => y + -p) ⁻¹' (r • A) := by
     ext y
     simp only [mem_preimage, ← sub_eq_add_neg]
@@ -217,7 +217,7 @@ theorem map_smul_sub_euclideanHausdorffMeasure (d : ℕ) (p : Rn n) {r : ℝ} (h
   rw [hpre, measure_preimage_add_right, Measure.euclideanHausdorffMeasure_smul₀ d hr.ne',
     ENNReal.smul_def, smul_eq_mul]
   congr 1
-  rw [Real.nnnorm_of_nonneg hr.le, ENNReal.coe_pow, ENNReal.ofReal_pow hr.le]
+  rw [Real.nnNorm_of_nonneg hr.le, ENNReal.coe_pow, ENNReal.ofReal_pow hr.le]
   congr 1
   rw [ENNReal.ofReal, Real.toNNReal_of_nonneg hr.le]
 

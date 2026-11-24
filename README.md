@@ -101,7 +101,7 @@ isoperimetric and relative isoperimetric inequalities, and a De Giorgi iteration
 
 ## Build
 
-The project uses Lean `v4.35.0-rc3` and Mathlib `v4.35.0-rc3`
+The project uses Lean `v4.36.0` and Mathlib `v4.36.0`
 ([leanprover-community/mathlib4](https://github.com/leanprover-community/mathlib4)), as pinned in
 `lean-toolchain`, `lakefile.toml` and `lake-manifest.json`. Mathlib is the only dependency.
 
@@ -127,14 +127,14 @@ exactly `propext`, `Classical.choice`, `Quot.sound`; and elaborates every challe
 plain-language statements), the pinned toolchain, the expected axioms, the AI-assistance
 disclosure and the comparator challenge inventory.
 
-`challenges/` contains three standalone [Comparator](https://github.com/leanprover/comparator)
+`challenges/` contains three standalone comparator (`lake comparator`) challenge
 workspaces covering the nine theorems. In each, `Vocabulary.lean` imports Mathlib only and states
 the theorems with every notion defined inline, `Challenge.lean` is a self-contained copy of that
 vocabulary (importing Mathlib only) that states them with `sorry`, and
 `Solution.lean` proves them from the library. Ordinary CI only elaborates these files. Exact
 statement equality and the permitted-axiom check are established by the release workflow
-`.github/workflows/release-comparator.yml`, which runs Comparator with pinned tool revisions and
-uploads an attestation. See `challenges/README.md`, which also records a review of the challenges.
+`.github/workflows/release-comparator.yml`, which runs the pinned toolchain's
+`lake comparator --paranoid` and uploads an attestation. See `challenges/README.md`, which also records a review of the challenges.
 
 ## Layout
 

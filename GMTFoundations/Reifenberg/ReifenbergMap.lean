@@ -357,7 +357,7 @@ theorem perturbId {ν : Rn n} {H : Rn n → Rn n} {ℓ : ℝ≥0} (hℓ : ℓ < 
     · exact Or.inl h
     · right
       simp only [f', ContinuousLinearEquiv.refl_symm, ContinuousLinearEquiv.coe_refl,
-        ContinuousLinearMap.nnnorm_id, inv_one]
+        ContinuousLinearMap.nnNorm_id, inv_one]
       exact hℓ
   refine ⟨hA.toHomeomorph _ hc, rfl, ?_, fun w => ?_⟩
   · refine AntilipschitzWith.of_le_mul_dist fun a b => ?_

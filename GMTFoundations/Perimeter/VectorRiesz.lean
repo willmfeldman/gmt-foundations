@@ -386,7 +386,7 @@ section Jordan
 variable {X : Type*} [TopologicalSpace X]
 
 /-- The values `ℓ h`, `0 ≤ h ≤ g`. -/
-def valuesBelow (Λ : C_c(X, ℝ) →ₗ[ℝ] ℝ) (g : C_c(X, ℝ≥0)) : Set ℝ :=
+noncomputable def valuesBelow (Λ : C_c(X, ℝ) →ₗ[ℝ] ℝ) (g : C_c(X, ℝ≥0)) : Set ℝ :=
   (fun h : C_c(X, ℝ≥0) ↦ Λ h.toReal) '' Iic g
 
 /-- `Λ` is bounded above on each order interval `[0, g]`. -/
@@ -730,22 +730,22 @@ theorem exists_rieszPair (hU : IsOpen U) {L : (Rn n → Rn n) → ℝ} (hL : IsV
   set P : Measure U := ∑ i, (μp i + μm i) with hP
   have hPK : ∀ K : Set U, IsCompact K → P K < ⊤ := by
     intro K hK
-    rw [hP, Measure.finsetSum_apply]
+    rw [hP, sum_apply]
     exact ENNReal.sum_lt_top.2 fun i _ ↦ by
-      rw [Measure.add_apply]
+      rw [add_apply]
       exact ENNReal.add_lt_top.2 ⟨hK.measure_lt_top, hK.measure_lt_top⟩
   have : IsFiniteMeasureOnCompacts P := ⟨hPK⟩
   have hpP : ∀ i, μp i ≤ P := fun i ↦ Measure.le_iff'.2 fun s ↦ by
-    rw [hP, Measure.finsetSum_apply]
+    rw [hP, sum_apply]
     refine le_trans ?_ (Finset.single_le_sum (f := fun j ↦ (μp j + μm j) s)
       (fun j _ ↦ zero_le) (Finset.mem_univ i))
-    simp only [Measure.add_apply]
+    simp only [add_apply]
     exact le_self_add
   have hmP : ∀ i, μm i ≤ P := fun i ↦ Measure.le_iff'.2 fun s ↦ by
-    rw [hP, Measure.finsetSum_apply]
+    rw [hP, sum_apply]
     refine le_trans ?_ (Finset.single_le_sum (f := fun j ↦ (μp j + μm j) s)
       (fun j _ ↦ zero_le) (Finset.mem_univ i))
-    simp only [Measure.add_apply]
+    simp only [add_apply]
     exact le_add_self
   -- the densities
   set σc : Fin n → U → ℝ := fun i x ↦
@@ -832,11 +832,11 @@ theorem exists_rieszPair (hU : IsOpen U) {L : (Rn n → Rn n) → ℝ} (hL : IsV
   · intro φ hφ
     rw [hemb.integral_map]
     simp_rw [Subtype.val_injective.extend_apply]
-    rw [hm_def, integral_withDensity_eq_integral_smul hσ_meas.nnnorm]
+    rw [hm_def, integral_withDensity_eq_integral_smul hσ_meas.nnNorm]
     have hpt : ∀ x : U, (‖σ x‖₊ : ℝ≥0) • ⟪φ x, νU x⟫ = ∑ i, σc i x * ⟪b i, φ x⟫ := by
       intro x
       have h1 : (‖σ x‖₊ : ℝ≥0) • ⟪φ x, νU x⟫ = ⟪φ x, σ x⟫ := by
-        rw [NNReal.smul_def, smul_eq_mul, coe_nnnorm, hνU, real_inner_smul_right]
+        rw [NNReal.smul_def, smul_eq_mul, coe_nnNorm, hνU, real_inner_smul_right]
         rcases eq_or_ne (σ x) 0 with h | h
         · simp [h]
         · field_simp

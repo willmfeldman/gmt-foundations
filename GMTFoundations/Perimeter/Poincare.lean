@@ -8,6 +8,8 @@ module
 public import GMTFoundations.Perimeter.Mollify
 import GMTFoundations.GMT.Polar
 import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.MeasureTheory.Integral.Average
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # The `L¹` Poincaré inequality on balls and the relative isoperimetric inequality
@@ -154,7 +156,7 @@ theorem enorm_sub_le_lintegral_segment {u : Rn n → ℝ} (hu : ContDiff ℝ 1 u
         rw [← ofReal_norm, ← ofReal_norm, ← ofReal_norm, ← ENNReal.ofReal_mul (norm_nonneg _)]
         exact ENNReal.ofReal_le_ofReal ((fderiv ℝ u (γ t)).le_opNorm (y - z))
     _ = ‖y - z‖ₑ * ∫⁻ t in Ioc (0 : ℝ) 1, ‖fderiv ℝ u (γ t)‖ₑ := by
-        rw [lintegral_mul_const' _ _ enorm_ne_top, mul_comm]
+        rw [lintegral_mul_const' _ _ eNorm_ne_top, mul_comm]
 
 /-! ### Poincaré inequality on balls -/
 
@@ -168,7 +170,7 @@ theorem lintegral_lintegral_enorm_sub_le {u : Rn n → ℝ} (hu : ContDiff ℝ 1
   set B := ball x r with hB_def
   have hBm : MeasurableSet B := measurableSet_ball
   set g : Rn n → ℝ≥0∞ := fun w ↦ ‖fderiv ℝ u w‖ₑ with hg_def
-  have hg : Measurable g := (hu.continuous_fderiv one_ne_zero).enorm.measurable
+  have hg : Measurable g := (hu.continuous_fderiv one_ne_zero).eNorm.measurable
   set G := B.indicator g with hG_def
   have hG : Measurable G := hg.indicator hBm
   set F : Rn n → Rn n → ℝ → ℝ≥0∞ := fun y z t ↦ G (z + t • (y - z)) with hF_def
@@ -240,7 +242,7 @@ theorem enorm_sub_setAverage_le {u : Rn n → ℝ} (hu : Continuous u) (x : Rn n
     ENNReal.ofReal_mul (inv_nonneg.2 hV.le), ENNReal.ofReal_inv_of_pos hV, hV_def,
     ENNReal.ofReal_toReal hBt]
   gcongr
-  rw [← ofReal_integral_norm_eq_lintegral_enorm hint']
+  rw [← ofReal_integral_norm_eq_lintegral_eNorm hint']
   exact ENNReal.ofReal_le_ofReal (norm_integral_le_integral_norm _)
 
 /-- **`L¹` Poincaré inequality on balls** (EG Thm 4.9 with `p = 1`, `L¹` form).
@@ -286,12 +288,12 @@ theorem min_volume_le_lintegral_enorm_indicator_sub {E A : Set (Rn n)} (hE : Mea
       setLIntegral_const, inter_comm]
   have h2 : ∫⁻ y in A \ E, ‖E.indicator (1 : Rn n → ℝ) y - c‖ₑ = ‖c‖ₑ * volume (A \ E) := by
     rw [setLIntegral_congr_fun (g := fun _ ↦ ‖c‖ₑ) (hA.diff hE)
-      (fun y hy ↦ by simp only; rw [indicator_of_notMem hy.2, zero_sub, enorm_neg]),
+      (fun y hy ↦ by simp only; rw [indicator_of_notMem hy.2, zero_sub, eNorm_neg]),
       setLIntegral_const]
   rw [h1, h2]
   have hsum : 1 ≤ ‖1 - c‖ₑ + ‖c‖ₑ := by
     calc (1 : ℝ≥0∞) = ‖(1 - c) + c‖ₑ := by simp
-      _ ≤ _ := enorm_add_le _ _
+      _ ≤ _ := eNorm_add_le _ _
   calc min (volume (E ∩ A)) (volume (A \ E))
       = 1 * min (volume (E ∩ A)) (volume (A \ E)) := (one_mul _).symm
     _ ≤ (‖1 - c‖ₑ + ‖c‖ₑ) * min (volume (E ∩ A)) (volume (A \ E)) := by gcongr
@@ -326,15 +328,15 @@ private theorem min_volume_le_of_lt {E : Set (Rn n)} (hE : MeasurableSet E) (x :
         closedBall_subset_ball' (show (mollifierBump k : ContDiffBump (0 : Rn n)).rOut +
           dist y x < r by rw [mem_ball] at hy; linarith)
     have hmeas : Measurable fun y ↦ ‖E.indicator (1 : Rn n → ℝ) y - u y‖ₑ :=
-      ((measurable_const.indicator hE).sub (contDiff_mollify _ hli).continuous.measurable).enorm
+      ((measurable_const.indicator hE).sub (contDiff_mollify _ hli).continuous.measurable).eNorm
     have h1 : ∫⁻ y in ball x s, ‖E.indicator (1 : Rn n → ℝ) y - u y‖ₑ ≤
         eLpNorm (u - E.indicator 1) 1 (volume.restrict (closedBall x s)) := by
-      rw [eLpNorm_one_eq_lintegral_enorm (hu1.continuous.aestronglyMeasurable.sub
+      rw [eLpNorm_one_eq_lintegral_eNorm (hu1.continuous.aestronglyMeasurable.sub
         (measurable_one.indicator hE).aestronglyMeasurable)]
       refine (lintegral_mono_set ball_subset_closedBall).trans (le_of_eq ?_)
       congr 1
       funext y
-      rw [enorm_sub_rev]
+      rw [eNorm_sub_rev]
       rfl
     calc min (volume (E ∩ ball x s)) (volume (ball x s \ E))
         ≤ ∫⁻ y in ball x s, ‖E.indicator (1 : Rn n → ℝ) y - c‖ₑ :=
@@ -342,7 +344,7 @@ private theorem min_volume_le_of_lt {E : Set (Rn n)} (hE : MeasurableSet E) (x :
       _ ≤ ∫⁻ y in ball x s, (‖E.indicator (1 : Rn n → ℝ) y - u y‖ₑ + ‖u y - c‖ₑ) :=
           lintegral_mono fun y ↦ by
             rw [← sub_add_sub_cancel (E.indicator (1 : Rn n → ℝ) y) (u y) c]
-            exact enorm_add_le _ _
+            exact eNorm_add_le _ _
       _ ≤ eLpNorm (u - E.indicator 1) 1 (volume.restrict (closedBall x s)) + K := by
           rw [lintegral_add_left hmeas]
           refine add_le_add h1 ?_

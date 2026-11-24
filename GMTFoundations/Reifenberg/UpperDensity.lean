@@ -109,7 +109,7 @@ theorem hausdorffN_eq_zero_of_forall_ball_le {k : ℕ} {A E : Set (Rn n)} (hAE :
           rw [← inter_iUnion]; exact measure_mono (subset_inter subset_rfl hAt)
       _ ≤ ∑' i, hausdorffN n k (A ∩ t i) := measure_iUnion_le _
       _ ≤ ∑' i, ENNReal.ofReal c' * ⨆ _ : (t i).Nonempty, ediam (t i) ^ (k : ℝ) := by
-          refine ENNReal.tsum_le_tsum fun i => ?_
+          refine tsum_le_tsum fun i => ?_
           rcases (A ∩ t i).eq_empty_or_nonempty with he | ⟨x, hxA, hxt⟩
           · rw [he, measure_empty]; exact zero_le
           · rw [iSup_pos ⟨x, hxt⟩]

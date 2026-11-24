@@ -15,6 +15,7 @@ import GMTFoundations.Sobolev.Mollify
 public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 public import Mathlib.Analysis.Calculus.BumpFunction.Normed
 import Mathlib.Analysis.Real.Sqrt
+import Mathlib.MeasureTheory.Covering.DensityTheorem
 import Mathlib.Tactic.ContinuousFunctionalCalculus
 import Mathlib.Topology.UniformSpace.Uniformizable
 
@@ -508,7 +509,7 @@ theorem tendstoLpLoc_mollify {ρ : ℕ → ContDiffBump (0 : Rn n)}
     _ = ENNReal.ofReal (∫ x, ‖mollify (ρ i) f' x - f' x‖) := by
         have hm : AEStronglyMeasurable ((fun x ↦ mollify (ρ i) f' x) - f') volume :=
           hint.aestronglyMeasurable
-        rw [eLpNorm_one_eq_lintegral_enorm hm, ofReal_integral_norm_eq_lintegral_enorm hint]
+        rw [eLpNorm_one_eq_lintegral_eNorm hm, ofReal_integral_norm_eq_lintegral_eNorm hint]
         rfl
 
 end Convergence

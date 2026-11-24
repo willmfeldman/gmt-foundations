@@ -137,7 +137,7 @@ theorem measure_le_mul_hausdorffMeasure_of_forall_ball_le {k : ℕ} {μ : Measur
             rw [← inter_iUnion]; exact measure_mono (subset_inter subset_rfl hAT)
         _ ≤ ∑' i, μ (A ∩ T i) := measure_iUnion_le _
         _ ≤ ∑' i, (t : ℝ≥0∞) * ⨆ _ : (T i).Nonempty, ediam (T i) ^ (k : ℝ) := by
-            refine ENNReal.tsum_le_tsum fun i => ?_
+            refine tsum_le_tsum fun i => ?_
             rcases (A ∩ T i).eq_empty_or_nonempty with he | ⟨x, hxA, hxT⟩
             · rw [he, measure_empty]; exact zero_le
             · rw [iSup_pos ⟨x, hxT⟩]
@@ -229,7 +229,7 @@ theorem mul_hausdorffMeasure_le_of_frequently {k : ℕ} {μ : Measure (Rn n)} {A
           rw [tsum_iUnion_decode₂ (fun S => ⨆ _ : S.Nonempty, ediam S ^ (k : ℝ)) (by simp)]
       _ ≤ ∑' p : u, 8 ^ k * μ (ball (p : Rn n × ℝ).1 (p : Rn n × ℝ).2) := by
           rw [← ENNReal.tsum_mul_left]
-          refine ENNReal.tsum_le_tsum fun p => ?_
+          refine tsum_le_tsum fun p => ?_
           have hp := huF p.2
           calc t * ⨆ _ : (ball (p : Rn n × ℝ).1 (4 * (p : Rn n × ℝ).2)).Nonempty,
                 ediam (ball (p : Rn n × ℝ).1 (4 * (p : Rn n × ℝ).2)) ^ (k : ℝ)
@@ -327,7 +327,7 @@ theorem exists_isOpen_subset_measure_le {μ : Measure (Rn n)} {Ω A : Set (Rn n)
     exact mem_iUnion.2 ⟨z, hAW z hx, hxz⟩
   · calc μ (⋃ z : T, W z ∩ ball ((z : Ω) : Rn n) (ρ z))
         ≤ ∑' z : T, μ (W z ∩ ball ((z : Ω) : Rn n) (ρ z)) := measure_iUnion_le _
-      _ ≤ ∑' z : T, (δ z : ℝ≥0∞) := ENNReal.tsum_le_tsum fun z => (hWμ z).le
+      _ ≤ ∑' z : T, (δ z : ℝ≥0∞) := tsum_le_tsum fun z => (hWμ z).le
       _ ≤ ε := hδ.le
 
 /-- **(a), null case** (EG Lemma 5.5 (ii) and Thm 5.15 use

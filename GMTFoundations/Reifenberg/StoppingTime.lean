@@ -96,7 +96,7 @@ theorem measurable_chartWeight (s : ℕ) : Measurable (D.chartWeight s) :=
 
 theorem measurable_stopFun : Measurable D.stopFun := by
   unfold stopFun
-  simp_rw [ENNReal.tsum_eq_iSup_sum]
+  simp_rw [tsum_eq_iSup_sum]
   exact .iSup fun s => s.measurable_fun_sum fun i _ =>
     ENNReal.measurable_ofReal.comp (measurable_chartWeight i)
 
@@ -296,7 +296,7 @@ theorem dist_limitMap_le_of_stopFun {u u' : Rn n} (hu : u ∈ D.surf 0) (hu' : u
     intro s
     have hsum : ∑ t ∈ Finset.range s, w t ≤ a := by
       rw [← ENNReal.ofReal_le_ofReal_iff ha, ENNReal.ofReal_sum_of_nonneg fun t _ => hw t]
-      exact (ENNReal.sum_le_tsum _).trans hA
+      exact (sum_le_tsum _).trans hA
     calc ∏ t ∈ Finset.range s, (1 + w t) ≤ ∏ t ∈ Finset.range s, Real.exp (w t) :=
           Finset.prod_le_prod₀ (fun t _ => by linarith [hw t])
             fun t _ => by linarith [Real.add_one_le_exp (w t)]

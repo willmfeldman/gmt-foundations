@@ -391,7 +391,7 @@ lemma natCast_add_one_mul_ofReal_div (X : ℝ) :
 lemma hausdorffN_apply (n d : ℕ) (s : Set (Rn n)) :
     hausdorffN n d s =
       ENNReal.ofReal (unitBallVolume d / 2 ^ d) * Measure.hausdorffMeasure (d : ℝ) s := by
-  rw [hausdorffN, Measure.smul_apply, smul_eq_mul]
+  rw [hausdorffN, smul_apply, smul_eq_mul]
 
 section CapBounds
 
@@ -554,8 +554,8 @@ theorem le_of_frequently_mul_closedBall_le {E : Type*} [NormedAddCommGroup E] [N
   have hac : a • μ ≪ μ + ν := (Measure.AbsolutelyContinuous.rfl.add_right ν).smul_left a
   have := v.measure_le_of_frequently_le ν hac s fun x _ =>
     (Besicovitch.tendsto_filterAt (μ + ν) x).frequently ((h a ha' x).mono fun r hr => by
-      simpa [Measure.smul_apply] using hr)
-  simpa [Measure.smul_apply] using this
+      simpa [smul_apply] using hr)
+  simpa [smul_apply] using this
 
 /-! ### The main theorem -/
 
